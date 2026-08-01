@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Assistant — Smart Lishe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="professional.css" />
+    <style>
+        /* Very minor adjustments that may not be covered by the main CSS */
+        .hamburger-btn { display: none; }
+        @media (max-width: 1024px) { .hamburger-btn { display: flex; } }
+        .floating-ai-btn { display: none; }
+        .page-header h1 { font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; }
+        .page-header p { color: var(--text-secondary); font-size: 0.95rem; }
+    </style>
+</head>
+<body>
+
+<!-- ===== SIDEBAR OVERLAY (Mobile) ===== -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="app-shell">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="mark"><i class="fa-solid fa-seedling"></i></div>
+            <div class="name">Smart Lishe<span>Professional</span></div>
+        </div>
+        <nav class="sidebar-nav">
+            <!-- ✅ Kept: Home, Dashboard, Clients -->
+            <a href="home.html" class="nav-link"><i class="fa-solid fa-house"></i> Home</a>
+            <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+            <a href="clients.html" class="nav-link"><i class="fa-solid fa-users"></i> Clients</a>
+            
+            <!-- ❌ Removed: Appointments, Meal Plans, Reports, Analytics -->
+            
+            <!-- ✅ Kept: AI Assistant (active) -->
+            <a href="ai-assistant.html" class="nav-link active"><i class="fa-solid fa-robot"></i> AI Assistant</a>
+            
+            <!-- ✅ Kept: Settings -->
+            <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> Settings</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="../auth/logout.html" class="nav-link" style="color:var(--char);">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content">
+
+        <!-- Top Bar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="search-box">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" placeholder="Search clients, programs..." />
+                </div>
+            </div>
+            <div class="topbar-actions">
+                <button class="icon-btn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+                <a href="profile.html" class="profile-chip">
+                    <div class="avatar" id="profAvatar">PK</div>
+                    <span class="label" id="profName">Dr. Peter</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div class="page-inner">
+
+            <!-- Page Header -->
+            <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:24px;">
+                <div>
+                    <h1 style="font-family:var(--font-display); font-size:1.6rem; font-weight:700;">Professional AI Assistant</h1>
+                    <p style="color:var(--text-secondary); font-size:0.95rem;">Use AI to assist with meal planning, nutrition analysis, client recommendations, and report generation.</p>
+                </div>
+            </div>
+
+            <!-- Context Banner -->
+            <div class="context-banner" id="contextBanner">
+                <i class="fa-regular fa-circle-info"></i>
+                <span id="contextMessage">AI Assistant opened with client context.</span>
+                <button class="close-context" id="closeContext"><i class="fa-regular fa-xmark"></i></button>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <span class="sc-number" id="statRequests">47</span>
+                    <span class="sc-label">AI Requests Today</span>
+                </div>
+                <div class="summary-card">
+                    <span class="sc-number" id="statMealPlans">23</span>
+                    <span class="sc-label">Meal Plans Generated</span>
+                </div>
+                <div class="summary-card">
+                    <span class="sc-number" id="statAnalyses">18</span>
+                    <span class="sc-label">Client Analyses</span>
+                </div>
+                <div class="summary-card">
+                    <span class="sc-number" id="statReports">12</span>
+                    <span class="sc-label">Reports Generated</span>
+                </div>
+            </div>
+
+            <!-- Main AI Layout -->
+            <div class="ai-layout">
+
+                <!-- Left Panel: Client Selection & Info -->
+                <div class="client-panel">
+                    <div class="panel-title"><i class="fa-regular fa-user"></i> Client</div>
+                    <select class="client-select" id="clientSelect">
+                        <!-- populated by JS -->
+                    </select>
+
+                    <div class="client-info-card" id="clientInfoCard">
+                        <!-- populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Right Panel: Chat & Tools -->
+                <div class="chat-panel">
+                    <!-- Chat Header -->
+                    <div class="chat-header">
+                        <span class="chat-title"><i class="fa-regular fa-comment-dots"></i> Conversation</span>
+                        <div class="chat-search">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="searchMessages" placeholder="Search history..." />
+                        </div>
+                    </div>
+
+                    <!-- Messages -->
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- populated by JS -->
+                    </div>
+
+                    <!-- Typing Indicator -->
+                    <div class="typing-indicator" id="typingIndicator">
+                        <span></span><span></span><span></span>
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div class="chat-input-area">
+                        <textarea id="chatInput" rows="1" placeholder="Type your request..." aria-label="Message"></textarea>
+                        <button class="btn-send" id="sendBtn"><i class="fa-regular fa-paper-plane"></i></button>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="quick-actions" id="quickActions">
+                        <span class="qa-chip" data-msg="Generate a meal plan">📋 Meal Plan</span>
+                        <span class="qa-chip" data-msg="Analyze client progress">📊 Progress</span>
+                        <span class="qa-chip" data-msg="Give nutrition advice">🍎 Nutrition</span>
+                        <span class="qa-chip" data-msg="Suggest healthy recipes">🥗 Recipes</span>
+                        <span class="qa-chip" data-msg="Weight gain plan">🏋️ Weight Gain</span>
+                        <span class="qa-chip" data-msg="Weight loss plan">🔥 Weight Loss</span>
+                        <span class="qa-chip" data-msg="Diabetes meal guide">🩸 Diabetes</span>
+                        <span class="qa-chip" data-msg="Hypertension nutrition guide">❤️ Hypertension</span>
+                        <span class="qa-chip" data-msg="High protein meal plan">💪 High Protein</span>
+                        <span class="qa-chip" data-msg="Generate shopping list">🛒 Shopping List</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Tools Section -->
+            <div class="tools-section" id="toolsSection">
+                <button class="tool-btn" data-tool="meal-plan"><i class="fa-regular fa-bowl-food"></i> Meal Plan</button>
+                <button class="tool-btn" data-tool="analyze-nutrition"><i class="fa-regular fa-chart-pie"></i> Nutrition</button>
+                <button class="tool-btn" data-tool="shopping-list"><i class="fa-regular fa-basket-shopping"></i> Shopping List</button>
+                <button class="tool-btn" data-tool="meal-alternatives"><i class="fa-regular fa-arrows-rotate"></i> Alternatives</button>
+                <button class="tool-btn" data-tool="weekly-plan"><i class="fa-regular fa-calendar-week"></i> Weekly Plan</button>
+                <button class="tool-btn" data-tool="monthly-plan"><i class="fa-regular fa-calendar"></i> Monthly Plan</button>
+                <button class="tool-btn" data-tool="analyze-progress"><i class="fa-regular fa-chart-line"></i> Progress</button>
+                <button class="tool-btn" data-tool="consultation-report"><i class="fa-regular fa-file-medical"></i> Report</button>
+                <button class="tool-btn" data-tool="followup-notes"><i class="fa-regular fa-pen-to-square"></i> Follow-up</button>
+            </div>
+
+        </div><!-- /page-inner -->
+    </main>
+</div>
+
+<!-- Floating AI Button (hidden on this page) -->
+<button class="floating-ai-btn" id="floatingAiBtn" style="display:none;" aria-label="Open AI Assistant">
+    <i class="fa-solid fa-robot"></i>
+    <span class="ping-dot"></span>
+</button>
+
+<!-- Toast Container -->
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+    /* ============================================================
+       SMART LISHE — PROFESSIONAL AI ASSISTANT
+       ============================================================ */
+
+    (function() {
+        'use strict';
+
+        // ---- Load Professional Name from localStorage ----
+        function getProfessionalName() {
+            const profile = JSON.parse(localStorage.getItem('smartlishe_profile') || '{}');
+            const firstName = localStorage.getItem('firstName') || profile.firstName || 'Dr. Peter';
+            return firstName;
+        }
+
+        // ---- Sample Clients ----
+        const clients = [{
+            id: 1,
+            name: 'Gregory Omondi',
+            age: 34,
+            gender: 'Male',
+            height: 178,
+            weight: 82,
+            bmi: 25.9,
+            goal: 'Weight Loss',
+            activity: 'Moderate',
+            budget: 'KES 5,000/month',
+            conditions: ['None'],
+            allergies: ['Peanuts'],
+            progress: 'active'
+        }, {
+            id: 2,
+            name: 'Jane Atieno',
+            age: 28,
+            gender: 'Female',
+            height: 165,
+            weight: 68,
+            bmi: 25.0,
+            goal: 'Weight Management',
+            activity: 'Light',
+            budget: 'KES 4,000/month',
+            conditions: ['Diabetes Type 2'],
+            allergies: ['None'],
+            progress: 'active'
+        }, {
+            id: 3,
+            name: 'Brian Otieno',
+            age: 42,
+            gender: 'Male',
+            height: 175,
+            weight: 95,
+            bmi: 31.0,
+            goal: 'Weight Loss',
+            activity: 'Sedentary',
+            budget: 'KES 6,000/month',
+            conditions: ['Hypertension'],
+            allergies: ['Dairy'],
+            progress: 'pending'
+        }];
+
+        let currentClient = clients[0];
+        let chatMessages = [];
+        let messageIdCounter = 0;
+        let selectedClientId = null;
+
+        // ---- DOM refs ----
+        const clientSelect = document.getElementById('clientSelect');
+        const clientInfoCard = document.getElementById('clientInfoCard');
+        const chatMessagesContainer = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const searchInput = document.getElementById('searchMessages');
+        const toastStack = document.getElementById('toastStack');
+        const contextBanner = document.getElementById('contextBanner');
+        const contextMessage = document.getElementById('contextMessage');
+        const closeContext = document.getElementById('closeContext');
+
+        // ---- Render Client Select ----
+        function renderClientSelect() {
+            clientSelect.innerHTML = '';
+            clients.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.name;
+                if (currentClient && c.id === currentClient.id) opt.selected = true;
+                clientSelect.appendChild(opt);
+            });
+        }
+
+        // ---- Render Client Info Card ----
+        function renderClientInfo(client) {
+            if (!client) {
+                clientInfoCard.innerHTML = '<p style="color:var(--text-muted);">No client selected</p>';
+                return;
+            }
+            const statusClass = client.progress === 'active' ? 'active' : 'pending';
+            const statusLabel = client.progress === 'active' ? 'Active' : 'Pending';
+            const conditions = client.conditions.join(', ') || 'None';
+            const allergies = client.allergies.join(', ') || 'None';
+            clientInfoCard.innerHTML = `
+                <div class="ci-row"><span class="ci-label">Name</span><span class="ci-value">${client.name}</span></div>
+                <div class="ci-row"><span class="ci-label">Age / Gender</span><span class="ci-value">${client.age} / ${client.gender}</span></div>
+                <div class="ci-row"><span class="ci-label">Height / Weight</span><span class="ci-value">${client.height} cm / ${client.weight} kg</span></div>
+                <div class="ci-row"><span class="ci-label">BMI</span><span class="ci-value">${client.bmi}</span></div>
+                <div class="ci-row"><span class="ci-label">Goal</span><span class="ci-value">${client.goal}</span></div>
+                <div class="ci-row"><span class="ci-label">Activity</span><span class="ci-value">${client.activity}</span></div>
+                <div class="ci-row"><span class="ci-label">Budget</span><span class="ci-value">${client.budget}</span></div>
+                <div class="ci-row"><span class="ci-label">Conditions</span><span class="ci-value">${conditions}</span></div>
+                <div class="ci-row"><span class="ci-label">Allergies</span><span class="ci-value">${allergies}</span></div>
+                <div class="ci-row"><span class="ci-label">Status</span><span class="ci-value"><span class="ci-status ${statusClass}">${statusLabel}</span></span></div>
+            `;
+        }
+
+        // ---- Add message to chat ----
+        function addMessage(role, content, actions = null) {
+            const msg = {
+                id: messageIdCounter++,
+                role: role, // 'professional' or 'ai'
+                content: content,
+                time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+                actions: actions // array of action objects { label, callback }
+            };
+            chatMessages.push(msg);
+            renderMessages();
+            scrollToBottom();
+        }
+
+        // ---- Render messages ----
+        function renderMessages(filter = '') {
+            const container = chatMessagesContainer;
+            container.innerHTML = '';
+            const filtered = chatMessages.filter(m =>
+                m.content.toLowerCase().includes(filter.toLowerCase())
+            );
+            if (filtered.length === 0) {
+                container.innerHTML =
+                    `<div style="text-align:center; color:var(--text-muted); padding:20px;">No messages match your search.</div>`;
+                return;
+            }
+            filtered.forEach(msg => {
+                const div = document.createElement('div');
+                div.className = `message ${msg.role}`;
+                let html = `<div>${msg.content}</div><span class="msg-time">${msg.time}</span>`;
+                if (msg.actions && msg.actions.length > 0) {
+                    html += `<div class="response-actions">`;
+                    msg.actions.forEach(action => {
+                        html +=
+                            `<button class="btn-sm ${action.class || ''}" data-action="${action.id}">${action.label}</button>`;
+                    });
+                    html += `</div>`;
+                }
+                div.innerHTML = html;
+                container.appendChild(div);
+            });
+            // Attach event listeners to action buttons
+            container.querySelectorAll('[data-action]').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    const actionId = this.dataset.action;
+                    handleAction(actionId, this);
+                });
+            });
+        }
+
+        // ---- Scroll to bottom ----
+        function scrollToBottom() {
+            const container = chatMessagesContainer;
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // ---- Typing indicator ----
+        function showTyping() {
+            typingIndicator.classList.add('show');
+            scrollToBottom();
+        }
+
+        function hideTyping() {
+            typingIndicator.classList.remove('show');
+        }
+
+        // ---- Simulate AI response ----
+        function simulateAIResponse(userMessage) {
+            showTyping();
+            setTimeout(() => {
+                hideTyping();
+                let response = getAIResponse(userMessage);
+                const actions = [
+                    { id: 'approve', label: '✅ Approve', class: 'approve' },
+                    { id: 'edit', label: '✏️ Edit' },
+                    { id: 'regenerate', label: '🔄 Regenerate' },
+                    { id: 'assign', label: '📤 Assign to Client' },
+                    { id: 'pdf', label: '📄 Export PDF' },
+                    { id: 'save', label: '💾 Save' }
+                ];
+                addMessage('ai', response, actions);
+            }, 1200 + Math.random() * 800);
+        }
+
+        // ---- AI response generator (sample) ----
+        function getAIResponse(userMessage) {
+            const lower = userMessage.toLowerCase();
+            const clientName = currentClient ? currentClient.name : 'the client';
+            if (lower.includes('meal plan') || lower.includes('weight gain')) {
+                return `📋 **Meal Plan for Weight Gain**\n\n**Client:** ${clientName}\n**Goal:** Weight Gain\n\n**Breakfast**  \n- Body Builder Porridge  \n- 3 Boiled Eggs  \n- 1 Banana  \n\n**Lunch**  \n- Rice (200g)  \n- Beef Stew  \n- Mixed Vegetables  \n\n**Dinner**  \n- Ugali  \n- Fried Fish  \n- Avocado  \n\n**Snacks**  \n- Nuts mix  \n- Greek Yogurt  \n\n**Calories:** 2900 kcal  \n**Protein:** 140g  \n**Carbs:** 280g  \n**Fat:** 70g`;
+            } else if (lower.includes('weight loss')) {
+                return `🔥 **Meal Plan for Weight Loss**\n\n**Client:** ${clientName}\n**Goal:** Weight Loss\n\n**Breakfast**  \n- Oatmeal with Berries  \n- Scrambled Egg Whites  \n\n**Lunch**  \n- Grilled Chicken Salad  \n- Quinoa  \n\n**Dinner**  \n- Steamed Fish  \n- Roasted Vegetables  \n\n**Calories:** 1500 kcal  \n**Protein:** 90g  \n**Carbs:** 120g  \n**Fat:** 40g`;
+            } else if (lower.includes('diabetes')) {
+                return `🩸 **Diabetes-Friendly Meal Guide**\n\n**Client:** ${clientName}\n**Condition:** Diabetes\n\n**Breakfast**  \n- Millet Porridge (unsweetened)  \n- Boiled Egg  \n\n**Lunch**  \n- Brown Rice with Lentils  \n- Grilled Chicken  \n- Green Salad  \n\n**Dinner**  \n- Fish with Steamed Vegetables  \n- Small portion of Ugali (finger millet)  \n\n**Snacks**  \n- Apple slices with peanut butter  \n\n**Key Tip:** Focus on low-GI foods, moderate portions, and regular meal times.`;
+            } else if (lower.includes('hypertension')) {
+                return `❤️ **Hypertension Nutrition Guide**\n\n**Client:** ${clientName}\n**Condition:** Hypertension\n\n**Breakfast**  \n- Oatmeal with Banana  \n- Low-fat Milk  \n\n**Lunch**  \n- Brown Rice with Beans  \n- Steamed Vegetables  \n\n**Dinner**  \n- Baked Fish  \n- Sweet Potato  \n- Mixed Greens  \n\n**Snacks**  \n- Fresh Fruit  \n- Unsalted Nuts  \n\n**Key Tip:** Reduce salt, increase potassium-rich foods like bananas, sweet potatoes, and leafy greens.`;
+            } else if (lower.includes('shopping list')) {
+                return `🛒 **Shopping List**\n\n**Client:** ${clientName}\n\n**Vegetables**  \n- Spinach (200g)  \n- Bell Peppers (3)  \n- Onions (2)  \n- Tomatoes (4)  \n\n**Proteins**  \n- Chicken Breast (1kg)  \n- Fish fillets (500g)  \n- Eggs (12)  \n\n**Grains**  \n- Brown Rice (1kg)  \n- Oats (500g)  \n- Whole Wheat Bread (1 loaf)  \n\n**Dairy**  \n- Milk (1L)  \n- Yogurt (500g)  \n\n**Fruits**  \n- Bananas (6)  \n- Apples (4)  \n\n**Estimated Budget:** KES 4,200`;
+            } else if (lower.includes('analyze progress') || lower.includes('progress')) {
+                return `📊 **Client Progress Analysis**\n\n**Client:** ${clientName}  \n**Goal:** ${currentClient ? currentClient.goal : 'N/A'}  \n**Start Weight:** 82kg  \n**Current Weight:** ${currentClient ? currentClient.weight : 'N/A'}kg  \n**BMI Change:** ${currentClient ? (currentClient.bmi - 26).toFixed(1) : 'N/A'}  \n\n**Compliance:** 78%  \n**Meals Completed:** 15/20  \n**Water Intake:** 2.1L/day  \n\n**Recommendation:** Increase protein intake and add resistance training.`;
+            } else if (lower.includes('recipe')) {
+                return `🥗 **Healthy Recipe Suggestions**\n\n**For:** ${clientName}\n\n**1. Grilled Chicken with Quinoa Salad**  \n- Calories: 420  \n- Prep time: 25 mins  \n\n**2. Vegetable Stir-fry with Tofu**  \n- Calories: 350  \n- Prep time: 20 mins  \n\n**3. Oven-baked Fish with Roasted Veggies**  \n- Calories: 390  \n- Prep time: 30 mins  \n\n**4. Lentil Soup with Whole Grain Bread**  \n- Calories: 280  \n- Prep time: 35 mins`;
+            } else if (lower.includes('weekly plan')) {
+                return `📅 **Weekly Meal Plan**\n\n**Client:** ${clientName}\n\n**Day 1:** Weight Gain  \n- Breakfast: Porridge + Eggs  \n- Lunch: Rice + Beef  \n- Dinner: Ugali + Fish  \n\n**Day 2:** Weight Loss  \n- Breakfast: Oatmeal + Fruit  \n- Lunch: Chicken Salad  \n- Dinner: Grilled Veggies  \n\n**Day 3:** Diabetic-friendly  \n- Breakfast: Millet Porridge  \n- Lunch: Lentil Soup  \n- Dinner: Fish + Veggies  \n\n**Day 4:** Hypertension-friendly  \n- Breakfast: Oatmeal + Banana  \n- Lunch: Beans + Brown Rice  \n- Dinner: Baked Fish + Sweet Potato  \n\n**Day 5:** High Protein  \n- Breakfast: Scrambled Eggs + Avocado  \n- Lunch: Chicken Breast + Quinoa  \n- Dinner: Steak + Asparagus  \n\n**Day 6–7:** Flexible, repeat favourites`;
+            } else {
+                return `🤖 **AI Recommendation**\n\n**Client:** ${clientName}\n\nBased on the client's profile, I recommend:\n\n- Increase water intake to 2.5L/day.\n- Incorporate more leafy greens into meals.\n- Consider a weekly meal prep schedule.\n- Monitor portion sizes for carbohydrates.\n\n*This is a sample response — in production, the AI will provide tailored recommendations.*`;
+            }
+        }
+
+        // ---- Handle Professional Controls ----
+        function handleAction(actionId, btnElement) {
+            const actionsMap = {
+                'approve': '✅ Recommendation approved!',
+                'edit': '✏️ Edit mode opened (simulated).',
+                'regenerate': '🔄 Regenerating recommendation...',
+                'assign': '📤 Recommendation assigned to ' + (currentClient ? currentClient.name : 'client') + '!',
+                'pdf': '📄 PDF export started (simulated).',
+                'save': '💾 Recommendation saved successfully!'
+            };
+            const msg = actionsMap[actionId] || 'Action performed.';
+            showToast(msg);
+            if (actionId === 'regenerate') {
+                const lastAIIndex = chatMessages.map(m => m.role).lastIndexOf('ai');
+                if (lastAIIndex !== -1) {
+                    chatMessages.splice(lastAIIndex, 1);
+                    const userMsg = chatMessages[chatMessages.length - 1]?.content || 'Generate meal plan';
+                    simulateAIResponse(userMsg);
+                }
+            }
+        }
+
+        // ---- Show Toast ----
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type === 'error' ? 'error' : ''}`;
+            const icon = type === 'error' ? 'fa-circle-exclamation' : 'fa-check-circle';
+            toast.innerHTML = `<i class="fa-regular ${icon}"></i><span>${message}</span>`;
+            toastStack.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(40px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // ---- Send message ----
+        function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+            addMessage('professional', text);
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+            simulateAIResponse(text);
+        }
+
+        // ---- Handle quick action click (fill input) ----
+        function handleQuickAction(msg) {
+            chatInput.value = msg;
+            chatInput.focus();
+            chatInput.dispatchEvent(new Event('input'));
+        }
+
+        // ---- Handle tool button click (direct AI response) ----
+        function handleTool(tool) {
+            const toolMessages = {
+                'meal-plan': 'Generate a meal plan for ' + (currentClient ? currentClient.name : 'the client'),
+                'analyze-nutrition': 'Analyze the nutrition of the current meal plan for ' + (currentClient ? currentClient
+                    .name : 'the client'),
+                'shopping-list': 'Generate a shopping list for ' + (currentClient ? currentClient.name : 'the client'),
+                'meal-alternatives': 'Suggest meal alternatives for ' + (currentClient ? currentClient.name : 'the client'),
+                'weekly-plan': 'Generate a weekly plan for ' + (currentClient ? currentClient.name : 'the client'),
+                'monthly-plan': 'Generate a monthly plan for ' + (currentClient ? currentClient.name : 'the client'),
+                'analyze-progress': 'Analyze progress for ' + (currentClient ? currentClient.name : 'the client'),
+                'consultation-report': 'Generate a consultation report for ' + (currentClient ? currentClient.name :
+                    'the client'),
+                'followup-notes': 'Generate follow-up notes for ' + (currentClient ? currentClient.name : 'the client')
+            };
+            const msg = toolMessages[tool] || 'AI assistance';
+            addMessage('professional', msg);
+            simulateAIResponse(msg);
+        }
+
+        // ---- Load context from URL parameters ----
+        function loadContext() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const clientId = urlParams.get('client');
+            const task = urlParams.get('task');
+            const from = urlParams.get('from');
+
+            if (clientId) {
+                const client = clients.find(c => c.id === parseInt(clientId));
+                if (client) {
+                    currentClient = client;
+                    clientSelect.value = client.id;
+                    renderClientInfo(client);
+                    // Show context banner
+                    contextBanner.classList.add('show');
+                    let message = `AI Assistant opened with <strong>${client.name}</strong> selected.`;
+                    if (task === 'meal-plan') {
+                        message += ' Ready to generate a meal plan.';
+                    } else if (task === 'analyze') {
+                        message += ' Ready to analyze client progress.';
+                    } else if (task === 'report') {
+                        message += ' Ready to generate a report.';
+                    }
+                    contextMessage.innerHTML = message;
+                    // Auto-send initial message if task provided
+                    if (task) {
+                        setTimeout(() => {
+                            const taskMessages = {
+                                'meal-plan': 'Generate a meal plan for ' + client.name,
+                                'analyze': 'Analyze the progress of ' + client.name,
+                                'report': 'Generate a report for ' + client.name,
+                                'shopping-list': 'Generate a shopping list for ' + client.name,
+                                'nutrition': 'Analyze the nutrition for ' + client.name
+                            };
+                            const msg = taskMessages[task] || 'How can I help with ' + client.name + '?';
+                            addMessage('professional', msg);
+                            setTimeout(() => simulateAIResponse(msg), 300);
+                        }, 500);
+                    }
+                }
+            }
+        }
+
+        // ---- Initialize ----
+        function init() {
+            // Set professional name
+            const profName = getProfessionalName();
+            document.getElementById('profName').textContent = profName;
+            document.getElementById('profAvatar').textContent = profName.charAt(0).toUpperCase();
+
+            // Render clients
+            renderClientSelect();
+            renderClientInfo(currentClient);
+
+            // Load context from URL
+            loadContext();
+
+            // If no context, show initial greeting
+            if (chatMessages.length === 0) {
+                addMessage('ai',
+                    '👋 Hello! I\'m your AI Assistant. Select a client, ask a question, or use the tools below to get started.'
+                    );
+            }
+
+            // Event listeners
+            clientSelect.addEventListener('change', function() {
+                const id = parseInt(this.value);
+                const client = clients.find(c => c.id === id);
+                if (client) {
+                    currentClient = client;
+                    renderClientInfo(client);
+                    showToast(`Client switched to ${client.name}`);
+                }
+            });
+
+            sendBtn.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            chatInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+
+            // Quick actions
+            document.querySelectorAll('.qa-chip').forEach(chip => {
+                chip.addEventListener('click', function() {
+                    handleQuickAction(this.dataset.msg);
+                });
+            });
+
+            // Tool buttons
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tool = this.dataset.tool;
+                    handleTool(tool);
+                });
+            });
+
+            // Search
+            searchInput.addEventListener('input', function() {
+                renderMessages(this.value);
+            });
+
+            // Context banner close
+            if (closeContext) {
+                closeContext.addEventListener('click', function() {
+                    contextBanner.classList.remove('show');
+                });
+            }
+
+            // Mobile sidebar toggle
+            const hamburger = document.getElementById('hamburgerBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (hamburger) {
+                hamburger.addEventListener('click', function() {
+                    sidebar.classList.toggle('open');
+                    overlay.classList.toggle('show');
+                });
+            }
+            if (overlay) {
+                overlay.addEventListener('click', function() {
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('show');
+                });
+            }
+            document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
+                link.addEventListener('click', function() {
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('show');
+                });
+            });
+        }
+
+        // ---- Expose to global for debugging ----
+        window.aiAssistant = {
+            addMessage,
+            clients,
+            currentClient,
+            chatMessages,
+            simulateAIResponse,
+            getAIResponse
+        };
+
+        // ---- Run ----
+        document.addEventListener('DOMContentLoaded', init);
+
+    })();
+</script>
+
+</body>
+</html>

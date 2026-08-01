@@ -1,0 +1,95 @@
+[
+  {
+    "id": "user-1785580185267",
+    "email": "paul@gmail.com",
+    "password": "CjgSLNt2yR697j3",
+    "passwordHash": "$2b$10$8re9Uz4dGERuVRqtF/q9Eu6EBIp.gi9xVi0qYN8Yta3CYoF3LfXA6",
+    "first_name": "paul",
+    "last_name": "john",
+    "role": "user",
+    "status": "active",
+    "created_at": "2026-08-01T10:29:45.361Z",
+    "phone": "",
+    "date_of_birth": "2026-07-28",
+    "gender": "male",
+    "height_cm": 100,
+    "weight_kg": 70,
+    "bmi": 70,
+    "lifestyle": "moderately_active",
+    "activity_level": 4,
+    "diet_preference": "vegetarian",
+    "allergies": [
+      "gluten"
+    ],
+    "medical_conditions": [
+      "cholesterol"
+    ],
+    "favorite_foods": [
+      "chapati"
+    ],
+    "disliked_foods": [
+      "meat"
+    ],
+    "water_goal_ml": 5000,
+    "calorie_goal": 590,
+    "bio": "Am ready",
+    "payment_methods": [
+      {
+        "id": "pm-1785581370171",
+        "type": "mpesa",
+        "title": "M-Pesa Express",
+        "detail": "+254 712345678",
+        "is_default": true,
+        "created_at": "2026-08-01T10:49:30.171Z"
+      }
+    ]
+  },
+  {
+    "id": "user-1785583834173",
+    "email": "adminlishe@gmail.com",
+    "password": "Admin@2003",
+    "passwordHash": "$2b$10$EfegzUn1sPRKhgVt9U3ZHuQ7kZVdMC9H8l7g2xHr3xZl7jrD0xRGS",
+    "first_name": "admin",
+    "last_name": "you",
+    "role": "admin",
+    "status": "active",
+    "profile_completed": true,
+    "created_at": "2026-08-01T11:30:34.269Z"
+  },
+  {
+    "id": "user-1785585586932",
+    "email": "profess@gmail.com",
+    "password": "6ihasRhkPuKUu3s",
+    "passwordHash": "$2b$10$xpMEOzOHlrUptNgcoWQshOXlRIbuCR.LL/eAVQDstxXTQifd3AGIO",
+    "first_name": "Profes",
+    "last_name": "01",
+    "role": "professional",
+    "status": "pending",
+    "approval_status": "pending",
+    "profile_completed": false,
+    "created_at": "2026-08-01T11:59:47.030Z",
+    "phone": "",
+    "date_of_birth": "",
+    "gender": "",
+    "height_cm": null,
+    "weight_kg": null,
+    "lifestyle": "sedentary",
+    "diet_preference": "",
+    "allergies": [],
+    "medical_conditions": [],
+    "favorite_foods": [],
+    "disliked_foods": [],
+    "water_goal_ml": null,
+    "calorie_goal": null,
+    "biography": "More about helping pregnant women",
+    "license_number": "KRA/23423-DGFD",
+    "qualification": "Dietitian - Pregnancy",
+    "years_experience": 2,
+    "consultation_fee": 5000,
+    "availability": "{\"days\":[\"weekdays\"],\"sessions\":[\"virtual\",\"physical\"]}",
+    "specialty": [
+      "weight-management",
+      "pregnancy"
+    ]
+  }
+]

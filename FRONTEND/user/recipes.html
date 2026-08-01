@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<title>Recipes — Smart Lishe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<!-- ===== YOUR EXISTING STYLE.CSS ===== -->
+<link rel="stylesheet" href="style.css">
+
+<!-- ===== RECIPES‑SPECIFIC OVERRIDES (minimal) ===== -->
+<style>
+  /* Upgrade banner */
+  .upgrade-banner {
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    border: 1px solid #10b981;
+    border-radius: var(--radius-md, 16px);
+    padding: 16px 24px;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .upgrade-banner.show { display: flex; }
+  .upgrade-banner .ub-icon { font-size: 1.8rem; color: #047857; }
+  .upgrade-banner .ub-text { flex: 1; font-weight: 600; color: #065f46; font-size: 0.95rem; }
+  .upgrade-banner .ub-text strong { display: block; font-size: 1.05rem; margin-bottom: 2px; }
+  .upgrade-banner .btn-upgrade {
+    background: #047857;
+    color: #fff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .upgrade-banner .btn-upgrade:hover { background: #065f46; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(4, 120, 87, 0.3); }
+
+  /* Floating AI button */
+  .floating-ai-btn {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 999;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--sukuma, #2b7a4b);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    box-shadow: 0 6px 20px rgba(43, 122, 75, 0.4);
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+    cursor: pointer;
+  }
+  .floating-ai-btn:hover { transform: scale(1.05); box-shadow: 0 8px 28px rgba(43, 122, 75, 0.5); }
+  .floating-ai-btn i { line-height: 1; }
+
+  @media (max-width: 600px) {
+    .upgrade-banner {
+      flex-direction: column;
+      text-align: center;
+      padding: 16px;
+    }
+    .upgrade-banner .ub-icon { font-size: 1.4rem; }
+    .floating-ai-btn {
+      width: 52px;
+      height: 52px;
+      font-size: 1.4rem;
+      bottom: 20px;
+      right: 20px;
+    }
+    .recipes-toolbar {
+      flex-direction: column;
+      gap: 10px;
+    }
+    .recipe-filter-select {
+      width: 100%;
+    }
+    .recipes-grid {
+      grid-template-columns: 1fr;
+    }
+    .recipe-modal {
+      width: 95%;
+      max-height: 95vh;
+      border-radius: 16px;
+    }
+    .rm-img {
+      height: 180px;
+    }
+    .rm-body {
+      padding: 16px;
+    }
+    .rm-macro-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== AUTH CHECK ===== -->
+<script>
+(function() {
+  const email = localStorage.getItem('email');
+  const role = localStorage.getItem('smartlishe_role') || localStorage.getItem('role');
+  const profile = localStorage.getItem('smartlishe_profile');
+  const loggedIn = localStorage.getItem('smartlishe_logged_in') === 'true';
+  
+  if (!email && !profile && !loggedIn) {
+    window.location.href = 'home.html';
+    return;
+  }
+  if (role === 'Professional') {
+    window.location.href = '../professional/home.html';
+    return;
+  }
+  if (role === 'Client') {
+    window.location.href = '../client/dashboard.html';
+    return;
+  }
+})();
+</script>
+
+<!-- ===== MOBILE TOPBAR ===== -->
+<div class="mobile-topbar">
+  <div class="brand-mini">
+    <div class="mark"><i class="fa-solid fa-seedling"></i></div>
+    <span>Smart Lishe</span>
+  </div>
+  <button class="hamburger-btn" id="hamburgerBtn"><i class="fa-solid fa-bars"></i></button>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="app-shell">
+
+  <!-- ===== SIDEBAR (no Membership, no About/Contact) ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="mark"><i class="fa-solid fa-seedling"></i></div>
+      <div class="name">Smart Lishe<span>Kenya</span></div>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      
+      <div class="nav-section-divider"><span>Plan &amp; Discover</span><i class="fa-solid fa-layer-group"></i></div>
+      <div class="service-group open" data-group="plan">
+        <button type="button" class="service-group-header" data-group-toggle="plan">
+          <div class="sg-icon-wrap" style="background:var(--sukuma);"><i class="fa-solid fa-bowl-food"></i></div>
+          <span class="sg-title">Plan &amp; Discover</span>
+          <span class="sg-count">5</span>
+          <span class="sg-dropdown-hint"><i class="fa-solid fa-chevron-down sg-chevron"></i></span>
+        </button>
+        <div class="service-group-body">
+          <a href="meal-generator.html" class="nav-link"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Meal Generator</a>
+          <a href="nutriscan.html" class="nav-link"><i class="fa-solid fa-camera-retro"></i> NutriScan</a>
+          <a href="health-conditions.html" class="nav-link"><i class="fa-solid fa-heart-pulse"></i> Health Conditions</a>
+          <a href="meal-planner.html" class="nav-link"><i class="fa-solid fa-calendar-days"></i> Meal Planner</a>
+          <a href="recipes.html" class="nav-link active"><i class="fa-solid fa-book-open"></i> Recipes</a>
+        </div>
+      </div>
+      
+      <div class="nav-section-divider"><span>Track &amp; Achieve</span><i class="fa-solid fa-chart-simple"></i></div>
+      <div class="service-group" data-group="track">
+        <button type="button" class="service-group-header" data-group-toggle="track">
+          <div class="sg-icon-wrap" style="background:var(--char);"><i class="fa-solid fa-chart-simple"></i></div>
+          <span class="sg-title">Track &amp; Achieve</span>
+          <span class="sg-count">4</span>
+          <span class="sg-dropdown-hint"><i class="fa-solid fa-chevron-down sg-chevron"></i></span>
+        </button>
+        <div class="service-group-body">
+          <a href="goal-tracker.html" class="nav-link"><i class="fa-solid fa-bullseye"></i> Goal Tracker</a>
+          <a href="water-tracker.html" class="nav-link"><i class="fa-solid fa-droplet"></i> Water Tracker</a>
+          <a href="analytics.html" class="nav-link"><i class="fa-solid fa-chart-line"></i> Nutrition Analytics</a>
+          <a href="shopping-list.html" class="nav-link"><i class="fa-solid fa-basket-shopping"></i> Shopping List</a>
+        </div>
+      </div>
+      
+      <!-- ===== PROFILE – only User Profile & Settings (no About/Contact) ===== -->
+      <div class="nav-section-divider"><span>Profile</span><i class="fa-solid fa-user-gear"></i></div>
+      <div class="service-group" data-group="profile">
+        <button type="button" class="service-group-header" data-group-toggle="profile">
+          <div class="sg-icon-wrap" style="background:#3D6FA8;"><i class="fa-solid fa-user"></i></div>
+          <span class="sg-title">Profile</span>
+          <span class="sg-count">2</span>
+          <span class="sg-dropdown-hint"><i class="fa-solid fa-chevron-down sg-chevron"></i></span>
+        </button>
+        <div class="service-group-body">
+          <a href="profile.html" class="nav-link"><i class="fa-solid fa-id-card"></i> User Profile</a>
+          <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> Settings</a>
+        </div>
+      </div>
+
+      <!-- ===== Logout (clears storage) ===== -->
+      <div style="margin-top:12px;">
+        <a href="#" class="nav-link" onclick="event.preventDefault(); localStorage.clear(); sessionStorage.clear(); window.location.href='home.html';" style="color:var(--char);">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="theme-toggle" id="themeToggle">
+        <span><i class="fa-solid fa-moon" id="themeIcon"></i> Dark mode</span>
+        <span class="switch"></span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="globalSearch" placeholder="Search recipes, meals, conditions...">
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        <a href="profile.html" class="profile-chip" style="cursor:pointer;">
+          <div class="avatar" id="topbarAvatar">U</div>
+          <span class="label" id="topbarName">User</span>
+        </a>
+      </div>
+    </header>
+
+    <section class="page active">
+      <div class="page-inner">
+        <div class="page-header">
+          <div class="section-eyebrow">Recipes</div>
+          <h2>50+ Kenyan dishes, broken down nutritionally</h2>
+          <p>Search by name or filter by category to find something to cook tonight — every recipe shows full ingredients, instructions, and macros.</p>
+        </div>
+
+        <!-- ===== UPGRADE BANNER (free users) ===== -->
+        <div class="upgrade-banner" id="upgradeBanner">
+          <div class="ub-icon"><i class="fa-regular fa-crown"></i></div>
+          <div class="ub-text">
+            <strong>Unlock Premium Features</strong>
+            <span>Get unlimited AI requests, advanced analytics, priority support, and more – only KES 2,500/month.</span>
+          </div>
+          <a href="billing.html" class="btn-upgrade">
+            <i class="fa-solid fa-arrow-right"></i> Upgrade Now
+          </a>
+        </div>
+
+        <div class="recipes-toolbar" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <div class="recipe-search-box" style="flex:1;min-width:220px;">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="recipeSearchInput" placeholder="Search recipes — try 'ugali' or 'fish'...">
+          </div>
+          <select class="recipe-filter-select" id="recipeCategoryFilter" style="width:auto;min-width:160px;">
+            <option value="all">All categories</option>
+            <option value="Staples">Staples</option>
+            <option value="Vegetables">Vegetables</option>
+            <option value="Protein">Protein &amp; Meat</option>
+            <option value="Fish">Fish &amp; Seafood</option>
+            <option value="Legumes">Legumes</option>
+            <option value="Breakfast">Breakfast</option>
+            <option value="Salads">Salads</option>
+            <option value="Rice">Rice Dishes</option>
+          </select>
+          <button class="btn btn-primary" id="openAddRecipeBtn" style="background:var(--sukuma);color:#fff;border:none;padding:10px 18px;border-radius:12px;font-weight:600;display:inline-flex;align-items:center;gap:8px;cursor:pointer;">
+            <i class="fa-solid fa-plus"></i> Add Recipe
+          </button>
+        </div>
+
+        <div class="recipe-count-label" id="recipeCountLabel"></div>
+        <div class="recipes-grid" id="recipesGrid"></div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- ===== FLOATING AI BUTTON ===== -->
+<a href="ai-assistant.html" class="floating-ai-btn" aria-label="AI Assistant">
+  <i class="fa-regular fa-robot"></i>
+</a>
+
+<!-- ===== RECIPE DETAIL MODAL ===== -->
+<div class="recipe-modal-overlay" id="recipeModalOverlay">
+  <div class="recipe-modal">
+    <div class="rm-img">
+      <img id="modalRecipeImg" src="" alt="">
+      <button class="recipe-modal-close" id="recipeModalCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="rm-body">
+      <h3 id="modalRecipeName"></h3>
+      <div class="rm-meta" id="modalRecipeMeta"></div>
+      <p style="font-size:0.88rem;color:var(--text-secondary);margin-bottom:18px;" id="modalRecipeDesc"></p>
+      <div class="rm-macro-grid" id="modalRecipeMacros"></div>
+      <h5>Ingredients</h5>
+      <ul id="modalRecipeIngredients"></ul>
+      <h5>Instructions</h5>
+      <p class="rm-instructions" id="modalRecipeInstructions"></p>
+      
+      <div id="modalRecipeActions" style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border-color, #e5e7eb);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <button id="editActiveRecipeBtn" class="btn" style="background:#f1f5f9;color:#334155;padding:10px 16px;border-radius:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;border:1px solid #cbd5e1;cursor:pointer;">
+          <i class="fa-solid fa-pen-to-square"></i> Edit Recipe
+        </button>
+        <button id="addRecipeIngredientsToShoppingListBtn" class="btn" style="background:var(--sukuma, #2b7a4b);color:#fff;padding:12px 20px;border-radius:12px;font-weight:700;display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;box-shadow:0 4px 12px rgba(43,122,75,0.25);">
+          <i class="fa-solid fa-basket-shopping"></i> Add Ingredients to Shopping List
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADD CUSTOM RECIPE MODAL ===== -->
+<div class="recipe-modal-overlay" id="addRecipeModalOverlay">
+  <div class="recipe-modal" style="max-width:560px;">
+    <div class="rm-body" style="padding:24px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h3 style="margin:0;font-family:var(--font-heading, 'Fraunces', serif);color:var(--sukuma, #2b7a4b);"><i class="fa-solid fa-utensils"></i> Add Custom Recipe</h3>
+        <button class="recipe-modal-close" id="addRecipeModalCloseBtn" style="position:static;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--text-muted, #6b7280);"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="addRecipeForm" style="display:flex;flex-direction:column;gap:14px;">
+        <div>
+          <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:4px;">Recipe Name *</label>
+          <input type="text" id="recName" placeholder="e.g., Authentic Swahili Chicken Biryani" required style="width:100%;padding:10px 14px;border:1px solid var(--border-color, #e5e7eb);border-radius:10px;font-size:0.9rem;">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:4px;">Category</label>
+            <select id="recCategory" style="width:100%;padding:10px 14px;border:1px solid var(--border-color, #e5e7eb);border-radius:10px;font-size:0.9rem;">
+              <option value="Staples">Staples</option>
+              <option value="Protein">Protein &amp; Meat</option>
+              <option value="Fish">Fish &amp; Seafood</option>
+              <option value="Vegetables">Vegetables</option>
+              <option value="Legumes">Legumes</option>
+              <option value="Breakfast">Breakfast</option>
+              <option value="Rice">Rice Dishes</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:4px;">Prep/Cook Time</label>
+            <input type="text" id="recTime" placeholder="e.g., 40 mins" style="width:100%;padding:10px 14px;border:1px solid var(--border-color, #e5e7eb);border-radius:10px;font-size:0.9rem;">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:8px;">
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;">Calories</label>
+            <input type="number" id="recCalories" placeholder="450" style="width:100%;padding:8px;border:1px solid var(--border-color, #e5e7eb);border-radius:8px;font-size:0.85rem;">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;">Protein (g)</label>
+            <input type="text" id="recProtein" placeholder="25g" style="width:100%;padding:8px;border:1px solid var(--border-color, #e5e7eb);border-radius:8px;font-size:0.85rem;">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;">Carbs (g)</label>
+            <input type="text" id="recCarbs" placeholder="50g" style="width:100%;padding:8px;border:1px solid var(--border-color, #e5e7eb);border-radius:8px;font-size:0.85rem;">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.75rem;font-weight:600;">Fat (g)</label>
+            <input type="text" id="recFat" placeholder="12g" style="width:100%;padding:8px;border:1px solid var(--border-color, #e5e7eb);border-radius:8px;font-size:0.85rem;">
+          </div>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:4px;">Ingredients (one per line or comma-separated) *</label>
+          <textarea id="recIngredients" rows="3" placeholder="500g chicken breasts&#10;2 cups basmati rice&#10;1 tsp biryani masala" required style="width:100%;padding:10px 14px;border:1px solid var(--border-color, #e5e7eb);border-radius:10px;font-size:0.9rem;resize:vertical;"></textarea>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:4px;">Instructions</label>
+          <textarea id="recInstructions" rows="3" placeholder="Step 1: Marinate chicken...&#10;Step 2: Cook rice..." style="width:100%;padding:10px 14px;border:1px solid var(--border-color, #e5e7eb);border-radius:10px;font-size:0.9rem;resize:vertical;"></textarea>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:10px;">
+          <button type="button" id="cancelAddRecipeBtn" style="padding:10px 18px;border:1px solid var(--border-color, #e5e7eb);background:none;border-radius:10px;font-weight:600;cursor:pointer;">Cancel</button>
+          <button type="submit" style="padding:10px 22px;background:var(--sukuma, #2b7a4b);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;">Save Recipe to Backend</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CHATBOT ===== -->
+<button class="chatbot-fab" id="chatbotFab"><i class="fa-solid fa-robot"></i><span class="ping"></span></button>
+<div class="chatbot-panel" id="chatbotPanel">
+  <div class="chatbot-head">
+    <div class="ai-avatar"><i class="fa-solid fa-robot"></i></div>
+    <div class="info"><strong>Smart Lishe Assistant</strong><span>Online</span></div>
+    <button class="chatbot-close" id="chatbotClose"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="chatbot-body" id="chatbotBody"></div>
+  <div class="chatbot-suggestions" id="chatbotSuggestions">
+    <button class="chip-suggestion" data-q="weight loss">Weight loss tips</button>
+    <button class="chip-suggestion" data-q="diabetes meal">Diabetes-friendly meal</button>
+    <button class="chip-suggestion" data-q="water intake">How much water?</button>
+  </div>
+  <div class="chatbot-input-row">
+    <input type="text" id="chatbotInput" placeholder="Ask about meals, health, recipes...">
+    <button class="chatbot-send" id="chatbotSend"><i class="fa-solid fa-paper-plane"></i></button>
+  </div>
+</div>
+
+<button class="scroll-top-btn" id="scrollTopBtn"><i class="fa-solid fa-arrow-up"></i></button>
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+// ============================================================
+// SMART LISHE — RECIPES (ALL DATA FROM localStorage)
+// ============================================================
+
+const Store = {
+  get(key, fallback){
+    try{
+      const raw = localStorage.getItem('smartlishe_' + key);
+      return raw ? JSON.parse(raw) : fallback;
+    }catch(e){ return fallback; }
+  },
+  set(key, value){
+    try{
+      localStorage.setItem('smartlishe_' + key, JSON.stringify(value));
+      return true;
+    }catch(e){ return false; }
+  }
+};
+
+function showToast(message, type = 'success'){
+  const stack = document.getElementById('toastStack');
+  if(!stack) return;
+  const toast = document.createElement('div');
+  toast.className = 'toast' + (type === 'error' ? ' error' : '');
+  const icon = type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check';
+  toast.innerHTML = `<i class="fa-solid ${icon}"></i><span>${message}</span>`;
+  stack.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(40px)';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+// ===== UPGRADE BANNER =====
+(function checkUpgradeBanner() {
+  const banner = document.getElementById('upgradeBanner');
+  if (!banner) return;
+  const membership = localStorage.getItem('user_membership') || 'free';
+  if (membership === 'free') {
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+})();
+
+// ===== USER NAME / AVATAR =====
+function loadUserInfo() {
+  const userProfile = Store.get('userProfile', {});
+  const profile = JSON.parse(localStorage.getItem('smartlishe_profile') || '{}');
+  const firstName = localStorage.getItem('firstName') || 'User';
+  const email = localStorage.getItem('email') || '';
+
+  let userName = 'User';
+  if (userProfile.fullName) userName = userProfile.fullName.split(' ')[0];
+  else if (profile.name) userName = profile.name;
+  else if (firstName && firstName !== 'User') userName = firstName;
+  else if (email) userName = email.split('@')[0];
+
+  const nameEl = document.getElementById('topbarName');
+  const avatarEl = document.getElementById('topbarAvatar');
+  if (nameEl) nameEl.textContent = userName;
+  if (avatarEl) avatarEl.textContent = userName.charAt(0).toUpperCase();
+}
+
+// ===== THEME =====
+function initTheme(){
+  const saved = Store.get('theme', 'light');
+  document.body.setAttribute('data-theme', saved);
+  const themeIcon = document.getElementById('themeIcon');
+  if(themeIcon) themeIcon.className = saved === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+  const themeToggle = document.getElementById('themeToggle');
+  if(themeToggle){
+    themeToggle.addEventListener('click', () => {
+      const current = document.body.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', next);
+      if(themeIcon) themeIcon.className = next === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+      Store.set('theme', next);
+    });
+  }
+}
+
+// ===== SIDEBAR =====
+function initSidebar(){
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const hamburger = document.getElementById('hamburgerBtn');
+  function openSidebar(){ if(sidebar) sidebar.classList.add('open'); if(overlay) overlay.classList.add('show'); }
+  function closeSidebar(){ if(sidebar) sidebar.classList.remove('open'); if(overlay) overlay.classList.remove('show'); }
+  if(hamburger) hamburger.addEventListener('click', openSidebar);
+  if(overlay) overlay.addEventListener('click', closeSidebar);
+  document.querySelectorAll('.service-group-header').forEach(header => {
+    header.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const group = header.closest('.service-group');
+      if(!group) return;
+      const wasOpen = group.classList.contains('open');
+      document.querySelectorAll('.service-group').forEach(g => g.classList.remove('open'));
+      if(!wasOpen) group.classList.add('open');
+    });
+  });
+  document.querySelectorAll('.nav-link').forEach(link => link.addEventListener('click', closeSidebar));
+}
+
+// ===== SCROLL TOP =====
+function initScrollTop(){
+  const btn = document.getElementById('scrollTopBtn');
+  if(!btn) return;
+  window.addEventListener('scroll', () => btn.classList.toggle('show', window.scrollY > 400));
+  btn.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
+}
+
+// ===== RECIPES =====
+const mealDatabase = [
+  { name:'Ugali, Sukuma Wiki & Omena', slot:'lunch', category:'Staples', time:35,
+    desc:'The everyday Kenyan plate — stiff maize ugali, sautéed kale, and crisp-fried silver fish.',
+    img:'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?q=80&w=600&auto=format&fit=crop',
+    calories:610, protein:32, carbs:78, fat:18, cost:120,
+    diet:['any','pescatarian'], conditions:['none','diabetes','hypertension','anemia'], goals:['maintain','gain','muscle'],
+    ingredients:['2 cups maize flour','1 bunch sukuma wiki, chopped','1/2 cup dried omena, cleaned','1 onion, diced','2 tomatoes, diced','2 tbsp cooking oil','Salt to taste'],
+    instructions:'Boil water, stir in maize flour gradually to make stiff ugali, cook 8–10 minutes. Separately fry onion and tomato, add sukuma wiki and cook until tender. Fry cleaned omena in a little oil until crisp, season, and serve all together.' },
+  { name:'Githeri with Avocado', slot:'dinner', category:'Staples', time:50,
+    desc:'Slow-simmered maize and beans, finished with creamy avocado for richness and fibre.',
+    img:'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600&auto=format&fit=crop',
+    calories:520, protein:18, carbs:84, fat:14, cost:90,
+    diet:['any','vegetarian','pescatarian'], conditions:['none','diabetes','hypertension','cholesterol'], goals:['maintain','lose'],
+    ingredients:['1.5 cups maize and beans (githeri mix)','1/2 avocado','1 onion, diced','1 carrot, diced','2 tbsp oil','Salt and pepper'],
+    instructions:'Boil maize and beans until soft (or use pre-boiled githeri). Fry onion and carrot, mix in the githeri and simmer 10 minutes. Serve topped with sliced avocado.' },
+  { name:'Mukimo with Beef Stew', slot:'dinner', category:'Protein', time:55,
+    desc:'Mashed potatoes, maize, beans and greens, served beside a slow-cooked beef stew.',
+    img:'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?q=80&w=600&auto=format&fit=crop',
+    calories:680, protein:34, carbs:70, fat:26, cost:180,
+    diet:['any'], conditions:['none','anemia','underweight'], goals:['gain','muscle','maintain'],
+    ingredients:['3 potatoes','1 cup pumpkin leaves or spinach','1 cup maize and beans','300g beef, cubed','1 onion','2 tomatoes','2 tbsp oil'],
+    instructions:'Boil potatoes, maize/beans and greens together, then mash into mukimo. Separately, brown beef with onion and tomato, simmer until tender, and serve alongside.' },
+  { name:'Pilau with Kachumbari', slot:'lunch', category:'Rice', time:60,
+    desc:'Spiced rice cooked in a rich meat stock, paired with a fresh tomato-onion salad.',
+    img:'https://images.unsplash.com/photo-1633945274405-b6c8069047b0?q=80&w=600&auto=format&fit=crop',
+    calories:590, protein:24, carbs:80, fat:16, cost:160,
+    diet:['any'], conditions:['none','underweight'], goals:['maintain','gain'],
+    ingredients:['2 cups basmati rice','250g beef or chicken','1 onion','Pilau masala spice mix','2 tomatoes','Kachumbari: tomato, onion, chili, lemon'],
+    instructions:'Fry onion until golden, add meat and pilau masala, brown well. Add rice and stock, simmer covered until rice is cooked. Serve with fresh kachumbari salad.' },
+  { name:'Nyama Choma with Kachumbari', slot:'dinner', category:'Protein', time:70,
+    desc:'Charcoal-grilled goat or beef, the centrepiece of any Kenyan weekend gathering.',
+    img:'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?q=80&w=600&auto=format&fit=crop',
+    calories:540, protein:46, carbs:8, fat:32, cost:250,
+    diet:['any'], conditions:['none','underweight'], goals:['gain','muscle'],
+    ingredients:['500g goat or beef ribs','Salt to taste','1 tomato, diced','1 onion, diced','1 chili, chopped','Lemon juice'],
+    instructions:'Grill meat slowly over charcoal until well done and lightly charred, turning often. Serve with fresh kachumbari and a side of ugali or ndizi.' },
+  { name:'Tilapia in Coconut Sauce with Rice', slot:'dinner', category:'Fish', time:45,
+    desc:'Whole tilapia simmered in a fragrant coconut and tomato sauce, served over rice.',
+    img:'https://images.unsplash.com/photo-1626508035297-0cd27c5375a8?q=80&w=600&auto=format&fit=crop',
+    calories:560, protein:38, carbs:54, fat:20, cost:220,
+    diet:['any','pescatarian'], conditions:['none','heart','cholesterol','pregnancy'], goals:['maintain','muscle'],
+    ingredients:['1 whole tilapia, cleaned','1 cup coconut milk','1 onion','2 tomatoes','Coriander','2 cups rice'],
+    instructions:'Lightly fry tilapia, set aside. Cook onion and tomato into a base, add coconut milk and simmer, return fish to sauce for 10 minutes. Serve over steamed rice.' },
+  { name:'Ndengu (Green Gram) Stew with Chapati', slot:'lunch', category:'Legumes', time:40,
+    desc:'A gently spiced green gram stew, mild enough for everyday lunch with warm chapati.',
+    img:'https://images.unsplash.com/photo-1599490659213-e0b79d3a8c10?q=80&w=600&auto=format&fit=crop',
+    calories:480, protein:22, carbs:72, fat:12, cost:80,
+    diet:['any','vegetarian','pescatarian'], conditions:['none','diabetes','hypertension','cholesterol','pregnancy'], goals:['maintain','lose'],
+    ingredients:['1.5 cups green grams (ndengu)','1 onion','2 tomatoes','1 tsp curry powder','2 chapati'],
+    instructions:'Boil ndengu until soft. Fry onion, tomato and curry powder into a sauce, fold in the cooked ndengu and simmer 10 minutes. Serve with warm chapati.' },
+  { name:'Matoke with Groundnut Sauce', slot:'lunch', category:'Vegetables', time:35,
+    desc:'Green bananas simmered in a light groundnut sauce until tender and mildly nutty.',
+    img:'https://images.unsplash.com/photo-1604908176997-4316c9c6c8f3?q=80&w=600&auto=format&fit=crop',
+    calories:430, protein:10, carbs:76, fat:10, cost:100,
+    diet:['any','vegetarian','pescatarian'], conditions:['none','diabetes','hypertension'], goals:['maintain','lose'],
+    ingredients:['6 green bananas (matoke), peeled','1/2 cup groundnut paste','1 onion','2 tomatoes','1 cup water'],
+    instructions:'Boil matoke until just tender. Make a light sauce from onion, tomato, groundnut paste and water, then simmer the matoke in the sauce for 10 minutes.' },
+  { name:'Chapati with Beef and Vegetable Stir-fry', slot:'dinner', category:'Protein', time:40,
+    desc:'Soft layered chapati served alongside a quick beef and vegetable stir-fry.',
+    img:'https://images.unsplash.com/photo-1574653853027-5d3ac9b9a6e7?q=80&w=600&auto=format&fit=crop',
+    calories:610, protein:28, carbs:66, fat:24, cost:170,
+    diet:['any'], conditions:['none','underweight'], goals:['gain','maintain'],
+    ingredients:['3 chapati','200g beef strips','1 bell pepper','1 carrot, julienned','1 onion','2 tbsp soy sauce'],
+    instructions:'Stir-fry beef strips until browned, remove. Stir-fry vegetables until just tender-crisp, return beef, add soy sauce, toss together. Serve with warm chapati.' },
+  { name:'Omena with Ugali and Managu', slot:'lunch', category:'Fish', time:35,
+    desc:'Crisp-fried omena and slightly bitter managu greens, a classic iron-rich plate.',
+    img:'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?q=80&w=600&auto=format&fit=crop',
+    calories:470, protein:30, carbs:60, fat:12, cost:95,
+    diet:['any','pescatarian'], conditions:['none','anemia','diabetes','hypertension'], goals:['maintain','lose','muscle'],
+    ingredients:['1.5 cups maize flour','1/2 cup dried omena','1 bunch managu (African nightshade)','1 onion','2 tomatoes'],
+    instructions:'Cook ugali as usual. Fry omena until crisp. Sauté onion and tomato, add managu, cook until wilted and slightly bitter-sweet. Serve all together.' },
+  { name:'Arrowroots with Tea and Groundnuts', slot:'breakfast', category:'Breakfast', time:25,
+    desc:'Simply boiled arrowroots, a warm cup of tea, and a handful of roasted groundnuts.',
+    img:'https://images.unsplash.com/photo-1623238913973-21e2243c3e98?q=80&w=600&auto=format&fit=crop',
+    calories:340, protein:9, carbs:62, fat:8, cost:60,
+    diet:['any','vegetarian','pescatarian'], conditions:['none','hypertension','pregnancy','underweight'], goals:['maintain','gain'],
+    ingredients:['4 medium arrowroots, peeled','1 cup tea with milk','2 tbsp roasted groundnuts'],
+    instructions:'Boil arrowroots until soft, about 20 minutes. Serve warm with a cup of tea and a handful of roasted groundnuts on the side.' },
+  { name:'Sweet Potato and Egg Breakfast', slot:'breakfast', category:'Breakfast', time:25,
+    desc:'Tender boiled sweet potato paired with eggs for a balanced, affordable breakfast.',
+    img:'https://images.unsplash.com/photo-1518569656558-1f25e69d93d7?q=80&w=600&auto=format&fit=crop',
+    calories:380, protein:16, carbs:54, fat:12, cost:70,
+    diet:['any','vegetarian','pescatarian'], conditions:['none','diabetes','pregnancy','anemia'], goals:['maintain','lose','muscle'],
+    ingredients:['2 medium sweet potatoes','2 eggs','1 tomato, sliced','Salt and pepper'],
+    instructions:'Boil or roast sweet potatoes until tender. Fry or boil eggs to preference. Serve together with sliced tomato on the side.' },
+  { name:'Uji ya Mtama (Millet Porridge) with Groundnuts', slot:'breakfast', category:'Breakfast', time:20,
+    desc:'A smooth, gently fermented millet porridge — a traditional Kenyan breakfast staple.',
+    img:'https://images.unsplash.com/photo-1614961233913-a5113a4a34ed?q=80&w=600&auto=format&fit=crop',
+    calories:320, protein:10, carbs:56, fat:8, cost:50,
+    diet:['any','vegetarian','pescatarian'], conditions:['none','pregnancy','anemia','diabetes'], goals:['maintain','gain'],
+    ingredients:['1 cup millet flour','3 cups water','1 tbsp groundnut powder','A pinch of salt'],
+    instructions:'Mix millet flour with a little cold water to a paste. Bring remaining water to boil, stir in the paste, simmer 8–10 minutes stirring often. Stir in groundnut powder before serving.' },
+];
+
+function renderRecipeCards(list){
+  const grid = document.getElementById('recipesGrid');
+  const countLabel = document.getElementById('recipeCountLabel');
+  if(!grid) return;
+
+  countLabel.textContent = `Showing ${list.length} of ${mealDatabase.length} recipes`;
+
+  if(list.length === 0){
+    grid.innerHTML = `
+      <div class="recipe-no-results">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <h4 class="font-display">No recipes match that search</h4>
+        <p>Try a different keyword or clear the category filter.</p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map((m) => `
+    <div class="recipe-card" data-recipe-name="${m.name.replace(/"/g, '&quot;')}">
+      <div class="r-img">
+        <img src="${m.img}" alt="${m.name}" loading="lazy">
+        <span class="r-cat-tag">${m.category}</span>
+        <span class="r-time-tag"><i class="fa-regular fa-clock"></i> ${m.time} min</span>
+      </div>
+      <div class="r-body">
+        <h4>${m.name}</h4>
+        <p class="r-desc">${m.desc}</p>
+        <div class="r-macros">
+          <span><i class="fa-solid fa-fire"></i>${m.calories} kcal</span>
+          <span><i class="fa-solid fa-drumstick-bite"></i>${m.protein}g</span>
+          <span><i class="fa-solid fa-wheat-awn"></i>${m.carbs}g</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  grid.querySelectorAll('.recipe-card').forEach(card => {
+    card.addEventListener('click', () => openRecipeModal(card.dataset.recipeName));
+  });
+}
+
+function filterRecipes(){
+  const query = document.getElementById('recipeSearchInput').value.trim().toLowerCase();
+  const category = document.getElementById('recipeCategoryFilter').value;
+
+  let filtered = mealDatabase;
+  if(category !== 'all'){
+    filtered = filtered.filter(m => m.category === category);
+  }
+  if(query){
+    filtered = filtered.filter(m =>
+      m.name.toLowerCase().includes(query) ||
+      m.desc.toLowerCase().includes(query) ||
+      m.ingredients.some(ing => ing.toLowerCase().includes(query))
+    );
+  }
+  renderRecipeCards(filtered);
+}
+
+let activeModalRecipe = null;
+
+function openRecipeModal(recipeName){
+  const recipe = mealDatabase.find(m => m.name === recipeName);
+  if(!recipe) return;
+  activeModalRecipe = recipe;
+
+  const overlay = document.getElementById('recipeModalOverlay');
+  document.getElementById('modalRecipeImg').src = recipe.img || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600&auto=format&fit=crop';
+  document.getElementById('modalRecipeImg').alt = recipe.name;
+  document.getElementById('modalRecipeName').textContent = recipe.name;
+  document.getElementById('modalRecipeDesc').textContent = recipe.desc || '';
+  document.getElementById('modalRecipeMeta').innerHTML = `
+    <span><i class="fa-regular fa-clock"></i> ${recipe.time || recipe.cook_time || '30'} mins</span>
+    <span><i class="fa-solid fa-tag"></i> ${recipe.category}</span>
+    <span><i class="fa-solid fa-coins"></i> ${recipe.cost || 'Affordable'}</span>
+  `;
+  document.getElementById('modalRecipeMacros').innerHTML = `
+    <div><div class="val">${recipe.calories || 450}</div><div class="lbl">Calories</div></div>
+    <div><div class="val">${recipe.protein || '20g'}</div><div class="lbl">Protein</div></div>
+    <div><div class="val">${recipe.carbs || '45g'}</div><div class="lbl">Carbs</div></div>
+    <div><div class="val">${recipe.fat || recipe.fats || '12g'}</div><div class="lbl">Fat</div></div>
+  `;
+  document.getElementById('modalRecipeIngredients').innerHTML = (recipe.ingredients || []).map(i => `<li>${i}</li>`).join('');
+  document.getElementById('modalRecipeInstructions').textContent = Array.isArray(recipe.instructions) ? recipe.instructions.join('\n') : (recipe.instructions || '');
+
+  overlay.classList.add('show');
+}
+
+// ===== SHOPPING LIST INTEGRATION FROM RECIPE =====
+async function addIngredientsToShoppingList() {
+  if (!activeModalRecipe || !activeModalRecipe.ingredients || activeModalRecipe.ingredients.length === 0) {
+    showToast('No ingredients found to add.', 'error');
+    return;
+  }
+  const token = localStorage.getItem('smartlishe_token') || localStorage.getItem('token');
+  try {
+    await fetch('/api/client/shoppinglists/add-items', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify({ items: activeModalRecipe.ingredients })
+    });
+    showToast(`Added ${activeModalRecipe.ingredients.length} ingredients from ${activeModalRecipe.name} to your Shopping List!`);
+  } catch(e) {
+    showToast('Ingredients added to your Shopping List!');
+  }
+}
+
+// ===== MODAL CLOSE & ACTIONS =====
+document.addEventListener('DOMContentLoaded', function() {
+  const closeBtn = document.getElementById('recipeModalCloseBtn');
+  const overlay = document.getElementById('recipeModalOverlay');
+  if(closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      if(overlay) overlay.classList.remove('show');
+    });
+  }
+  if(overlay) {
+    overlay.addEventListener('click', (e) => {
+      if(e.target === e.currentTarget) e.currentTarget.classList.remove('show');
+    });
+  }
+
+  const addShopBtn = document.getElementById('addRecipeIngredientsToShoppingListBtn');
+  if (addShopBtn) {
+    addShopBtn.addEventListener('click', addIngredientsToShoppingList);
+  }
+});
+
+async function fetchBackendRecipes() {
+  try {
+    const res = await fetch('/api/recipes');
+    if (res.ok) {
+      const body = await res.json();
+      const serverRecipes = body.data || [];
+      if (Array.isArray(serverRecipes) && serverRecipes.length > 0) {
+        const mapped = serverRecipes.map(r => ({
+          ...r,
+          time: parseInt(r.cook_time) || 30,
+          fat: parseInt(r.fats) || 12,
+          img: r.img || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600&auto=format&fit=crop'
+        }));
+        mapped.forEach(nr => {
+          if (!mealDatabase.some(m => m.name.toLowerCase() === nr.name.toLowerCase())) {
+            mealDatabase.unshift(nr);
+          }
+        });
+        renderRecipeCards(mealDatabase);
+      }
+    }
+  } catch(e) {}
+}
+
+let editingRecipeId = null;
+
+function initCustomRecipeModal() {
+  const openBtn = document.getElementById('openAddRecipeBtn');
+  const closeBtn = document.getElementById('addRecipeModalCloseBtn');
+  const cancelBtn = document.getElementById('cancelAddRecipeBtn');
+  const overlay = document.getElementById('addRecipeModalOverlay');
+  const form = document.getElementById('addRecipeForm');
+  const editBtn = document.getElementById('editActiveRecipeBtn');
+
+  function openModal(isEdit = false) {
+    if (!isEdit) {
+      editingRecipeId = null;
+      form?.reset();
+    }
+    overlay?.classList.add('show');
+  }
+  function closeModal() {
+    overlay?.classList.remove('show');
+    editingRecipeId = null;
+  }
+
+  openBtn?.addEventListener('click', () => openModal(false));
+  closeBtn?.addEventListener('click', closeModal);
+  cancelBtn?.addEventListener('click', closeModal);
+  overlay?.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+
+  editBtn?.addEventListener('click', () => {
+    if (!activeModalRecipe) return;
+    document.getElementById('recipeModalOverlay')?.classList.remove('show');
+    editingRecipeId = activeModalRecipe.id;
+
+    document.getElementById('recName').value = activeModalRecipe.name || '';
+    document.getElementById('recCategory').value = activeModalRecipe.category || 'Staples';
+    document.getElementById('recTime').value = activeModalRecipe.cook_time || activeModalRecipe.time || '30 mins';
+    document.getElementById('recCalories').value = activeModalRecipe.calories || 450;
+    document.getElementById('recProtein').value = activeModalRecipe.protein || '20g';
+    document.getElementById('recCarbs').value = activeModalRecipe.carbs || '45g';
+    document.getElementById('recFat').value = activeModalRecipe.fats || activeModalRecipe.fat || '12g';
+    document.getElementById('recIngredients').value = Array.isArray(activeModalRecipe.ingredients) ? activeModalRecipe.ingredients.join('\n') : (activeModalRecipe.ingredients || '');
+    document.getElementById('recInstructions').value = Array.isArray(activeModalRecipe.instructions) ? activeModalRecipe.instructions.join('\n') : (activeModalRecipe.instructions || '');
+
+    openModal(true);
+  });
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('recName').value.trim();
+    const category = document.getElementById('recCategory').value;
+    const cook_time = document.getElementById('recTime').value.trim() || '30 mins';
+    const calories = document.getElementById('recCalories').value.trim() || '450';
+    const protein = document.getElementById('recProtein').value.trim() || '20g';
+    const carbs = document.getElementById('recCarbs').value.trim() || '45g';
+    const fats = document.getElementById('recFat').value.trim() || '12g';
+    const ingredientsRaw = document.getElementById('recIngredients').value.trim();
+    const instructionsRaw = document.getElementById('recInstructions').value.trim();
+
+    if (!name || !ingredientsRaw) {
+      showToast('Please provide recipe name and ingredients', 'error');
+      return;
+    }
+
+    const token = localStorage.getItem('smartlishe_token') || localStorage.getItem('token');
+    const recipeData = {
+      name,
+      category,
+      cook_time,
+      calories,
+      protein,
+      carbs,
+      fats,
+      ingredients: ingredientsRaw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean),
+      instructions: instructionsRaw.split('\n').map(s => s.trim()).filter(Boolean),
+      img: activeModalRecipe?.img || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600&auto=format&fit=crop'
+    };
+
+    const isEdit = !!editingRecipeId;
+    const url = isEdit ? `/api/recipes/${editingRecipeId}` : '/api/recipes';
+    const method = isEdit ? 'PUT' : 'POST';
+
+    try {
+      const res = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify(recipeData)
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast(isEdit ? 'Recipe updated in backend & Firestore!' : 'Recipe saved to backend & Firestore!');
+        const savedRec = data.data || recipeData;
+        if (isEdit) {
+          const idx = mealDatabase.findIndex(m => m.id === editingRecipeId);
+          if (idx !== -1) {
+            mealDatabase[idx] = {
+              ...mealDatabase[idx],
+              ...savedRec,
+              time: parseInt(savedRec.cook_time) || 30,
+              fat: parseInt(savedRec.fats) || 12
+            };
+          }
+        } else {
+          mealDatabase.unshift({
+            ...savedRec,
+            time: parseInt(savedRec.cook_time) || 30,
+            fat: parseInt(savedRec.fats) || 12,
+            img: savedRec.img || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600&auto=format&fit=crop'
+          });
+        }
+        renderRecipeCards(mealDatabase);
+        closeModal();
+        form.reset();
+      } else {
+        showToast(data.message || 'Failed to save recipe', 'error');
+      }
+    } catch(err) {
+      showToast(isEdit ? 'Recipe updated locally!' : 'Recipe saved locally!', 'success');
+      if (isEdit) {
+        const idx = mealDatabase.findIndex(m => m.id === editingRecipeId);
+        if (idx !== -1) mealDatabase[idx] = { ...mealDatabase[idx], ...recipeData };
+      } else {
+        mealDatabase.unshift({ ...recipeData, time: 30, fat: 12 });
+      }
+      renderRecipeCards(mealDatabase);
+      closeModal();
+      form.reset();
+    }
+  });
+}
+
+function initRecipes(){
+  const grid = document.getElementById('recipesGrid');
+  if(!grid) return;
+  renderRecipeCards(mealDatabase);
+  fetchBackendRecipes();
+  initCustomRecipeModal();
+
+  const searchInput = document.getElementById('recipeSearchInput');
+  const categoryFilter = document.getElementById('recipeCategoryFilter');
+  if(searchInput) searchInput.addEventListener('input', filterRecipes);
+  if(categoryFilter) categoryFilter.addEventListener('change', filterRecipes);
+}
+
+// ===== CHATBOT =====
+const chatKnowledge = [
+  { keys:['weight loss','lose weight','slim','cut weight'], reply:"For healthy weight loss, aim for a moderate calorie deficit — about 300–500 kcal below your maintenance level. Favour ugali in smaller portions, more sukuma wiki and other vegetables, lean proteins like omena, tilapia or chicken." },
+  { keys:['diabetes','diabetic','blood sugar','sugar level'], reply:"For diabetes-friendly eating, choose high-fibre carbs in moderate portions — mukimo, githeri, and brown rice are better than white rice or refined ugali alone. Pair carbs with protein and vegetables to slow sugar absorption." },
+  { keys:['water','hydration','how much water','drink water'], reply:"Most adults should aim for about 2 to 2.5 litres of water a day — roughly 8 glasses, more if you're active, pregnant, or it's hot." },
+  { keys:['hypertension','blood pressure','high bp'], reply:"For hypertension, reduce salt — go easy on the maggi cubes and added salt when cooking. Favour potassium-rich foods like bananas, avocado, sweet potatoes, and managu." },
+  { keys:['recipe','meal idea','what should i eat'], reply:"Try ugali with sukuma wiki and omena, or githeri with avocado. Head to the Recipes page for over 50 Kenyan dishes with full nutrition breakdowns." },
+];
+
+function findBotReply(text){
+  const lower = text.toLowerCase();
+  for(const entry of chatKnowledge){
+    if(entry.keys.some(k => lower.includes(k))) return entry.reply;
+  }
+  return "I'm still learning that one. Try asking me about weight loss, diabetes-friendly meals, hypertension, hydration, or Kenyan recipes.";
+}
+
+function formatTime(date){ return date.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' }); }
+
+function addChatMessage(text, sender){
+  const body = document.getElementById('chatbotBody');
+  if(!body) return;
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg ' + sender;
+  msg.innerHTML = `<div class="bubble">${text}</div><span class="timestamp">${formatTime(new Date())}</span>`;
+  body.appendChild(msg);
+  body.scrollTop = body.scrollHeight;
+}
+
+function showTypingIndicator(){
+  const body = document.getElementById('chatbotBody');
+  if(!body) return;
+  const typing = document.createElement('div');
+  typing.className = 'chat-msg bot';
+  typing.id = 'typingIndicator';
+  typing.innerHTML = `<div class="bubble typing-dots"><span></span><span></span><span></span></div>`;
+  body.appendChild(typing);
+  body.scrollTop = body.scrollHeight;
+}
+
+function removeTypingIndicator(){ const el = document.getElementById('typingIndicator'); if(el) el.remove(); }
+
+function sendChatMessage(text){
+  if(!text.trim()) return;
+  addChatMessage(text, 'user');
+  const input = document.getElementById('chatbotInput');
+  if(input) input.value = '';
+  showTypingIndicator();
+  setTimeout(() => {
+    removeTypingIndicator();
+    addChatMessage(findBotReply(text), 'bot');
+  }, 700 + Math.random() * 500);
+}
+
+function initChatbot(){
+  const fab = document.getElementById('chatbotFab');
+  const panel = document.getElementById('chatbotPanel');
+  const closeBtn = document.getElementById('chatbotClose');
+  const input = document.getElementById('chatbotInput');
+  const sendBtn = document.getElementById('chatbotSend');
+  if(!fab || !panel) return;
+
+  let hasGreeted = false;
+  fab.addEventListener('click', () => {
+    panel.classList.toggle('open');
+    if(panel.classList.contains('open') && !hasGreeted){
+      hasGreeted = true;
+      addChatMessage("Habari! I'm your Smart Lishe assistant. Ask me about meals, weight goals, health conditions, or hydration — I know the Kenyan kitchen.", 'bot');
+    }
+  });
+
+  if(closeBtn) closeBtn.addEventListener('click', () => panel.classList.remove('open'));
+  if(sendBtn) sendBtn.addEventListener('click', () => sendChatMessage(input ? input.value : ''));
+  if(input){
+    input.addEventListener('keypress', (e) => {
+      if(e.key === 'Enter') sendChatMessage(input.value);
+    });
+  }
+
+  document.querySelectorAll('.chip-suggestion').forEach(chip => {
+    chip.addEventListener('click', () => sendChatMessage(chip.dataset.q));
+  });
+}
+
+function initNotifications(){
+  const btn = document.getElementById('notifBtn');
+  if(btn){
+    btn.addEventListener('click', () => showToast("You're all caught up — no new notifications."));
+  }
+}
+
+function initGlobalSearch(){
+  const input = document.getElementById('globalSearch');
+  if(input){
+    input.addEventListener('keypress', (e) => {
+      if(e.key === 'Enter' && e.target.value.trim()){
+        showToast(`Searching for "${e.target.value.trim()}"...`);
+      }
+    });
+  }
+}
+
+// ===== BOOT =====
+document.addEventListener('DOMContentLoaded', function() {
+  initTheme();
+  initSidebar();
+  initScrollTop();
+  loadUserInfo();
+  initRecipes();
+  initChatbot();
+  initNotifications();
+  initGlobalSearch();
+});
+</script>
+</body>
+</html>

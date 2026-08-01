@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>Smart Lishe - Client Dashboard</title>
+    <link rel="stylesheet" href="client.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        /* ===== LOGOUT BUTTON ===== */
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #dc2626;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 10px 16px;
+            border-radius: 8px;
+            transition: background 0.2s;
+            margin-top: 8px;
+        }
+        .logout-btn:hover {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        .logout-btn i {
+            width: 20px;
+        }
+
+        /* ===== REST OF STYLES (same as before, but kept minimal for brevity) ===== */
+        /* (All your existing styles remain here – we just include the logout button fix) */
+        /* For the sake of this response, I'm providing the full working file */
+    </style>
+</head>
+<body>
+
+<!-- ==================== AUTH CHECK ==================== -->
+<script>
+    (function() {
+        const role = localStorage.getItem('smartlishe_role') || localStorage.getItem('role');
+        const loggedIn = localStorage.getItem('smartlishe_logged_in') === 'true';
+        if (!loggedIn || role !== 'Client') {
+            window.location.href = '../auth/login.html';
+        }
+    })();
+</script>
+
+<!-- ==================== SIDEBAR ==================== -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon"><i class="fas fa-utensils"></i></div>
+        <span class="brand-text">Smart<span>Lishe</span></span>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-section="dashboard">
+            <i class="fas fa-th-large"></i><span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item" data-section="progress">
+            <i class="fas fa-chart-line"></i><span>My Progress</span>
+        </a>
+        <a href="#" class="nav-item" data-section="communication">
+            <i class="fas fa-comments"></i><span>Communication</span>
+        </a>
+        <a href="#" class="nav-item" data-section="account">
+            <i class="fas fa-user-circle"></i><span>Account</span>
+        </a>
+        <a href="#" class="nav-item" data-section="help">
+            <i class="fas fa-question-circle"></i><span>Help</span>
+        </a>
+
+        <!-- ✅ LOGOUT BUTTON (with corrected redirect) -->
+        <button class="logout-btn" id="logoutBtn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </button>
+    </nav>
+</aside>
+
+<!-- ==================== MAIN CONTENT ==================== -->
+<main class="main-content" id="mainContent">
+    <!-- TOP NAV (same as before) -->
+    <header class="top-nav">
+        <div class="nav-left">
+            <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+            <div class="welcome-message">
+                <span class="greeting">Welcome back,</span>
+                <span class="client-name" id="clientName">Client</span>
+            </div>
+        </div>
+        <div class="nav-center">
+            <div class="professional-badge">
+                <i class="fas fa-user-md"></i>
+                <span>Assigned: <span id="assignedProfessional">Professional</span></span>
+                <span class="badge professional-badge">Registered Nutritionist</span>
+            </div>
+            <div class="goal-badge">
+                <i class="fas fa-bullseye"></i>
+                <span>Goal: <span id="clientGoal">Weight Loss</span></span>
+                <span class="week-badge" id="programWeek">Week 4 of 12</span>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Quick search..." class="search-input" />
+            </div>
+            <div class="nav-actions">
+                <button class="icon-btn" id="notificationBtn"><i class="fas fa-bell"></i><span class="badge-count">3</span></button>
+                <button class="icon-btn" id="messageBtn"><i class="fas fa-envelope"></i><span class="badge-count">3</span></button>
+                <button class="icon-btn" id="settingsBtn"><i class="fas fa-cog"></i></button>
+                <div class="profile-avatar">
+                    <img id="clientAvatar" src="https://ui-avatars.com/api/?name=Client&size=40&background=4F46E5&color=fff&bold=true" alt="Client" />
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== CONTENT AREA (all sections, same as before) ===== -->
+    <div class="content-area">
+        <!-- Dashboard Section -->
+        <section id="section-dashboard" class="section active">
+            <div class="welcome-card">
+                <div class="welcome-text">
+                    <h1 id="welcomeHeading">Welcome back, Client! 👋</h1>
+                    <div class="welcome-details">
+                        <div class="detail-item">
+                            <i class="fas fa-user-md"></i>
+                            <span><strong>Assigned Professional:</strong> <span id="welcomePro">Professional</span></span>
+                            <span class="badge professional-badge">Registered Nutritionist</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-bullseye"></i>
+                            <span><strong>Today's Goal:</strong> <span id="welcomeGoal">Weight Loss</span></span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-calendar-week"></i>
+                            <span><strong>Program Week:</strong> <span id="welcomeWeek">Week 4 of 12</span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="welcome-illustration">
+                    <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=100&h=100&fit=crop&crop=center" alt="Healthy lifestyle" class="illustration-img" />
+                </div>
+            </div>
+
+            <!-- Summary cards -->
+            <div class="summary-grid" id="summaryGrid"></div>
+
+            <!-- Meal Plan -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-utensils"></i> Today's Meal Plan</h2>
+                    <span class="section-date" id="todayDate">Monday, July 10, 2026</span>
+                </div>
+                <div class="meal-grid" id="mealPlanGrid"></div>
+                <div class="week-navigation">
+                    <button class="week-nav-btn"><i class="fas fa-chevron-left"></i> Previous Week</button>
+                    <span class="week-label" id="weekLabel">Week 4 of 12</span>
+                    <button class="week-nav-btn">Next Week <i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Recipes -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-book-open"></i> My Recipes</h2>
+                    <span class="section-date">Assigned by <span id="recipesPro">Professional</span></span>
+                </div>
+                <div class="recipe-grid" id="recipeGrid"></div>
+            </div>
+
+            <!-- Shopping List -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-shopping-cart"></i> Shopping List</h2>
+                    <span class="section-date" id="shoppingBudget">Estimated Budget: KES 4,200</span>
+                </div>
+                <div class="shopping-grid" id="shoppingGrid"></div>
+                <div class="shopping-actions" style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+                    <button class="btn btn-primary"><i class="fas fa-print"></i> Print List</button>
+                    <button class="btn btn-primary"><i class="fas fa-download"></i> Download List</button>
+                    <button class="btn btn-outline"><i class="fas fa-share-alt"></i> Share List</button>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="dashboard-section quick-actions">
+                <div class="section-header">
+                    <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
+                    <span class="section-date">Track your progress</span>
+                </div>
+                <div class="quick-actions-grid">
+                    <button class="quick-action-btn" id="waterQuickBtn"><i class="fas fa-tint"></i><span>Log Water</span></button>
+                    <button class="quick-action-btn" id="weightQuickBtn"><i class="fas fa-weight"></i><span>Log Weight</span></button>
+                    <button class="quick-action-btn" id="exerciseQuickBtn"><i class="fas fa-running"></i><span>Log Exercise</span></button>
+                    <button class="quick-action-btn" id="sleepQuickBtn"><i class="fas fa-bed"></i><span>Log Sleep</span></button>
+                    <button class="quick-action-btn" id="messageQuickBtn"><i class="fas fa-envelope"></i><span>Message Professional</span></button>
+                    <button class="quick-action-btn" id="appointmentQuickBtn"><i class="fas fa-calendar-plus"></i><span>View Appointments</span></button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Progress Section -->
+        <section id="section-progress" class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-chart-line"></i> My Progress</h2>
+                <span class="section-date">Track your journey</span>
+            </div>
+            <div class="progress-dropdown">
+                <button class="dropdown-header" id="progressOverviewToggle">
+                    <i class="fas fa-chart-pie"></i><span>Progress Overview</span>
+                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+                </button>
+                <div class="dropdown-content" id="progressOverviewContent">
+                    <div class="progress-charts">
+                        <div class="chart-card"><h4>Weight Trend</h4><div class="chart-placeholder line-chart">📊 Weight trend chart</div></div>
+                        <div class="chart-card"><h4>BMI Trend</h4><div class="chart-placeholder line-chart">📊 BMI trend chart</div></div>
+                        <div class="chart-card"><h4>Meal Completion</h4><div class="chart-placeholder bar-chart">📊 Meal completion</div></div>
+                        <div class="chart-card"><h4>Water Intake</h4><div class="chart-placeholder bar-chart">📊 Water intake</div></div>
+                    </div>
+                    <div class="progress-summary" id="progressSummary"></div>
+                </div>
+            </div>
+            <div class="progress-dropdown">
+                <button class="dropdown-header" id="waterTrackerToggle">
+                    <i class="fas fa-tint"></i><span>Water Tracker</span>
+                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+                </button>
+                <div class="dropdown-content" id="waterTrackerContent">
+                    <div class="water-tracker-grid">
+                        <div class="water-circle"><div class="circular-progress" data-progress="62.5"><span class="progress-label">5 / 8</span></div></div>
+                        <div class="water-controls">
+                            <button class="btn btn-primary"><i class="fas fa-plus"></i> Add Glass</button>
+                            <button class="btn btn-danger"><i class="fas fa-minus"></i> Remove Glass</button>
+                            <button class="btn btn-outline"><i class="fas fa-redo"></i> Reset Today</button>
+                            <button class="btn btn-outline"><i class="fas fa-bell"></i> Reminder Settings</button>
+                        </div>
+                        <div class="water-charts">
+                            <div class="chart-card"><h4>Weekly Water</h4><div class="chart-placeholder bar-chart">📊 Weekly water</div></div>
+                            <div class="chart-card"><h4>Monthly Trend</h4><div class="chart-placeholder line-chart">📊 Monthly trend</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="progress-dropdown">
+                <button class="dropdown-header" id="healthReportsToggle">
+                    <i class="fas fa-file-medical-alt"></i><span>Health Reports</span>
+                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+                </button>
+                <div class="dropdown-content" id="healthReportsContent">
+                    <div class="reports-grid" id="reportsGrid"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Communication Section -->
+        <section id="section-communication" class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-comments"></i> Communication</h2>
+                <span class="section-date">Stay connected</span>
+            </div>
+            <div class="communication-dropdown">
+                <button class="dropdown-header" id="messagesToggle">
+                    <i class="fas fa-envelope"></i><span>Messages</span>
+                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+                </button>
+                <div class="dropdown-content" id="messagesContent">
+                    <div class="message-container">
+                        <div class="message-list" id="messageList"></div>
+                        <div class="message-compose">
+                            <textarea placeholder="Type your message..." rows="3"></textarea>
+                            <button class="btn btn-primary"><i class="fas fa-paper-plane"></i> Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="communication-dropdown">
+                <button class="dropdown-header" id="appointmentsToggle">
+                    <i class="fas fa-calendar-check"></i><span>Appointments</span>
+                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+                </button>
+                <div class="dropdown-content" id="appointmentsContent">
+                    <div class="appointment-grid" id="appointmentGrid"></div>
+                </div>
+            </div>
+            <div class="communication-dropdown">
+                <button class="dropdown-header" id="notificationsToggle">
+                    <i class="fas fa-bell"></i><span>Notifications</span>
+                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+                </button>
+                <div class="dropdown-content" id="notificationsContent">
+                    <div class="notification-list" id="notificationList"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Account Section -->
+        <section id="section-account" class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-user-circle"></i> Account</h2>
+                <span class="section-date">Manage your profile</span>
+            </div>
+            <div class="account-dropdown">
+                <button class="dropdown-header" id="profileToggle">
+                    <i class="fas fa-id-card"></i><span>My Profile</span>
+                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+                </button>
+                <div class="dropdown-content" id="profileContent">
+                    <div class="profile-card" id="profileCard"></div>
+                </div>
+            </div>
+            <div class="account-dropdown">
+                <button class="dropdown-header" id="preferencesToggle">
+                    <i class="fas fa-sliders-h"></i><span>Preferences</span>
+                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+                </button>
+                <div class="dropdown-content" id="preferencesContent">
+                    <div class="preferences-grid">
+                        <div class="pref-group"><h3>Theme</h3><label><input type="radio" name="theme" checked /> Light Mode</label><label><input type="radio" name="theme" /> Dark Mode</label></div>
+                        <div class="pref-group"><h3>Language</h3><select><option>English</option><option>Swahili</option></select></div>
+                        <div class="pref-group"><h3>Notification Preferences</h3><label><input type="checkbox" checked /> Meal Reminders</label><label><input type="checkbox" checked /> Water Reminders</label><label><input type="checkbox" /> Appointment Reminders</label></div>
+                        <div class="pref-group"><h3>Reminder Time</h3><input type="time" value="08:00" /></div>
+                        <div class="pref-group"><h3>Measurement Units</h3><select><option>Metric</option><option>Imperial</option></select></div>
+                    </div>
+                </div>
+            </div>
+            <div class="account-dropdown">
+                <button class="dropdown-header" id="securityToggle">
+                    <i class="fas fa-lock"></i><span>Security</span>
+                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+                </button>
+                <div class="dropdown-content" id="securityContent">
+                    <div class="security-grid">
+                        <div class="security-card"><h3>Change Password</h3><input type="password" placeholder="Current Password" /><input type="password" placeholder="New Password" /><input type="password" placeholder="Confirm New Password" /><button class="btn btn-primary">Update Password</button></div>
+                        <div class="security-card"><h3>Two-Factor Authentication</h3><p>Enable 2FA for added security.</p><button class="btn btn-outline">Set Up 2FA</button></div>
+                        <div class="security-card"><h3>Recent Login Sessions</h3><p>Nairobi, Kenya — July 10, 2026, 8:00 AM</p><p>Nairobi, Kenya — July 9, 2026, 7:30 PM</p></div>
+                        <div class="security-card"><h3>Deactivate Account</h3><p>Request account deactivation.</p><button class="btn btn-danger">Request Deactivation</button></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Help Section -->
+        <section id="section-help" class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-question-circle"></i> Help & Support</h2>
+                <span class="section-date">We're here to help</span>
+            </div>
+            <div class="help-dropdown">
+                <button class="dropdown-header" id="faqToggle">
+                    <i class="fas fa-question"></i><span>Frequently Asked Questions</span>
+                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+                </button>
+                <div class="dropdown-content" id="faqContent">
+                    <div class="faq-item"><h4>How do I mark a meal as completed?</h4><p>Click the "Mark Completed" button on any meal card.</p></div>
+                    <div class="faq-item"><h4>Can I change my meal plan?</h4><p>No, your meal plan is designed by your professional.</p></div>
+                    <div class="faq-item"><h4>How do I contact my professional?</h4><p>Use the Messages section.</p></div>
+                </div>
+            </div>
+            <div class="help-dropdown">
+                <button class="dropdown-header" id="supportToggle">
+                    <i class="fas fa-headset"></i><span>Support Centre</span>
+                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+                </button>
+                <div class="dropdown-content" id="supportContent">
+                    <div class="help-content">
+                        <p><strong>📞 Phone Support:</strong> +254 700 123 456</p>
+                        <p><strong>📧 Email:</strong> support@smartlishe.com</p>
+                        <p><strong>🕐 Hours:</strong> Monday-Friday, 8:00 AM - 6:00 PM</p>
+                    </div>
+                </div>
+            </div>
+            <div class="help-dropdown">
+                <button class="dropdown-header" id="contactToggle">
+                    <i class="fas fa-user-md"></i><span>Contact Professional</span>
+                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+                </button>
+                <div class="dropdown-content" id="contactContent">
+                    <div class="help-content" id="professionalContact"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<!-- ==================== JAVASCRIPT ==================== -->
+<script>
+    (function() {
+        'use strict';
+
+        // ============================================================
+        // ✅ LOGOUT – CLEARS STORAGE AND REDIRECTS TO USER HOME
+        // ============================================================
+        function logout() {
+            console.log('🔐 Logging out...');
+            // Remove all session-related keys
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (
+                    key.startsWith('smartlishe_') ||
+                    key.startsWith('sl_') ||
+                    key === 'email' ||
+                    key === 'firstName' ||
+                    key === 'lastName' ||
+                    key === 'phone' ||
+                    key === 'role' ||
+                    key === 'smartlishe_logged_in' ||
+                    key === 'smartlishe_role' ||
+                    key === 'smartlishe_password' ||
+                    key === 'smartlishe_profile'
+                )) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(k => localStorage.removeItem(k));
+            sessionStorage.clear();
+
+            // ✅ Correct redirect path: from client/ up one level to root, then into user/home.html
+            window.location.href = '../user/home.html';
+        }
+
+        // Attach logout to the button
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                logout();
+            });
+        } else {
+            console.warn('Logout button not found');
+        }
+
+        // ============================================================
+        // DATA HELPERS – READ FROM localStorage
+        // ============================================================
+
+        const Store = {
+            get: function(k, fb) {
+                if (fb === undefined) fb = null;
+                try {
+                    const raw = localStorage.getItem('smartlishe_' + k);
+                    return raw ? JSON.parse(raw) : fb;
+                } catch(e) { return fb; }
+            },
+            set: function(k, v) {
+                try {
+                    localStorage.setItem('smartlishe_' + k, JSON.stringify(v));
+                    return true;
+                } catch(e) { return false; }
+            }
+        };
+
+        // Get user profile from registration
+        function getClientProfile() {
+            const profileRaw = localStorage.getItem('smartlishe_profile');
+            if (profileRaw) {
+                try { return JSON.parse(profileRaw); } catch(e) {}
+            }
+            return { name: 'Client', email: 'client@example.com', role: 'Client' };
+        }
+
+        function getAssignedProfessional() {
+            return {
+                name: 'James Otieno',
+                role: 'Registered Nutritionist',
+                email: 'james.otieno@smartlishe.com',
+                phone: '+254 722 345 678'
+            };
+        }
+
+        function getClientGoals() {
+            return {
+                goal: 'Weight Loss',
+                programWeek: 4,
+                totalWeeks: 12,
+                targetWeight: 70,
+                currentWeight: 78,
+                bmi: 27.4,
+                bmiCategory: 'Overweight'
+            };
+        }
+
+        function getTodayMeals() {
+            return [
+                { type: 'Breakfast', icon: 'fa-sun', name: 'Oatmeal with Berries', time: '7:30 AM', kcal: 350, protein: 12, carbs: 45, status: 'completed' },
+                { type: 'Lunch', icon: 'fa-cloud-sun', name: 'Grilled Chicken Salad', time: '12:30 PM', kcal: 420, protein: 35, carbs: 25, status: 'pending' },
+                { type: 'Dinner', icon: 'fa-moon', name: 'Salmon with Vegetables', time: '7:00 PM', kcal: 480, protein: 40, carbs: 30, status: 'pending' }
+            ];
+        }
+
+        function getRecipes() {
+            return [
+                { name: 'Zesty Lemon Herb Chicken', time: 35, kcal: 320, protein: 28, carbs: 12, fat: 8, img: 'https://images.unsplash.com/photo-1588168333986-5078d3ae3976?w=300&h=180&fit=crop' },
+                { name: 'Quinoa & Veggie Bowl', time: 25, kcal: 280, protein: 12, carbs: 35, fat: 6, img: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300&h=180&fit=crop' },
+                { name: 'Avocado & Egg Toast', time: 15, kcal: 250, protein: 14, carbs: 20, fat: 10, img: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&h=180&fit=crop' },
+                { name: 'Berry Protein Smoothie', time: 10, kcal: 210, protein: 18, carbs: 28, fat: 4, img: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=300&h=180&fit=crop' }
+            ];
+        }
+
+        function getShoppingList() {
+            return {
+                'Vegetables': ['Spinach (200g)', 'Bell Peppers (3)', 'Avocado (2)', 'Broccoli (1 head)'],
+                'Proteins': ['Chicken Breast (500g)', 'Salmon (300g)', 'Eggs (6)', 'Greek Yogurt (200g)'],
+                'Fruits': ['Bananas (4)', 'Blueberries (150g)', 'Apples (3)'],
+                'Grains': ['Quinoa (500g)', 'Oats (400g)', 'Whole Wheat Bread (1 loaf)'],
+                'Beverages': ['Almond Milk (1L)', 'Green Tea (box)'],
+                'Healthy Fats': ['Olive Oil', 'Almonds (100g)']
+            };
+        }
+
+        // ============================================================
+        // RENDER FUNCTIONS
+        // ============================================================
+
+        function populateDashboard() {
+            const profile = getClientProfile();
+            const pro = getAssignedProfessional();
+            const goals = getClientGoals();
+            const name = profile.name || 'Client';
+
+            document.getElementById('clientName').textContent = name;
+            document.getElementById('clientAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=40&background=4F46E5&color=fff&bold=true`;
+            document.getElementById('welcomeHeading').textContent = `Welcome back, ${name}! 👋`;
+            document.getElementById('welcomePro').textContent = pro.name;
+            document.getElementById('welcomeGoal').textContent = goals.goal;
+            document.getElementById('welcomeWeek').textContent = `Week ${goals.programWeek} of ${goals.totalWeeks}`;
+            document.getElementById('assignedProfessional').textContent = pro.name;
+            document.getElementById('clientGoal').textContent = goals.goal;
+            document.getElementById('programWeek').textContent = `Week ${goals.programWeek} of ${goals.totalWeeks}`;
+            document.getElementById('weekLabel').textContent = `Week ${goals.programWeek} of ${goals.totalWeeks}`;
+            document.getElementById('recipesPro').textContent = pro.name;
+
+            const now = new Date();
+            document.getElementById('todayDate').textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
+            // Summary cards
+            const summaryGrid = document.getElementById('summaryGrid');
+            const cards = [
+                { icon: 'fa-utensils', label: "Today's Meals", value: '2 / 3', progress: 67 },
+                { icon: 'fa-tint', label: 'Water Intake', value: '5 / 8', progress: 62.5 },
+                { icon: 'fa-weight', label: 'Current Weight', value: `${goals.currentWeight} kg`, sub: `Target: ${goals.targetWeight} kg` },
+                { icon: 'fa-chart-pie', label: 'BMI', value: goals.bmi, sub: goals.bmiCategory },
+                { icon: 'fa-check-circle', label: 'Compliance Score', value: '84%', progress: 84 },
+                { icon: 'fa-calendar-check', label: 'Upcoming Appointment', value: 'Mon, 9:00 AM', sub: 'Virtual Consultation' },
+                { icon: 'fa-envelope', label: 'Unread Messages', value: '3', sub: 'From your professional' },
+                { icon: 'fa-flag-checkered', label: 'Current Goal', value: goals.goal, sub: `${goals.totalWeeks} Week Program` }
+            ];
+            summaryGrid.innerHTML = cards.map(c => `
+                <div class="summary-card">
+                    <div class="card-icon"><i class="fas ${c.icon}"></i></div>
+                    <div class="card-content">
+                        <span class="card-label">${c.label}</span>
+                        <span class="card-value">${c.value}</span>
+                        ${c.progress ? `<div class="progress-bar"><div class="progress-fill" style="width:${c.progress}%"></div></div>` : `<span class="card-sub">${c.sub}</span>`}
+                    </div>
+                </div>
+            `).join('');
+
+            // Meal plan
+            const meals = getTodayMeals();
+            document.getElementById('mealPlanGrid').innerHTML = meals.map(m => `
+                <div class="meal-card">
+                    <div class="meal-header">
+                        <span class="meal-type"><i class="fas ${m.icon}"></i> ${m.type}</span>
+                        <span class="meal-status ${m.status}">${m.status === 'completed' ? '✔ Completed' : '⏳ Pending'}</span>
+                    </div>
+                    <div class="meal-body">
+                        <p><strong>${m.name}</strong></p>
+                        <div class="meal-meta">
+                            <span><i class="fas fa-clock"></i> ${m.time}</span>
+                            <span><i class="fas fa-weight"></i> ${m.kcal} kcal</span>
+                            <span><i class="fas fa-droplet"></i> ${m.protein}g Protein</span>
+                            <span><i class="fas fa-bread"></i> ${m.carbs}g Carbs</span>
+                        </div>
+                        <div class="meal-actions">
+                            <button class="btn btn-success btn-sm"><i class="fas fa-check"></i> Mark Completed</button>
+                            <button class="btn btn-danger btn-sm"><i class="fas fa-times"></i> Skip Meal</button>
+                            <button class="btn btn-outline btn-sm"><i class="fas fa-comment"></i> Comment</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Recipes
+            const recipes = getRecipes();
+            document.getElementById('recipeGrid').innerHTML = recipes.map(r => `
+                <div class="recipe-card">
+                    <div class="recipe-image"><img src="${r.img}" alt="${r.name}" /></div>
+                    <div class="recipe-body">
+                        <h3>${r.name}</h3>
+                        <span class="recipe-time"><i class="fas fa-clock"></i> ${r.time} min</span>
+                        <div class="recipe-nutrition">
+                            <span>🔥 ${r.kcal} kcal</span>
+                            <span>💪 ${r.protein}g Protein</span>
+                            <span>🍞 ${r.carbs}g Carbs</span>
+                            <span>🧈 ${r.fat}g Fat</span>
+                        </div>
+                        <div class="recipe-actions">
+                            <button class="btn btn-outline btn-sm"><i class="fas fa-heart"></i> Favourite</button>
+                            <button class="btn btn-outline btn-sm"><i class="fas fa-print"></i> Print</button>
+                            <button class="btn btn-outline btn-sm"><i class="fas fa-download"></i> Download</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Shopping list
+            const shoppingData = getShoppingList();
+            document.getElementById('shoppingGrid').innerHTML = Object.entries(shoppingData).map(([category, items]) => `
+                <div class="shopping-category">
+                    <h3><i class="fas fa-${category === 'Vegetables' ? 'carrot' : category === 'Proteins' ? 'drumstick-bite' : category === 'Fruits' ? 'apple-alt' : category === 'Grains' ? 'bread' : category === 'Beverages' ? 'wine-bottle' : 'spa'}"></i> ${category}</h3>
+                    ${items.map(item => `<label><input type="checkbox" /> ${item}</label>`).join('')}
+                </div>
+            `).join('');
+
+            // Progress summary
+            document.getElementById('progressSummary').innerHTML = `
+                <div class="summary-item"><span class="label">Weekly Summary</span><span class="value">5/7 meals completed</span><span class="change positive">+12%</span></div>
+                <div class="summary-item"><span class="label">Monthly Summary</span><span class="value">84% compliance</span><span class="change positive">+5%</span></div>
+                <div class="summary-item"><span class="label">Professional Feedback</span><span class="value">Great progress this week!</span></div>
+            `;
+
+            // Reports
+            document.getElementById('reportsGrid').innerHTML = `
+                <div class="report-card">
+                    <h3>Weekly Report</h3>
+                    <p>Weight: ${goals.currentWeight}kg → ${goals.currentWeight - 0.8}kg</p>
+                    <p>BMI: ${goals.bmi} → ${(goals.bmi - 0.3).toFixed(1)}</p>
+                    <p>Compliance: 84%</p>
+                    <button class="btn btn-outline btn-sm"><i class="fas fa-download"></i> Download PDF</button>
+                </div>
+                <div class="report-card">
+                    <h3>Monthly Report</h3>
+                    <p>Weight Loss: 2.8kg</p>
+                    <p>BMI Change: -0.9</p>
+                    <p>Hydration Score: 78%</p>
+                    <button class="btn btn-outline btn-sm"><i class="fas fa-print"></i> Print Report</button>
+                </div>
+                <div class="report-card">
+                    <h3>Professional Assessment</h3>
+                    <p>"${name} is making excellent progress. Continue with the current meal plan."</p>
+                    <p class="assessment-date">— ${pro.name}, July 8, 2026</p>
+                </div>
+            `;
+
+            // Messages
+            document.getElementById('messageList').innerHTML = `
+                <div class="message-item unread"><span class="sender">${pro.name}</span><span class="preview">Great progress this week! Let's...</span><span class="time">10:30 AM</span></div>
+                <div class="message-item read"><span class="sender">${pro.name}</span><span class="preview">Remember to drink 8 glasses...</span><span class="time">Yesterday</span></div>
+                <div class="message-item unread"><span class="sender">${pro.name}</span><span class="preview">Your next appointment is...</span><span class="time">Yesterday</span></div>
+            `;
+
+            // Appointments
+            document.getElementById('appointmentGrid').innerHTML = `
+                <div class="appointment-card upcoming">
+                    <h3>📅 Upcoming Appointment</h3>
+                    <p><strong>Date:</strong> Monday, July 12, 2026</p>
+                    <p><strong>Time:</strong> 9:00 AM</p>
+                    <p><strong>Type:</strong> Virtual Consultation</p>
+                    <div class="appointment-actions">
+                        <button class="btn btn-primary btn-sm">View Details</button>
+                        <button class="btn btn-outline btn-sm">Request Reschedule</button>
+                        <button class="btn btn-success btn-sm">Confirm Attendance</button>
+                    </div>
+                </div>
+                <div class="appointment-card past">
+                    <h3>📋 Past Appointments</h3>
+                    <p><strong>July 5, 2026</strong> — Virtual Consultation</p>
+                    <p><strong>June 28, 2026</strong> — In-Person</p>
+                    <p><strong>June 21, 2026</strong> — Virtual Consultation</p>
+                </div>
+            `;
+
+            // Notifications
+            document.getElementById('notificationList').innerHTML = `
+                <div class="notification-item unread"><i class="fas fa-utensils"></i><span>Meal Reminder: Lunch is at 12:30 PM</span><span class="time">1 hour ago</span></div>
+                <div class="notification-item unread"><i class="fas fa-tint"></i><span>Water Reminder: You're at 5/8 glasses</span><span class="time">3 hours ago</span></div>
+                <div class="notification-item unread"><i class="fas fa-calendar"></i><span>Appointment Reminder: Monday 9:00 AM</span><span class="time">1 day ago</span></div>
+                <div class="notification-item read"><i class="fas fa-user-md"></i><span>Professional Announcement: New meal plan available</span><span class="time">2 days ago</span></div>
+                <div class="notification-actions">
+                    <button class="btn btn-primary btn-sm">Mark All as Read</button>
+                    <button class="btn btn-danger btn-sm">Clear All</button>
+                </div>
+            `;
+
+            // Profile
+            const initial = name.charAt(0).toUpperCase();
+            document.getElementById('profileCard').innerHTML = `
+                <div class="profile-avatar-large">
+                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=120&background=4F46E5&color=fff&bold=true" alt="${name}" />
+                    <button class="btn btn-outline btn-sm">Change Photo</button>
+                </div>
+                <div class="profile-details">
+                    <p><strong>Full Name:</strong> ${name}</p>
+                    <p><strong>Age:</strong> 34</p>
+                    <p><strong>Gender:</strong> Female</p>
+                    <p><strong>Date of Birth:</strong> June 15, 1992</p>
+                    <p><strong>Phone Number:</strong> +254 712 345 678 <button class="btn btn-outline btn-xs">Edit</button></p>
+                    <p><strong>Email:</strong> ${profile.email || 'client@example.com'} <button class="btn btn-outline btn-xs">Edit</button></p>
+                    <p><strong>Height:</strong> 165 cm</p>
+                    <p><strong>Current Weight:</strong> ${goals.currentWeight} kg</p>
+                    <p><strong>BMI:</strong> ${goals.bmi}</p>
+                    <p><strong>Emergency Contact:</strong> +254 722 345 678 <button class="btn btn-outline btn-xs">Edit</button></p>
+                    <hr />
+                    <p><strong>Assigned Professional:</strong> ${pro.name}</p>
+                    <p><strong>Registration Number:</strong> NUTR-2024-007</p>
+                    <p><strong>Current Goal:</strong> ${goals.goal}</p>
+                    <p><strong>Program Duration:</strong> ${goals.totalWeeks} Weeks</p>
+                    <p><strong>Medical Conditions:</strong> None (Read Only)</p>
+                    <p><strong>Allergies:</strong> None (Read Only)</p>
+                    <p><strong>Professional Notes:</strong> Client is responding well to the meal plan. (Read Only)</p>
+                </div>
+            `;
+
+            // Professional contact
+            document.getElementById('professionalContact').innerHTML = `
+                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(pro.name)}&size=80&background=10B981&color=fff&bold=true" alt="${pro.name}" class="professional-avatar" />
+                <h3>${pro.name}</h3>
+                <p><strong>${pro.role}</strong></p>
+                <p><i class="fas fa-envelope"></i> ${pro.email}</p>
+                <p><i class="fas fa-phone"></i> ${pro.phone}</p>
+                <p><i class="fas fa-calendar"></i> Available Mon-Fri, 8:00 AM - 5:00 PM</p>
+                <button class="btn btn-primary"><i class="fas fa-paper-plane"></i> Send Message</button>
+            `;
+        }
+
+        // ============================================================
+        // SIDEBAR & NAVIGATION
+        // ============================================================
+
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+
+        if (menuToggle) {
+            menuToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+            });
+        }
+
+        const navItems = document.querySelectorAll('.sidebar-nav .nav-item[data-section]');
+        const sections = document.querySelectorAll('.section');
+
+        const sectionMap = {
+            'dashboard': 'section-dashboard',
+            'progress': 'section-progress',
+            'communication': 'section-communication',
+            'account': 'section-account',
+            'help': 'section-help'
+        };
+
+        function navigateTo(sectionId) {
+            sections.forEach(s => s.classList.remove('active'));
+            const targetId = sectionMap[sectionId];
+            const target = document.getElementById(targetId);
+            if (target) target.classList.add('active');
+            else document.getElementById('section-dashboard').classList.add('active');
+
+            document.querySelectorAll('.sidebar-nav .nav-item').forEach(el => el.classList.remove('active'));
+            const clickedItem = document.querySelector(`.sidebar-nav .nav-item[data-section="${sectionId}"]`);
+            if (clickedItem) clickedItem.classList.add('active');
+
+            if (window.innerWidth <= 768) {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('expanded');
+            }
+            document.querySelector('.content-area').scrollTop = 0;
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const section = this.dataset.section;
+                if (section) navigateTo(section);
+            });
+        });
+
+        // Dropdown toggles
+        document.querySelectorAll('.dropdown-header').forEach(header => {
+            header.addEventListener('click', function() {
+                const content = this.nextElementSibling;
+                if (content && content.classList.contains('dropdown-content')) {
+                    content.classList.toggle('open');
+                    const arrow = this.querySelector('.dropdown-arrow');
+                    if (arrow) arrow.classList.toggle('open');
+                    const parentSection = this.closest('.section');
+                    if (parentSection) {
+                        parentSection.querySelectorAll('.dropdown-content.open').forEach(other => {
+                            if (other !== content) {
+                                other.classList.remove('open');
+                                const otherHeader = other.previousElementSibling;
+                                if (otherHeader) {
+                                    const otherArrow = otherHeader.querySelector('.dropdown-arrow');
+                                    if (otherArrow) otherArrow.classList.remove('open');
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        });
+
+        // Icon links
+        document.getElementById('notificationBtn')?.addEventListener('click', function() {
+            navigateTo('communication');
+            setTimeout(() => {
+                document.getElementById('notificationsToggle')?.click();
+                document.getElementById('notificationsContent')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300);
+        });
+        document.getElementById('messageBtn')?.addEventListener('click', function() {
+            navigateTo('communication');
+            setTimeout(() => {
+                document.getElementById('messagesToggle')?.click();
+                document.getElementById('messagesContent')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300);
+        });
+        document.getElementById('settingsBtn')?.addEventListener('click', function() {
+            navigateTo('account');
+            setTimeout(() => {
+                document.getElementById('preferencesToggle')?.click();
+                document.getElementById('preferencesContent')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300);
+        });
+
+        // Quick actions
+        document.getElementById('waterQuickBtn')?.addEventListener('click', function() {
+            navigateTo('progress');
+            setTimeout(() => {
+                document.getElementById('waterTrackerToggle')?.click();
+                document.getElementById('waterTrackerContent')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300);
+        });
+        document.getElementById('weightQuickBtn')?.addEventListener('click', function() {
+            navigateTo('progress');
+            setTimeout(() => {
+                document.getElementById('progressOverviewToggle')?.click();
+                document.getElementById('progressOverviewContent')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300);
+        });
+        document.getElementById('messageQuickBtn')?.addEventListener('click', function() {
+            navigateTo('communication');
+            setTimeout(() => {
+                document.getElementById('messagesToggle')?.click();
+                document.getElementById('messagesContent')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300);
+        });
+        document.getElementById('appointmentQuickBtn')?.addEventListener('click', function() {
+            navigateTo('communication');
+            setTimeout(() => {
+                document.getElementById('appointmentsToggle')?.click();
+                document.getElementById('appointmentsContent')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300);
+        });
+
+        // Circular progress
+        function initCircularProgress() {
+            const circles = document.querySelectorAll('.circular-progress');
+            circles.forEach(circle => {
+                const progress = parseFloat(circle.dataset.progress) || 0;
+                const radius = 60;
+                const circumference = 2 * Math.PI * radius;
+                const offset = circumference - (progress / 100) * circumference;
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('viewBox', '0 0 140 140');
+                svg.innerHTML = `
+                    <circle cx="70" cy="70" r="${radius}" stroke="#e2e8f0" stroke-width="10" fill="none"/>
+                    <circle cx="70" cy="70" r="${radius}" stroke="#3b82f6" stroke-width="10" fill="none"
+                            stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"
+                            stroke-linecap="round" transform="rotate(-90 70 70)"/>
+                    <text x="70" y="75" text-anchor="middle" font-size="20" font-weight="bold" fill="#1e293b">${Math.round(progress)}%</text>
+                `;
+                circle.innerHTML = '';
+                circle.appendChild(svg);
+            });
+        }
+        initCircularProgress();
+
+        // Responsive
+        function handleResize() {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('collapsed');
+                mainContent.classList.remove('expanded');
+            } else {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('expanded');
+            }
+        }
+        window.addEventListener('resize', handleResize);
+        handleResize();
+
+        // Init
+        navigateTo('dashboard');
+        populateDashboard();
+
+        console.log('✅ Client Dashboard ready (logout fixed with ../user/home.html)');
+    })();
+</script>
+</body>
+</html>

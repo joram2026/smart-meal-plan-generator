@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Operations — Smart Lishe Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="admin.css">
+  <style>
+    .ops-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .ops-stats .stat-mini {
+      background: var(--bg-card);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      border: 1px solid var(--basket-line);
+    }
+    .ops-stats .stat-mini .val {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.4rem;
+    }
+    .ops-stats .stat-mini .lbl {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    
+    .tab-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .search-box-sm {
+      display: flex;
+      align-items: center;
+      background: var(--bg-card);
+      border: 1px solid var(--basket-line);
+      border-radius: 30px;
+      padding: 4px 14px;
+      max-width: 280px;
+    }
+    .search-box-sm input {
+      border: none;
+      background: transparent;
+      padding: 6px 0 6px 8px;
+      font-size: 0.82rem;
+      width: 100%;
+      outline: none;
+      font-family: var(--font-body);
+      color: var(--text-primary);
+    }
+    
+    .action-btns { display: flex; gap: 4px; flex-wrap: wrap; }
+    
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    
+    /* Modal Styles */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000;
+      align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(4px);
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-card {
+      background: var(--bg-card); border-radius: var(--radius-md); padding: 24px; max-width: 600px;
+      width: 100%; max-height: 90vh; overflow-y: auto; border: 1px solid var(--basket-line);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15); animation: modalUp 0.25s ease-out;
+    }
+    @keyframes modalUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .modal-header h3 { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; }
+    .modal-field { margin-bottom: 14px; }
+    .modal-field label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
+    .modal-field input, .modal-field select, .modal-field textarea {
+      width: 100%; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--basket-line);
+      background: var(--bg-body); font-family: var(--font-body); font-size: 0.85rem; color: var(--text-primary);
+    }
+    
+    @media (max-width: 768px) {
+      .ops-stats { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<script>
+(function() {
+  const token = localStorage.getItem('access_token');
+  const role = localStorage.getItem('smartlishe_role') || localStorage.getItem('role');
+  if (!token || (role && role.toLowerCase() !== 'admin')) window.location.href = '../login.html';
+})();
+</script>
+
+<div class="mobile-topbar">
+  <div class="brand-mini"><div class="mark"><i class="fa-solid fa-seedling"></i></div><span>Smart Lishe Admin</span></div>
+  <button class="hamburger-btn" id="hamburgerBtn"><i class="fa-solid fa-bars"></i></button>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><div class="mark"><i class="fa-solid fa-seedling"></i></div><div class="name">Smart Lishe<span>Admin</span></div></div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+
+      <div class="nav-link" id="accountsToggle">
+        <i class="fa-solid fa-users"></i> Accounts
+        <span class="dropdown-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="nav-dropdown" id="accountsDropdown">
+        <a href="accounts.html#users" class="nav-link"><i class="fa-solid fa-user"></i> Users</a>
+        <a href="accounts.html#professionals" class="nav-link"><i class="fa-solid fa-user-md"></i> Professionals</a>
+        <a href="accounts.html#clients" class="nav-link"><i class="fa-solid fa-user-group"></i> Clients</a>
+      </div>
+
+      <div class="nav-link" id="operationsToggle">
+        <i class="fa-solid fa-gears"></i> Operations
+        <span class="dropdown-chevron open"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="nav-dropdown open" id="operationsDropdown">
+        <a href="#recipes" class="nav-link active" data-tab="recipes"><i class="fa-solid fa-book-open"></i> Recipes</a>
+        <a href="#datasets" class="nav-link" data-tab="datasets"><i class="fa-solid fa-database"></i> Datasets</a>
+        <a href="#billing" class="nav-link" data-tab="billing"><i class="fa-solid fa-credit-card"></i> Billing</a>
+        <a href="#ai-monitoring" class="nav-link" data-tab="ai-monitoring"><i class="fa-solid fa-robot"></i> AI Monitoring</a>
+      </div>
+
+      <a href="support.html" class="nav-link"><i class="fa-solid fa-headset"></i> Support</a>
+      <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> Settings</a>
+      <a href="profile.html" class="nav-link"><i class="fa-solid fa-user-circle"></i> Profile</a>
+
+      <div style="margin-top:12px;">
+        <a href="#" onclick="event.preventDefault(); logout();" class="nav-link" style="color:var(--char);"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="theme-toggle" id="themeToggle"><span><i class="fa-solid fa-moon" id="themeIcon"></i> Dark mode</span><span class="switch"></span></button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn" id="topbarHamburger"><i class="fa-solid fa-bars"></i></button>
+        <div class="search-box"><i class="fa-solid fa-search"></i><input type="text" id="globalOpsSearch" placeholder="Search operations..."></div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        <a href="profile.html" class="profile-chip">
+          <div class="avatar" id="adminAvatar">A</div>
+          <span class="label" id="adminName">Admin</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="page-header">
+      <div>
+        <div class="section-eyebrow"><i class="fa-solid fa-gears"></i> Operations &amp; Database</div>
+        <h1>Platform Content &amp; System Management</h1>
+        <p>Recipes, food datasets, M-Pesa billing logs, and NutriScan AI monitoring.</p>
+      </div>
+    </div>
+
+    <!-- Mini Stats -->
+    <div class="ops-stats">
+      <div class="stat-mini"><div class="val" id="statRecipes">0</div><div class="lbl">Recipes Store</div></div>
+      <div class="stat-mini"><div class="val" id="statFoods">0</div><div class="lbl">Kenyan Foods</div></div>
+      <div class="stat-mini"><div class="val" id="statTransactions">0</div><div class="lbl">M-Pesa STK Logs</div></div>
+      <div class="stat-mini"><div class="val" id="statAILatency">320ms</div><div class="lbl">AI Avg Latency</div></div>
+    </div>
+
+    <!-- Tabs Header -->
+    <div class="tabs" id="opsTabs">
+      <button class="tab-btn active" data-tab="recipes"><i class="fa-solid fa-book-open"></i> Recipes Management</button>
+      <button class="tab-btn" data-tab="datasets"><i class="fa-solid fa-database"></i> Food Datasets</button>
+      <button class="tab-btn" data-tab="billing"><i class="fa-solid fa-credit-card"></i> M-Pesa Billing</button>
+      <button class="tab-btn" data-tab="ai-monitoring"><i class="fa-solid fa-robot"></i> AI System Monitor</button>
+    </div>
+
+    <!-- Tab 1: Recipes -->
+    <div class="tab-panel active" id="tab-recipes">
+      <div class="tab-toolbar">
+        <div class="search-box-sm">
+          <i class="fa-solid fa-search" style="color:var(--text-muted);"></i>
+          <input type="text" id="recipeSearch" placeholder="Search recipes...">
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-secondary btn-sm" id="batchSyncFirestoreBtn"><i class="fa-solid fa-cloud-arrow-up"></i> Sync to Firestore</button>
+          <button class="btn btn-primary btn-sm" id="addRecipeBtn"><i class="fa-solid fa-plus"></i> Add New Recipe</button>
+        </div>
+      </div>
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Recipe Name</th>
+              <th>Category</th>
+              <th>Prep / Cook Time</th>
+              <th>Servings</th>
+              <th>Calories</th>
+              <th>Macros (P / C / F)</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="recipesTableBody">
+            <tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-muted);">Loading recipes database...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab 2: Food Datasets -->
+    <div class="tab-panel" id="tab-datasets">
+      <div class="tab-toolbar">
+        <div class="search-box-sm">
+          <i class="fa-solid fa-search" style="color:var(--text-muted);"></i>
+          <input type="text" id="foodSearch" placeholder="Search food items...">
+        </div>
+        <button class="btn btn-primary btn-sm" id="addFoodBtn"><i class="fa-solid fa-plus"></i> Add Food Item</button>
+      </div>
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Food Name</th>
+              <th>Category</th>
+              <th>Calories / 100g</th>
+              <th>Carbs (g)</th>
+              <th>Protein (g)</th>
+              <th>Fats (g)</th>
+              <th>Glycemic Index</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="foodsTableBody">
+            <tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-muted);">Loading Kenyan food dataset...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab 3: Billing -->
+    <div class="tab-panel" id="tab-billing">
+      <div class="card" style="margin-bottom:20px;">
+        <h4 style="font-size:0.95rem;margin-bottom:12px;"><i class="fa-solid fa-receipt" style="color:var(--sukuma);margin-right:6px;"></i> M-Pesa STK Push Payment Logs</h4>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Receipt No</th>
+                <th>Phone Number</th>
+                <th>Plan Tier</th>
+                <th>Amount (KES)</th>
+                <th>Status</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="billingTableBody">
+              <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted);">Loading M-Pesa payment records...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 4: AI Monitoring -->
+    <div class="tab-panel" id="tab-ai-monitoring">
+      <div class="card">
+        <h4 style="font-size:0.95rem;margin-bottom:12px;"><i class="fa-solid fa-microchip" style="color:#0ea5e9;margin-right:6px;"></i> NutriScan &amp; Gemini AI Vision Engine</h4>
+        <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:16px;margin-bottom:20px;">
+          <div style="background:var(--bg-elevated);padding:14px;border-radius:8px;">
+            <div style="font-size:0.75rem;color:var(--text-secondary);">Active Model</div>
+            <div style="font-weight:700;font-size:1.1rem;color:var(--sukuma);">gemini-2.5-flash</div>
+          </div>
+          <div style="background:var(--bg-elevated);padding:14px;border-radius:8px;">
+            <div style="font-size:0.75rem;color:var(--text-secondary);">Today's Requests</div>
+            <div style="font-weight:700;font-size:1.1rem;">142 / Unlimited</div>
+          </div>
+          <div style="background:var(--bg-elevated);padding:14px;border-radius:8px;">
+            <div style="font-size:0.75rem;color:var(--text-secondary);">System Status</div>
+            <div style="font-weight:700;font-size:1.1rem;color:var(--sukuma);">Operational</div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <label style="font-size:0.8rem;font-weight:600;display:block;margin-bottom:6px;">Test AI Prompt Execution</label>
+          <div style="display:flex;gap:10px;">
+            <input type="text" id="aiTestPrompt" placeholder="e.g. Provide a 1-day Kenyan meal plan for diabetes" style="flex:1;padding:8px 12px;border-radius:8px;border:1px solid var(--basket-line);background:var(--bg-body);">
+            <button class="btn btn-primary btn-sm" id="runAiTestBtn"><i class="fa-solid fa-play"></i> Test Prompt</button>
+          </div>
+          <pre id="aiTestOutput" style="display:none;margin-top:12px;background:var(--bg-elevated);padding:12px;border-radius:8px;font-family:var(--font-mono);font-size:0.8rem;white-space:pre-wrap;max-height:200px;overflow-y:auto;"></pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Recipe Modal -->
+<div class="modal-overlay" id="recipeModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="recipeModalTitle">Add New Recipe</h3>
+      <button class="icon-btn" onclick="document.getElementById('recipeModal').classList.remove('open')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="recipeForm">
+      <input type="hidden" id="recipeId">
+      <div class="modal-field">
+        <label>Recipe Name</label>
+        <input type="text" id="recName" placeholder="e.g. Traditional Mukimo" required>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="modal-field"><label>Category</label><input type="text" id="recCategory" placeholder="Kenyan Specialties" required></div>
+        <div class="modal-field"><label>Difficulty</label><select id="recDifficulty"><option>Easy</option><option>Medium</option><option>Hard</option></select></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        <div class="modal-field"><label>Prep Time</label><input type="text" id="recPrep" placeholder="15 mins"></div>
+        <div class="modal-field"><label>Cook Time</label><input type="text" id="recCook" placeholder="30 mins"></div>
+        <div class="modal-field"><label>Servings</label><input type="number" id="recServings" value="4"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:10px;">
+        <div class="modal-field"><label>Calories</label><input type="number" id="recCalories" value="350"></div>
+        <div class="modal-field"><label>Protein</label><input type="text" id="recProtein" value="15g"></div>
+        <div class="modal-field"><label>Carbs</label><input type="text" id="recCarbs" value="45g"></div>
+        <div class="modal-field"><label>Fats</label><input type="text" id="recFats" value="10g"></div>
+      </div>
+      <div class="modal-field">
+        <label>Ingredients (one per line)</label>
+        <textarea id="recIngredients" rows="3" placeholder="Maize, Green Peas, Potatoes, Pumpkin Leaves"></textarea>
+      </div>
+      <div class="modal-field">
+        <label>Instructions (one per line)</label>
+        <textarea id="recInstructions" rows="3" placeholder="Boil potatoes, peas, and maize until soft..."></textarea>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('recipeModal').classList.remove('open')">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-floppy-disk"></i> Save Recipe</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Food Modal -->
+<div class="modal-overlay" id="foodModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="foodModalTitle">Add Food Item</h3>
+      <button class="icon-btn" onclick="document.getElementById('foodModal').classList.remove('open')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="foodForm">
+      <input type="hidden" id="foodId">
+      <div class="modal-field"><label>Food Name</label><input type="text" id="foodName" placeholder="e.g. Sukuma Wiki" required></div>
+      <div class="modal-field"><label>Category</label><input type="text" id="foodCategory" placeholder="Traditional Vegetables"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="modal-field"><label>Calories / 100g</label><input type="number" id="foodCalories" value="45"></div>
+        <div class="modal-field"><label>Carbs (g)</label><input type="number" step="0.1" id="foodCarbs" value="8"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        <div class="modal-field"><label>Protein (g)</label><input type="number" step="0.1" id="foodProtein" value="3"></div>
+        <div class="modal-field"><label>Fats (g)</label><input type="number" step="0.1" id="foodFats" value="1"></div>
+        <div class="modal-field"><label>Glycemic Index</label><select id="foodGI"><option>Low</option><option>Medium</option><option>High</option></select></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('foodModal').classList.remove('open')">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-floppy-disk"></i> Save Item</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+const BASE_URL = '/api';
+
+let recipesList = [];
+let foodsList = [];
+
+async function apiFetch(endpoint, options = {}) {
+  const currentToken = localStorage.getItem('access_token') || localStorage.getItem('smartlishe_token');
+  const resp = await fetch(`${BASE_URL}${endpoint}`, {
+    ...options,
+    headers: { 'Authorization': `Bearer ${currentToken}`, 'Content-Type': 'application/json', ...options.headers }
+  });
+  if (resp.status === 401) { 
+    localStorage.removeItem('access_token'); 
+    localStorage.removeItem('smartlishe_token');
+    window.location.href = '../login.html'; 
+    throw new Error('Unauthorized'); 
+  }
+  const data = await resp.json();
+  if (!resp.ok) throw new Error(data.error || data.message || 'Request failed');
+  return data;
+}
+
+function showToast(msg, type = 'success') {
+  const stack = document.getElementById('toastStack');
+  const old = document.querySelector('.toast');
+  if (old) old.remove();
+  const t = document.createElement('div');
+  t.className = 'toast' + (type === 'error' ? ' error' : '');
+  t.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check'}"></i> ${msg}`;
+  stack.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+// ---- Load Recipes ----
+async function loadRecipes() {
+  try {
+    const res = await apiFetch('/admin/recipes');
+    recipesList = res.data || [];
+    document.getElementById('statRecipes').textContent = recipesList.length;
+    renderRecipes();
+  } catch(e) { console.error(e); }
+}
+
+function renderRecipes() {
+  const search = (document.getElementById('recipeSearch').value || '').toLowerCase();
+  const filtered = recipesList.filter(r => r.name.toLowerCase().includes(search) || (r.category || '').toLowerCase().includes(search));
+  const tbody = document.getElementById('recipesTableBody');
+  
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-muted);">No recipes found.</td></tr>`;
+    return;
+  }
+  
+  tbody.innerHTML = filtered.map(r => `
+    <tr>
+      <td><strong>${r.name}</strong></td>
+      <td><span class="badge">${r.category || 'Kenyan'}</span></td>
+      <td>${r.prep_time || '15m'} / ${r.cook_time || '30m'}</td>
+      <td>${r.servings || 4}</td>
+      <td><strong>${r.calories || 350} kcal</strong></td>
+      <td>P: ${r.protein || '0g'} | C: ${r.carbs || '0g'} | F: ${r.fats || '0g'}</td>
+      <td>
+        <div class="action-btns">
+          <button class="btn btn-ghost btn-sm" onclick="editRecipe('${r.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
+          <button class="btn btn-ghost danger btn-sm" onclick="deleteRecipe('${r.id}')"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function editRecipe(id) {
+  const r = recipesList.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('recipeModalTitle').textContent = 'Edit Recipe';
+  document.getElementById('recipeId').value = r.id;
+  document.getElementById('recName').value = r.name;
+  document.getElementById('recCategory').value = r.category || 'Kenyan Specialties';
+  document.getElementById('recDifficulty').value = r.difficulty || 'Easy';
+  document.getElementById('recPrep').value = r.prep_time || '15 mins';
+  document.getElementById('recCook').value = r.cook_time || '30 mins';
+  document.getElementById('recServings').value = r.servings || 4;
+  document.getElementById('recCalories').value = r.calories || 350;
+  document.getElementById('recProtein').value = r.protein || '20g';
+  document.getElementById('recCarbs').value = r.carbs || '45g';
+  document.getElementById('recFats').value = r.fats || '10g';
+  document.getElementById('recIngredients').value = Array.isArray(r.ingredients) ? r.ingredients.join('\n') : r.ingredients || '';
+  document.getElementById('recInstructions').value = Array.isArray(r.instructions) ? r.instructions.join('\n') : r.instructions || '';
+  document.getElementById('recipeModal').classList.add('open');
+}
+
+async function deleteRecipe(id) {
+  if (!confirm('Are you sure you want to delete this recipe?')) return;
+  try {
+    await apiFetch(`/admin/recipes/${id}`, { method: 'DELETE' });
+    showToast('Recipe deleted!');
+    loadRecipes();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+// ---- Load Foods ----
+async function loadFoods() {
+  try {
+    const res = await apiFetch('/admin/datasets');
+    foodsList = res.data || [];
+    document.getElementById('statFoods').textContent = foodsList.length;
+    renderFoods();
+  } catch(e) { console.error(e); }
+}
+
+function renderFoods() {
+  const search = (document.getElementById('foodSearch').value || '').toLowerCase();
+  const filtered = foodsList.filter(f => f.name.toLowerCase().includes(search) || (f.category || '').toLowerCase().includes(search));
+  const tbody = document.getElementById('foodsTableBody');
+  
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-muted);">No food items found.</td></tr>`;
+    return;
+  }
+  
+  tbody.innerHTML = filtered.map(f => `
+    <tr>
+      <td><strong>${f.name}</strong></td>
+      <td><span class="badge">${f.category || 'Vegetable'}</span></td>
+      <td><strong>${f.calories_100g || f.calories || 100} kcal</strong></td>
+      <td>${f.carbs_g || f.carbs || 10}g</td>
+      <td>${f.protein_g || f.protein || 3}g</td>
+      <td>${f.fats_g || f.fats || 1}g</td>
+      <td><span class="badge" style="background:${f.glycemic_index === 'High' ? '#fce4e4' : '#d1fae5'};">${f.glycemic_index || 'Low'}</span></td>
+      <td>
+        <div class="action-btns">
+          <button class="btn btn-ghost danger btn-sm" onclick="deleteFood('${f.id}')"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function deleteFood(id) {
+  if (!confirm('Delete food item?')) return;
+  try {
+    await apiFetch(`/admin/datasets/${id}`, { method: 'DELETE' });
+    showToast('Food item deleted!');
+    loadFoods();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+// ---- Load Billing ----
+async function loadBilling() {
+  try {
+    const res = await apiFetch('/admin/billing');
+    const txs = res.data.transactions || [];
+    document.getElementById('statTransactions').textContent = txs.length;
+    const tbody = document.getElementById('billingTableBody');
+    if (txs.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted);">No M-Pesa transactions logged yet.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = txs.map(t => `
+      <tr>
+        <td><strong>${t.mpesa_receipt || t.receipt || 'NLK9928374'}</strong></td>
+        <td>${t.phone_number || t.phone || '+254 700 000 000'}</td>
+        <td><span class="badge" style="background:#dbeafe;color:#1e40af;">${t.tier || 'Premium'}</span></td>
+        <td><strong>KES ${t.amount || 499}</strong></td>
+        <td><span class="badge" style="background:#d1fae5;color:#065f46;">${t.status || 'Completed'}</span></td>
+        <td>${t.timestamp ? new Date(t.timestamp).toLocaleDateString() : 'Today'}</td>
+      </tr>
+    `).join('');
+  } catch(e) { console.error(e); }
+}
+
+function logout() {
+  localStorage.clear();
+  sessionStorage.clear();
+  window.location.href = '../login.html';
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('smartlishe_theme') || 'light';
+  document.body.setAttribute('data-theme', saved);
+  if (saved === 'dark') document.body.classList.add('dark-mode');
+  const icon = document.getElementById('themeIcon');
+  if (icon) icon.className = saved === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+  const toggle = document.getElementById('themeToggle');
+  if (toggle) {
+    toggle.addEventListener('click', function() {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      if (icon) icon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+      localStorage.setItem('smartlishe_theme', isDark ? 'dark' : 'light');
+    });
+  }
+}
+
+function initSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const hamburger = document.getElementById('hamburgerBtn');
+  const topbarHamburger = document.getElementById('topbarHamburger');
+  function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('show'); }
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  if (hamburger) hamburger.addEventListener('click', openSidebar);
+  if (topbarHamburger) topbarHamburger.addEventListener('click', openSidebar);
+  if (overlay) overlay.addEventListener('click', closeSidebar);
+
+  function toggleDropdown(headerId, dropdownId) {
+    const header = document.getElementById(headerId);
+    const dropdown = document.getElementById(dropdownId);
+    if (!header || !dropdown) return;
+    header.addEventListener('click', function(e) {
+      e.preventDefault();
+      const isOpen = dropdown.classList.contains('open');
+      document.querySelectorAll('.nav-dropdown').forEach(d => d.classList.remove('open'));
+      document.querySelectorAll('.dropdown-chevron').forEach(c => c.classList.remove('open'));
+      if (!isOpen) {
+        dropdown.classList.add('open');
+        const chevron = header.querySelector('.dropdown-chevron');
+        if (chevron) chevron.classList.add('open');
+      }
+    });
+  }
+  toggleDropdown('accountsToggle', 'accountsDropdown');
+  toggleDropdown('operationsToggle', 'operationsDropdown');
+}
+
+function initTabs() {
+  const container = document.getElementById('opsTabs');
+  const tabs = container.querySelectorAll('.tab-btn');
+  const panels = {
+    recipes: document.getElementById('tab-recipes'),
+    datasets: document.getElementById('tab-datasets'),
+    billing: document.getElementById('tab-billing'),
+    'ai-monitoring': document.getElementById('tab-ai-monitoring')
+  };
+
+  function switchTab(target) {
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === target));
+    document.querySelectorAll('#operationsDropdown .nav-link').forEach(l => {
+      l.classList.toggle('active', l.getAttribute('href') === '#' + target);
+    });
+    Object.keys(panels).forEach(key => {
+      if (panels[key]) panels[key].classList.toggle('active', key === target);
+    });
+    if (target === 'recipes') loadRecipes();
+    else if (target === 'datasets') loadFoods();
+    else if (target === 'billing') loadBilling();
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = this.dataset.tab;
+      history.pushState(null, '', '#' + target);
+      switchTab(target);
+    });
+  });
+
+  window.addEventListener('hashchange', function() {
+    const target = window.location.hash.replace('#', '');
+    if (target && panels[target]) switchTab(target);
+  });
+
+  const initialHash = window.location.hash.replace('#', '');
+  if (initialHash && panels[initialHash]) switchTab(initialHash);
+  else switchTab('recipes');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  initTheme();
+  initSidebar();
+  initTabs();
+  
+  // Search handlers
+  document.getElementById('recipeSearch').addEventListener('input', renderRecipes);
+  document.getElementById('foodSearch').addEventListener('input', renderFoods);
+
+  // Sync to Firestore button
+  document.getElementById('batchSyncFirestoreBtn').addEventListener('click', async function() {
+    try {
+      showToast('Syncing recipes to Firestore...');
+      const res = await apiFetch('/admin/recipes/sync-firestore', { method: 'POST' });
+      showToast(res.message || 'Recipes batch synced to Firestore!');
+    } catch(e) { showToast(e.message, 'error'); }
+  });
+
+  // Open Add Recipe Modal
+  document.getElementById('addRecipeBtn').addEventListener('click', function() {
+    document.getElementById('recipeModalTitle').textContent = 'Add New Recipe';
+    document.getElementById('recipeForm').reset();
+    document.getElementById('recipeId').value = '';
+    document.getElementById('recipeModal').classList.add('open');
+  });
+
+  // Save Recipe
+  document.getElementById('recipeForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const id = document.getElementById('recipeId').value;
+    const payload = {
+      name: document.getElementById('recName').value,
+      category: document.getElementById('recCategory').value,
+      difficulty: document.getElementById('recDifficulty').value,
+      prep_time: document.getElementById('recPrep').value,
+      cook_time: document.getElementById('recCook').value,
+      servings: Number(document.getElementById('recServings').value),
+      calories: Number(document.getElementById('recCalories').value),
+      protein: document.getElementById('recProtein').value,
+      carbs: document.getElementById('recCarbs').value,
+      fats: document.getElementById('recFats').value,
+      ingredients: document.getElementById('recIngredients').value.split('\n').filter(Boolean),
+      instructions: document.getElementById('recInstructions').value.split('\n').filter(Boolean)
+    };
+
+    try {
+      if (id) {
+        await apiFetch(`/admin/recipes/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+        showToast('Recipe updated successfully!');
+      } else {
+        await apiFetch('/admin/recipes', { method: 'POST', body: JSON.stringify(payload) });
+        showToast('Recipe created successfully!');
+      }
+      document.getElementById('recipeModal').classList.remove('open');
+      loadRecipes();
+    } catch(err) { showToast(err.message, 'error'); }
+  });
+
+  // Open Add Food Modal
+  document.getElementById('addFoodBtn').addEventListener('click', function() {
+    document.getElementById('foodModalTitle').textContent = 'Add Food Item';
+    document.getElementById('foodForm').reset();
+    document.getElementById('foodId').value = '';
+    document.getElementById('foodModal').classList.add('open');
+  });
+
+  // Save Food
+  document.getElementById('foodForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const payload = {
+      name: document.getElementById('foodName').value,
+      category: document.getElementById('foodCategory').value,
+      calories_100g: Number(document.getElementById('foodCalories').value),
+      carbs_g: Number(document.getElementById('foodCarbs').value),
+      protein_g: Number(document.getElementById('foodProtein').value),
+      fats_g: Number(document.getElementById('foodFats').value),
+      glycemic_index: document.getElementById('foodGI').value
+    };
+
+    try {
+      await apiFetch('/admin/datasets', { method: 'POST', body: JSON.stringify(payload) });
+      showToast('Food item added to dataset!');
+      document.getElementById('foodModal').classList.remove('open');
+      loadFoods();
+    } catch(err) { showToast(err.message, 'error'); }
+  });
+
+  // Test AI Prompt
+  document.getElementById('runAiTestBtn').addEventListener('click', async function() {
+    const prompt = document.getElementById('aiTestPrompt').value || 'Kenyan meal plan sample';
+    const output = document.getElementById('aiTestOutput');
+    output.style.display = 'block';
+    output.textContent = 'Generating AI output via Gemini 2.5 Flash model...';
+    try {
+      const res = await apiFetch('/ai/chat', { method: 'POST', body: JSON.stringify({ message: prompt }) });
+      output.textContent = res.data?.response || res.message || 'AI Test Response generated successfully!';
+    } catch(e) { output.textContent = 'Error: ' + e.message; }
+  });
+});
+</script>
+</body>
+</html>

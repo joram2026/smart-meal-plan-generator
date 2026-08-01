@@ -1,0 +1,132 @@
+{
+  "entities": {
+    "users": {
+      "title": "User Profile",
+      "description": "App user accounts and roles",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "first_name": { "type": "string" },
+        "last_name": { "type": "string" },
+        "role": { "type": "string" },
+        "status": { "type": "string" },
+        "phone": { "type": "string" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "meal_plans": {
+      "title": "Meal Plan",
+      "description": "User daily or weekly meal plans",
+      "type": "object",
+      "properties": {
+        "user_id": { "type": "string" },
+        "title": { "type": "string" },
+        "days": { "type": "array" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["user_id", "title"]
+    },
+    "goals": {
+      "title": "Health Goal",
+      "description": "User health targets and progress",
+      "type": "object",
+      "properties": {
+        "user_id": { "type": "string" },
+        "title": { "type": "string" },
+        "target": { "type": "number" },
+        "current": { "type": "number" },
+        "unit": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["user_id", "title"]
+    },
+    "water_logs": {
+      "title": "Water Intake Log",
+      "description": "Water tracking records",
+      "type": "object",
+      "properties": {
+        "user_id": { "type": "string" },
+        "amount_ml": { "type": "number" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["user_id", "amount_ml"]
+    },
+    "shopping_lists": {
+      "title": "Shopping List",
+      "description": "Grocery items list",
+      "type": "object",
+      "properties": {
+        "user_id": { "type": "string" },
+        "title": { "type": "string" },
+        "items": { "type": "array" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["user_id", "title"]
+    },
+    "appointments": {
+      "title": "Professional Appointment",
+      "description": "Consultation appointments",
+      "type": "object",
+      "properties": {
+        "client_name": { "type": "string" },
+        "professional_name": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "status": { "type": "string" },
+        "type": { "type": "string" }
+      },
+      "required": ["date"]
+    },
+    "reports": {
+      "title": "Nutritional Report",
+      "description": "Client progress reports",
+      "type": "object",
+      "properties": {
+        "client_name": { "type": "string" },
+        "title": { "type": "string" },
+        "summary": { "type": "string" },
+        "date": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["title"]
+    },
+    "recipes": {
+      "title": "Recipe Catalog",
+      "description": "Kenyan and international healthy recipes",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "cook_time": { "type": "string" },
+        "prep_time": { "type": "string" },
+        "servings": { "type": "number" },
+        "difficulty": { "type": "string" },
+        "calories": { "type": "number" },
+        "protein": { "type": "string" },
+        "carbs": { "type": "string" },
+        "fats": { "type": "string" },
+        "cost": { "type": "string" },
+        "desc": { "type": "string" },
+        "img": { "type": "string" },
+        "ingredients": { "type": "array" },
+        "instructions": { "type": "array" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["name", "ingredients"]
+    },
+    "audit_logs": {
+      "title": "Audit Log",
+      "description": "Security and activity logs",
+      "type": "object",
+      "properties": {
+        "action": { "type": "string" },
+        "user": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["action"]
+    }
+  }
+}

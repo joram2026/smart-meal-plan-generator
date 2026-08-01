@@ -1,0 +1,123 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- Helper Functions ---
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isSuperAdminEmail() {
+      return isAuthenticated() && request.auth.token.email == 'adminlishe@gmail.com';
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return isSuperAdminEmail() || (
+        isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+        getUserData().role == 'admin'
+      );
+    }
+
+    function isProfessional() {
+      return isAuthenticated() && (
+        isAdmin() || 
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getUserData().role == 'professional')
+      );
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && (request.auth.uid == userId || isAdmin());
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && (
+        isAdmin() || 
+        resource.data.user_id == request.auth.uid || 
+        resource.data.userId == request.auth.uid
+      );
+    }
+
+    // --- Collection Security Rules ---
+
+    // Users Collection (Accounts, Roles, Profiles)
+    match /users/{userId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if isOwner(userId) || isAdmin();
+    }
+
+    // Public Catalog & Knowledge Base (Recipes, Foods, Health Conditions)
+    match /recipes/{recipeId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /foods/{foodId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /health_conditions/{conditionId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Meal Plans Collection
+    match /meal_plans/{planId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if isDocOwner() || isAdmin();
+    }
+
+    // Health Goals Tracking
+    match /goals/{goalId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if isDocOwner() || isAdmin();
+    }
+
+    // Daily Water Intake Logs
+    match /water_logs/{logId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if isDocOwner() || isAdmin();
+    }
+
+    // Grocery & Shopping Lists
+    match /shopping_lists/{listId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if isDocOwner() || isAdmin();
+    }
+
+    // Nutritionist Appointments & Consultations
+    match /appointments/{appointmentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isProfessional() || isAdmin();
+    }
+
+    // Clinical & Progress Reports
+    match /reports/{reportId} {
+      allow read: if isAuthenticated();
+      allow create: if isProfessional() || isAdmin();
+      allow update, delete: if isProfessional() || isAdmin();
+    }
+
+    // System Audit & Security Logs
+    match /audit_logs/{logId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Fallback Rule for all other collections
+    match /{document=**} {
+      allow read, write: if isAdmin() || true;
+    }
+  }
+}

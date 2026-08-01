@@ -1,0 +1,1119 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Smart Lishe Professional</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="professional.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* ===== DASHBOARD-SPECIFIC OVERRIDES ===== */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 1024px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+    }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    @media (max-width: 768px) {
+      .chart-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+    }
+
+    .chart-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--basket-line);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .chart-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-soft);
+    }
+    .chart-card .chart-title {
+      font-family: var(--font-display);
+      font-size: 0.92rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+    .chart-card canvas {
+      width: 100% !important;
+      max-height: 220px;
+    }
+
+    .client-avatar-sm {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.7rem;
+      flex-shrink: 0;
+    }
+
+    .client-table-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--basket-line);
+      background: var(--bg-elevated);
+      margin-top: 20px;
+    }
+    .client-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      min-width: 600px;
+    }
+    .client-table th {
+      background: var(--bg-card);
+      padding: 10px 14px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+      font-weight: 700;
+      text-align: left;
+      border-bottom: 1px solid var(--basket-line);
+    }
+    .client-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--basket-line);
+      vertical-align: middle;
+    }
+    .client-table tr:last-child td { border-bottom: none; }
+    .client-table tr:hover { background: var(--bg-card); }
+
+    .right-card {
+      margin-bottom: 16px;
+    }
+    .right-card:last-child { margin-bottom: 0; }
+
+    @media (max-width: 600px) {
+      .prof-stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .prof-stat-card {
+        padding: 14px 16px;
+      }
+      .prof-stat-card .stat-number {
+        font-size: 1.3rem;
+      }
+      .quick-actions {
+        gap: 8px;
+      }
+      .quick-actions .btn {
+        flex: 1 1 100%;
+        min-width: auto;
+        justify-content: center;
+        font-size: 0.82rem;
+        padding: 10px 16px;
+      }
+      .prof-hero {
+        padding: 20px 18px;
+        flex-direction: column;
+        text-align: center;
+      }
+      .prof-hero h1 {
+        font-size: 1.3rem;
+      }
+      .client-table-wrap {
+        border-radius: var(--radius-sm);
+      }
+      .client-table {
+        font-size: 0.75rem;
+        min-width: 480px;
+      }
+      .client-table th,
+      .client-table td {
+        padding: 6px 10px;
+      }
+      .client-avatar-sm {
+        width: 26px;
+        height: 26px;
+        font-size: 0.6rem;
+      }
+      .progress-ring-wrap {
+        gap: 10px;
+      }
+      .progress-ring .ring-circle {
+        width: 60px;
+        height: 60px;
+        font-size: 0.95rem;
+      }
+      .online-item {
+        padding: 8px 12px;
+      }
+      .notification-item {
+        padding: 10px 0;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .prof-stats-grid {
+        grid-template-columns: 1fr;
+      }
+      .quick-actions .btn {
+        font-size: 0.78rem;
+        padding: 8px 12px;
+      }
+      .client-table {
+        font-size: 0.7rem;
+        min-width: 380px;
+      }
+      .chart-card {
+        padding: 12px 14px;
+      }
+      .chart-card canvas {
+        max-height: 160px;
+      }
+    }
+
+    /* ===== FLOATING AI BUTTON ===== */
+    .floating-ai-btn {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 998;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--sukuma), var(--sukuma-light));
+      color: #fff;
+      border: none;
+      box-shadow: 0 8px 32px rgba(45,80,22,0.35);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .floating-ai-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 12px 40px rgba(45,80,22,0.45);
+    }
+    .floating-ai-btn .ping-dot {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #10b981;
+      border: 2px solid #fff;
+      animation: ping 2s infinite;
+    }
+    @keyframes ping {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+    @media (max-width: 600px) {
+      .floating-ai-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+        bottom: 20px;
+        right: 20px;
+      }
+    }
+
+    .toast-stack {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 360px;
+      width: calc(100% - 48px);
+    }
+    .toast {
+      background: var(--bg-elevated);
+      border: 1px solid var(--basket-line);
+      border-left: 4px solid var(--sukuma);
+      border-radius: 12px;
+      padding: 14px 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      animation: slideUp 0.3s ease;
+      backdrop-filter: blur(8px);
+    }
+    .toast.error {
+      border-left-color: #dc2626;
+    }
+    .toast i {
+      font-size: 1.2rem;
+      color: var(--sukuma);
+    }
+    .toast.error i {
+      color: #dc2626;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="mark"><i class="fa-solid fa-seedling"></i></div>
+        <div class="name">Smart Lishe<span>Professional</span></div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="home.html" class="nav-link"><i class="fa-solid fa-house"></i> Home</a>
+        <a href="dashboard.html" class="nav-link active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+        <a href="clients.html" class="nav-link"><i class="fa-solid fa-users"></i> Clients</a>
+        <a href="ai-assistant.html" class="nav-link"><i class="fa-solid fa-robot"></i> AI Assistant</a>
+        <a href="profile.html" class="nav-link"><i class="fa-solid fa-user"></i> Profile</a>
+        <a href="billing.html" class="nav-link"><i class="fa-solid fa-credit-card"></i> Billing</a>
+        <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> Settings</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="../auth/logout.html" class="nav-link" style="color:var(--char);">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div class="search-box">
+            <i class="fa-solid fa-search"></i>
+            <input type="text" placeholder="Search clients, programs...">
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" id="notifBtn">
+            <i class="fa-regular fa-bell"></i>
+            <span class="dot" id="notifDot"></span>
+          </button>
+          <div class="profile-chip" id="profileChip">
+            <div class="avatar" id="profileAvatar">PK</div>
+            <span class="label" id="profileName">Dr. Peter</span>
+            <span class="pro-badge" style="font-size:0.55rem;padding:2px 8px;">PRO</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="page-inner">
+        <!-- Professional Hero -->
+        <div class="prof-hero">
+          <div>
+            <h1 id="welcomeMessage">Welcome back, Dr. Peter</h1>
+            <p id="heroSubtitle">Loading your practice overview...</p>
+          </div>
+          <div class="hero-badge"><i class="fa-regular fa-circle-check"></i> Professional Plus</div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+          <a href="clients.html" class="btn btn-primary"><i class="fa-regular fa-user-plus"></i> Add Client</a>
+          <a href="clients.html" class="btn btn-secondary"><i class="fa-regular fa-calendar-plus"></i> Schedule</a>
+          <a href="clients.html" class="btn btn-secondary"><i class="fa-regular fa-message"></i> Message</a>
+          <a href="ai-assistant.html" class="btn btn-accent"><i class="fa-regular fa-robot"></i> AI Assistant</a>
+        </div>
+
+        <!-- Stats Grid (dynamic) -->
+        <div class="prof-stats-grid" id="statsGrid">
+          <!-- populated by JS -->
+        </div>
+
+        <!-- Stats Grid Row 2 (static - revenue, appointments, etc.) -->
+        <div class="prof-stats-grid" style="margin-bottom:24px;">
+          <div class="prof-stat-card">
+            <span class="stat-icon"><i class="fa-regular fa-chart-line"></i></span>
+            <span class="stat-number" id="complianceRate">--%</span>
+            <span class="stat-label">Compliance Rate</span>
+            <span class="stat-change up"><i class="fa-solid fa-arrow-up"></i> 3%</span>
+          </div>
+          <div class="prof-stat-card">
+            <span class="stat-icon"><i class="fa-regular fa-credit-card"></i></span>
+            <span class="stat-number">KES 240k</span>
+            <span class="stat-label">Revenue</span>
+            <span class="stat-change up"><i class="fa-solid fa-arrow-up"></i> 18%</span>
+          </div>
+          <div class="prof-stat-card">
+            <span class="stat-icon"><i class="fa-regular fa-calendar"></i></span>
+            <span class="stat-number">8</span>
+            <span class="stat-label">Appointments Today</span>
+            <span class="stat-change up"><i class="fa-solid fa-arrow-up"></i> 2%</span>
+          </div>
+          <div class="prof-stat-card">
+            <span class="stat-icon"><i class="fa-regular fa-flag"></i></span>
+            <span class="stat-number" id="pendingReviews">0</span>
+            <span class="stat-label">Pending Reviews</span>
+            <span class="stat-change down"><i class="fa-solid fa-arrow-down"></i> 2%</span>
+          </div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+          <!-- Left Column -->
+          <div>
+            <!-- Health Monitoring (dynamic) -->
+            <div class="prof-card" style="margin-bottom:20px;">
+              <div class="card-header">
+                <h3><i class="fa-regular fa-heart-pulse" style="color:var(--accent-3);margin-right:8px;"></i> Health Monitoring</h3>
+                <a href="clients.html">View All</a>
+              </div>
+              <div class="health-tags" id="healthTags">
+                <!-- populated by JS -->
+              </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="chart-grid">
+              <div class="chart-card">
+                <div class="chart-title">Client Goals</div>
+                <canvas id="goalChart"></canvas>
+              </div>
+              <div class="chart-card">
+                <div class="chart-title">Client Status</div>
+                <canvas id="statusChart"></canvas>
+              </div>
+              <div class="chart-card">
+                <div class="chart-title">Medical Conditions</div>
+                <canvas id="conditionChart"></canvas>
+              </div>
+              <div class="chart-card">
+                <div class="chart-title">Compliance Trends</div>
+                <canvas id="complianceChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Client Table (dynamic) -->
+            <div class="client-table-wrap">
+              <table class="client-table">
+                <thead>
+                  <tr>
+                    <th>Client</th>
+                    <th>Condition</th>
+                    <th>Goal</th>
+                    <th>Compliance</th>
+                    <th>Status</th>
+                    <th>Online</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="clientTableBody">
+                  <!-- populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Right Column -->
+          <div>
+            <!-- Progress Rings (mock – can be made dynamic) -->
+            <div class="prof-card right-card">
+              <div class="card-header">
+                <h3><i class="fa-regular fa-chart-pie" style="color:var(--accent-2);margin-right:8px;"></i> Progress</h3>
+              </div>
+              <div class="progress-ring-wrap">
+                <div class="progress-ring">
+                  <div class="ring-circle" style="background:conic-gradient(var(--sukuma) 89%, var(--basket-line) 0%);">
+                    <span class="val">89%</span>
+                  </div>
+                  <div class="ring-label">Compliance</div>
+                </div>
+                <div class="progress-ring">
+                  <div class="ring-circle" style="background:conic-gradient(var(--accent-2) 73%, var(--basket-line) 0%);">
+                    <span class="val">73%</span>
+                  </div>
+                  <div class="ring-label">Goals</div>
+                </div>
+                <div class="progress-ring">
+                  <div class="ring-circle" style="background:conic-gradient(var(--char) 84%, var(--basket-line) 0%);">
+                    <span class="val">84%</span>
+                  </div>
+                  <div class="ring-label">Diet</div>
+                </div>
+                <div class="progress-ring">
+                  <div class="ring-circle" style="background:conic-gradient(#1A5276 92%, var(--basket-line) 0%);">
+                    <span class="val">92%</span>
+                  </div>
+                  <div class="ring-label">Water</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Online Clients (dynamic) -->
+            <div class="prof-card right-card">
+              <div class="card-header">
+                <h3><i class="fa-regular fa-circle-user" style="color:var(--sukuma);margin-right:8px;"></i> Online Now</h3>
+                <span style="font-size:0.72rem;color:var(--text-muted);font-weight:600;" id="onlineCount">0 online</span>
+              </div>
+              <div class="online-list" id="onlineList">
+                <!-- populated by JS -->
+              </div>
+            </div>
+
+            <!-- Notifications (dynamic) -->
+            <div class="prof-card right-card">
+              <div class="card-header">
+                <h3><i class="fa-regular fa-bell" style="color:var(--accent-2);margin-right:8px;"></i> Notifications</h3>
+                <span style="font-size:0.72rem;color:var(--text-muted);font-weight:600;" id="notifCountLabel">0 new</span>
+                <a href="#" style="font-size:0.72rem;">View All</a>
+              </div>
+              <div id="notificationsContainer">
+                <!-- populated by JS -->
+              </div>
+            </div>
+
+            <!-- AI Quick Link -->
+            <div class="prof-card right-card" style="background:linear-gradient(135deg, var(--bg-elevated), rgba(45,80,22,0.04)); border-color: var(--sukuma);">
+              <div style="display:flex;align-items:center;gap:14px;">
+                <div style="width:44px;height:44px;border-radius:50%;background:var(--sukuma);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.2rem;flex-shrink:0;">
+                  <i class="fa-regular fa-robot"></i>
+                </div>
+                <div style="flex:1;">
+                  <strong style="font-size:0.95rem;">AI Assistant</strong>
+                  <p style="font-size:0.78rem;color:var(--text-muted);margin:0;">Get AI-powered recommendations</p>
+                </div>
+                <a href="ai-assistant.html" class="btn btn-primary btn-sm" style="white-space:nowrap;">Open</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ===== FLOATING AI BUTTON ===== -->
+  <button class="floating-ai-btn" id="floatingAiBtn" aria-label="Open AI Assistant">
+    <i class="fa-solid fa-robot"></i>
+    <span class="ping-dot"></span>
+  </button>
+
+  <!-- Toast Container -->
+  <div class="toast-stack" id="toastStack"></div>
+
+  <script>
+    // ============================================================
+    // SMART LISHE — PROFESSIONAL DASHBOARD (Backend-Integrated)
+    // ============================================================
+
+    const API_BASE = '/api';
+
+    // -------- HELPERS --------
+    function getToken() {
+      return localStorage.getItem('access_token') || 
+             localStorage.getItem('smartlishe_token') || 
+             localStorage.getItem('token') || '';
+    }
+
+    function getHeaders() {
+      return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`
+      };
+    }
+
+    async function apiRequest(endpoint, method = 'GET', body = null) {
+      const url = `${API_BASE}${endpoint}`;
+      const options = { method, headers: getHeaders() };
+      if (body) options.body = JSON.stringify(body);
+      const res = await fetch(url, options);
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(err);
+      }
+      return res.json();
+    }
+
+    function showToast(message, type = 'success') {
+      const stack = document.getElementById('toastStack');
+      if (!stack) return;
+      const toast = document.createElement('div');
+      toast.className = 'toast' + (type === 'error' ? ' error' : '');
+      const icon = type === 'error' ? 'fa-circle-exclamation' : 'fa-check-circle';
+      toast.innerHTML = `<i class="fa-regular ${icon}"></i><span>${message}</span>`;
+      stack.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(40px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // -------- AUTH CHECK (SAFE) --------
+    (function checkAuth() {
+      const token = localStorage.getItem('access_token') || 
+                     localStorage.getItem('smartlishe_token') || 
+                     localStorage.getItem('token');
+      const role = localStorage.getItem('smartlishe_role') || localStorage.getItem('role');
+
+      console.log('🔐 Token found:', token ? '✅ Yes' : '❌ No');
+      console.log('🔐 Role:', role);
+
+      if (!token) {
+        console.warn('⚠️ No token – redirecting to login');
+        window.location.href = '../auth/login.html';
+        return;
+      }
+      if (!role || role.toLowerCase() !== 'professional') {
+        console.warn('⚠️ Role not Professional – redirecting to dashboard (safe fallback)');
+        window.location.href = 'dashboard.html';
+        return;
+      }
+      console.log('✅ Authentication passed.');
+    })();
+
+    // -------- GET PROFESSIONAL NAME --------
+    function getProfessionalName() {
+      const profile = JSON.parse(localStorage.getItem('smartlishe_profile') || '{}');
+      if (profile.name) return profile.name;
+      const firstName = localStorage.getItem('firstName') || 'Professional';
+      const lastName = localStorage.getItem('lastName') || '';
+      return firstName + (lastName ? ' ' + lastName : '');
+    }
+
+    function getInitials() {
+      const name = getProfessionalName();
+      const parts = name.split(' ');
+      if (parts.length >= 2) return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+      return name.substring(0, 2).toUpperCase();
+    }
+
+    const fullName = getProfessionalName();
+    const firstName = fullName.split(' ')[0];
+    const initials = getInitials();
+
+    document.getElementById('welcomeMessage').textContent = 'Welcome back, ' + fullName;
+    document.getElementById('profileName').textContent = fullName;
+    document.getElementById('profileAvatar').textContent = initials;
+
+    // ============================================================
+    // LOAD CLIENTS & NOTIFICATIONS
+    // ============================================================
+
+    let clients = [];
+    let profileData = {};
+    let notifications = [];
+
+    async function loadDashboardData() {
+      try {
+        // Fetch clients
+        const clientsRes = await apiRequest('/professional/clients');
+        clients = clientsRes.data || [];
+
+        // Fetch professional profile
+        try {
+          const profileRes = await apiRequest('/professional/profile');
+          profileData = profileRes.data || {};
+        } catch (e) {
+          console.warn('Failed to load profile:', e);
+          profileData = {};
+        }
+
+        // Fetch notifications
+        try {
+          const notifRes = await apiRequest('/notifications');
+          notifications = notifRes.data || [];
+        } catch (e) {
+          console.warn('Failed to load notifications:', e);
+          notifications = [];
+        }
+
+        // Update all UI components
+        renderStats(clients);
+        renderClientTable(clients);
+        renderHealthTags(clients);
+        renderOnlineClients(clients);
+        renderCharts(clients);
+        updateComplianceRate(clients);
+        updatePendingReviews(clients);
+        renderNotifications(notifications);
+
+        // Update hero subtitle
+        const pending = clients.filter(c => c.status === 'pending').length;
+        document.getElementById('heroSubtitle').textContent =
+          `You have ${clients.length} clients and ${pending} pending reviews.`;
+
+        // Welcome toast (once per session)
+        if (sessionStorage.getItem('dashboardWelcome') !== 'shown') {
+          showToast(`👋 Welcome back, ${firstName}! You have ${clients.length} clients.`);
+          sessionStorage.setItem('dashboardWelcome', 'shown');
+        }
+
+      } catch (e) {
+        console.error('Load dashboard error:', e);
+        showToast('Failed to load dashboard: ' + e.message, 'error');
+        // Show empty state
+        renderStats([]);
+        renderClientTable([]);
+        renderHealthTags([]);
+        renderOnlineClients([]);
+        renderCharts([]);
+        updateComplianceRate([]);
+        updatePendingReviews([]);
+        renderNotifications([]);
+      }
+    }
+
+    // ===== RENDER NOTIFICATIONS =====
+    function renderNotifications(notifs) {
+      const container = document.getElementById('notificationsContainer');
+      const countLabel = document.getElementById('notifCountLabel');
+      const dot = document.getElementById('notifDot');
+
+      if (!container) return;
+
+      const unread = notifs.filter(n => !n.is_read);
+      const unreadCount = unread.length;
+
+      // Update dot and label
+      if (dot) {
+        if (unreadCount > 0) {
+          dot.style.display = 'flex';
+          dot.textContent = unreadCount > 9 ? '9+' : unreadCount;
+        } else {
+          dot.style.display = 'none';
+        }
+      }
+      if (countLabel) {
+        countLabel.textContent = unreadCount + ' new';
+      }
+
+      if (notifs.length === 0) {
+        container.innerHTML = `<div style="padding:12px 0;color:var(--text-muted);font-size:0.85rem;">No notifications</div>`;
+        return;
+      }
+
+      // Display latest 5 notifications
+      const latest = notifs.slice(0, 5);
+      container.innerHTML = latest.map(n => `
+        <div class="notification-item ${n.is_read ? '' : 'unread'}" data-id="${n.id}">
+          <div class="notif-icon" style="background:${n.type === 'message' ? '#1A5276' : n.type === 'alert' ? 'var(--maize-deep)' : 'var(--char)'};">
+            <i class="fa-regular ${n.type === 'message' ? 'fa-message' : n.type === 'alert' ? 'fa-triangle-exclamation' : 'fa-bell'}"></i>
+          </div>
+          <div class="notif-text">
+            <strong>${n.title || 'Notification'}</strong>
+            <br>
+            <span>${n.message || ''}</span>
+          </div>
+          <span class="notif-time">${n.created_at ? new Date(n.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : ''}</span>
+        </div>
+      `).join('');
+
+      // Click to mark as read (optional)
+      container.querySelectorAll('.notification-item.unread').forEach(el => {
+        el.addEventListener('click', function() {
+          const id = this.dataset.id;
+          if (id) {
+            markNotificationRead(id);
+          }
+        });
+      });
+    }
+
+    async function markNotificationRead(notifId) {
+      try {
+        await apiRequest(`/notifications/${notifId}/read`, 'PUT');
+        // Refresh notifications
+        const notifRes = await apiRequest('/notifications');
+        notifications = notifRes.data || [];
+        renderNotifications(notifications);
+      } catch (e) {
+        console.warn('Failed to mark notification as read:', e);
+      }
+    }
+
+    // ===== RENDER STATS (unchanged) =====
+    function renderStats(clients) {
+      const grid = document.getElementById('statsGrid');
+      if (!grid) return;
+
+      const total = clients.length;
+      const active = clients.filter(c => c.status === 'active').length;
+      const pending = clients.filter(c => c.status === 'pending').length;
+      const completed = clients.filter(c => c.status === 'completed').length;
+      const now = new Date();
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const newThisWeek = clients.filter(c => {
+        const created = new Date(c.created_at || now);
+        return created >= weekAgo;
+      }).length;
+
+      grid.innerHTML = `
+        <div class="prof-stat-card">
+          <span class="stat-icon"><i class="fa-regular fa-users"></i></span>
+          <span class="stat-number">${total}</span>
+          <span class="stat-label">Clients Supervised</span>
+          <span class="stat-change up"><i class="fa-solid fa-arrow-up"></i> ${total > 0 ? Math.round(total / 10) : 0}%</span>
+        </div>
+        <div class="prof-stat-card">
+          <span class="stat-icon"><i class="fa-regular fa-clock"></i></span>
+          <span class="stat-number">${active}</span>
+          <span class="stat-label">Active Clients</span>
+          <span class="stat-change up"><i class="fa-solid fa-arrow-up"></i> ${active > 0 ? Math.round(active / 15) : 0}%</span>
+        </div>
+        <div class="prof-stat-card">
+          <span class="stat-icon"><i class="fa-regular fa-bullseye"></i></span>
+          <span class="stat-number">${completed}</span>
+          <span class="stat-label">Completed Programs</span>
+          <span class="stat-change up"><i class="fa-solid fa-arrow-up"></i> ${completed > 0 ? Math.round(completed / 5) : 0}%</span>
+        </div>
+        <div class="prof-stat-card">
+          <span class="stat-icon"><i class="fa-regular fa-triangle-exclamation"></i></span>
+          <span class="stat-number">${pending}</span>
+          <span class="stat-label">Flagged Conditions</span>
+          <span class="stat-change down"><i class="fa-solid fa-arrow-down"></i> ${pending > 0 ? Math.round(pending / 3) : 0}%</span>
+        </div>
+      `;
+    }
+
+    // ===== RENDER CLIENT TABLE (unchanged) =====
+    function renderClientTable(clients) {
+      const tbody = document.getElementById('clientTableBody');
+      if (!tbody) return;
+
+      if (clients.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted);">No clients yet. Add your first client from the Clients page.</td></tr>';
+        return;
+      }
+
+      const avatarColors = ['var(--sukuma)', 'var(--char)', 'var(--maize-deep)', '#1A5276', '#8E44AD', '#2ECC71', '#F39C12'];
+
+      const rows = clients.map((client, index) => {
+        const name = client.name || 'Unnamed Client';
+        const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+        const colorIndex = index % avatarColors.length;
+        const avatarColor = avatarColors[colorIndex];
+
+        const condition = (client.medical_conditions && client.medical_conditions.length > 0) ?
+          client.medical_conditions[0].charAt(0).toUpperCase() + client.medical_conditions[0].slice(1) : 'None';
+
+        const goalMap = {
+          'weight-loss': 'Weight Loss',
+          'weight-gain': 'Weight Gain',
+          'maintain': 'Maintain',
+          'muscle-gain': 'Muscle Gain',
+          'healthy-eating': 'Healthy Eating',
+          'diabetes-management': 'Diabetes Management',
+          'blood-sugar-control': 'Blood Sugar Control',
+          'cholesterol-reduction': 'Cholesterol Reduction',
+          'blood-pressure-control': 'Blood Pressure Control',
+          'heart-health': 'Heart Health',
+          'sports-performance': 'Sports Performance',
+          'pregnancy-nutrition': 'Pregnancy Nutrition',
+          'child-nutrition': 'Child Nutrition',
+          'elderly-nutrition': 'Elderly Nutrition',
+          'general-wellness': 'General Wellness'
+        };
+        const goal = goalMap[client.goal] || client.goal || 'Weight Loss';
+
+        const compliance = client.compliance || 80;
+        const status = client.status || 'active';
+        const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
+        const online = Math.random() > 0.4;
+        const dotClass = online ? 'online' : 'offline';
+        const onlineLabel = online ? 'Online' : 'Offline';
+
+        return `<tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="client-avatar-sm" style="background:${avatarColor};">${initials}</div>
+              <div>
+                <strong>${name}</strong><br>
+                <span style="font-size:0.7rem;color:var(--text-muted);">${client.id || 'N/A'}</span>
+              </div>
+            </div>
+          </td>
+          <td>${condition}</td>
+          <td>${goal}</td>
+          <td><span style="font-weight:700;">${compliance}%</span></td>
+          <td><span class="client-status ${status}">${statusLabel}</span></td>
+          <td><span class="client-online"><span class="dot ${dotClass}"></span> ${onlineLabel}</span></td>
+          <td><a href="client-details.html?id=${client.id}" style="color:var(--accent-3);font-weight:700;font-size:0.75rem;">View</a></td>
+        </tr>`;
+      }).join('');
+
+      tbody.innerHTML = rows;
+    }
+
+    // ===== RENDER HEALTH TAGS (unchanged) =====
+    function renderHealthTags(clients) {
+      const container = document.getElementById('healthTags');
+      if (!container) return;
+
+      const conditionCounts = {};
+      clients.forEach(c => {
+        if (c.medical_conditions && c.medical_conditions.length > 0) {
+          c.medical_conditions.forEach(cond => {
+            if (cond && cond !== 'none') {
+              conditionCounts[cond] = (conditionCounts[cond] || 0) + 1;
+            }
+          });
+        }
+      });
+
+      const tagMap = {
+        'diabetes': { label: 'Diabetes', icon: 'fa-droplet', cls: 'diabetes' },
+        'hypertension': { label: 'Hypertension', icon: 'fa-heart', cls: 'hypertension' },
+        'obesity': { label: 'Obesity', icon: 'fa-weight', cls: 'obesity' },
+        'pregnancy': { label: 'Pregnancy', icon: 'fa-baby', cls: 'pregnancy' },
+        'heart_disease': { label: 'Heart Disease', icon: 'fa-heart-pulse', cls: 'heart' },
+        'kidney_disease': { label: 'Kidney Disease', icon: 'fa-filter', cls: 'kidney' },
+        'anemia': { label: 'Anemia', icon: 'fa-droplet', cls: 'anemia' },
+        'high_cholesterol': { label: 'High Cholesterol', icon: 'fa-circle-exclamation', cls: 'cholesterol' }
+      };
+
+      let html = '';
+      const total = clients.length;
+      for (const key in conditionCounts) {
+        const tag = tagMap[key] || { label: key.charAt(0).toUpperCase() + key.slice(1), icon: 'fa-circle', cls: '' };
+        const count = conditionCounts[key];
+        html += `<span class="health-tag ${tag.cls}"><i class="fa-regular ${tag.icon}"></i> ${count} ${tag.label}</span>`;
+      }
+      if (!html) {
+        html = '<span class="health-tag" style="color:var(--text-muted);">No health conditions recorded</span>';
+      }
+      container.innerHTML = html;
+    }
+
+    // ===== RENDER ONLINE CLIENTS (unchanged) =====
+    function renderOnlineClients(clients) {
+      const list = document.getElementById('onlineList');
+      const countEl = document.getElementById('onlineCount');
+      if (!list) return;
+
+      const onlineClients = clients.slice(0, 5);
+      const count = onlineClients.length;
+      if (countEl) countEl.textContent = count + ' online';
+
+      if (onlineClients.length === 0) {
+        list.innerHTML = '<div class="online-item" style="justify-content:center;color:var(--text-muted);">No clients online</div>';
+        return;
+      }
+
+      const avatarColors = ['var(--sukuma)', 'var(--char)', 'var(--maize-deep)', '#1A5276', '#8E44AD'];
+      list.innerHTML = onlineClients.map((client, index) => {
+        const name = client.name || 'Unnamed';
+        const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+        const color = avatarColors[index % avatarColors.length];
+        const condition = (client.medical_conditions && client.medical_conditions.length > 0) ? client.medical_conditions[0] : 'General';
+        return `<div class="online-item">
+          <div class="avatar-sm" style="background:${color};">${initials}</div>
+          <div class="info"><strong>${name}</strong><span>${condition}</span></div>
+          <span class="status-dot online"></span>
+        </div>`;
+      }).join('');
+    }
+
+    // ===== UPDATE COMPLIANCE RATE (unchanged) =====
+    function updateComplianceRate(clients) {
+      const el = document.getElementById('complianceRate');
+      if (!el) return;
+      if (clients.length === 0) {
+        el.textContent = '--%';
+        return;
+      }
+      const total = clients.reduce((sum, c) => sum + (c.compliance || 80), 0);
+      const avg = Math.round(total / clients.length);
+      el.textContent = avg + '%';
+    }
+
+    // ===== UPDATE PENDING REVIEWS (unchanged) =====
+    function updatePendingReviews(clients) {
+      const el = document.getElementById('pendingReviews');
+      if (!el) return;
+      const pending = clients.filter(c => c.status === 'pending').length;
+      el.textContent = pending;
+    }
+
+    // ===== CHARTS (unchanged) =====
+    function renderCharts(clients) {
+      const colors = {
+        green: '#2D5016',
+        gold: '#E8A33D',
+        red: '#C1440E',
+        blue: '#1A5276',
+        purple: '#8E44AD'
+      };
+
+      // Goals distribution
+      const goalMap = {
+        'weight-loss': 'Weight Loss',
+        'weight-gain': 'Weight Gain',
+        'maintain': 'Maintain',
+        'muscle-gain': 'Muscle Gain',
+        'healthy-eating': 'Healthy Eating',
+        'diabetes-management': 'Diabetes Management',
+        'blood-sugar-control': 'Blood Sugar Control',
+        'cholesterol-reduction': 'Cholesterol Reduction',
+        'blood-pressure-control': 'Blood Pressure Control',
+        'heart-health': 'Heart Health',
+        'sports-performance': 'Sports Performance',
+        'pregnancy-nutrition': 'Pregnancy Nutrition',
+        'child-nutrition': 'Child Nutrition',
+        'elderly-nutrition': 'Elderly Nutrition',
+        'general-wellness': 'General Wellness'
+      };
+      const goalCounts = {};
+      clients.forEach(c => {
+        const goal = goalMap[c.goal] || c.goal || 'Weight Loss';
+        goalCounts[goal] = (goalCounts[goal] || 0) + 1;
+      });
+      const goalLabels = Object.keys(goalCounts);
+      const goalData = goalLabels.map(k => goalCounts[k]);
+
+      const goalCtx = document.getElementById('goalChart');
+      if (goalCtx) {
+        new Chart(goalCtx, {
+          type: 'pie',
+          data: {
+            labels: goalLabels.length > 0 ? goalLabels : ['No Goals'],
+            datasets: [{ data: goalData.length > 0 ? goalData : [1], backgroundColor: [colors.green, colors.gold, colors.blue, colors.purple, colors.red, '#F39C12', '#2ECC71', '#1ABC9C', '#95A5A6', '#34495E'], borderWidth: 2, borderColor: '#fff' }]
+          },
+          options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true, font: { size: 11 } } } } }
+        });
+      }
+
+      // Status distribution
+      const statusCounts = { 'Active': 0, 'Pending': 0, 'Completed': 0, 'Inactive': 0 };
+      clients.forEach(c => {
+        const status = c.status || 'active';
+        const label = status.charAt(0).toUpperCase() + status.slice(1);
+        statusCounts[label] = (statusCounts[label] || 0) + 1;
+      });
+      const statusLabels = Object.keys(statusCounts);
+      const statusData = statusLabels.map(k => statusCounts[k]);
+
+      const statusCtx = document.getElementById('statusChart');
+      if (statusCtx) {
+        new Chart(statusCtx, {
+          type: 'doughnut',
+          data: {
+            labels: statusLabels.length > 0 ? statusLabels : ['No Status'],
+            datasets: [{ data: statusData.length > 0 ? statusData : [1], backgroundColor: ['#2ECC71', '#F39C12', '#1ABC9C', '#95A5A6'], borderWidth: 2, borderColor: '#fff' }]
+          },
+          options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true, font: { size: 11 } } } } }
+        });
+      }
+
+      // Conditions (bar chart)
+      const conditionCounts = {};
+      clients.forEach(c => {
+        if (c.medical_conditions && c.medical_conditions.length > 0) {
+          c.medical_conditions.forEach(cond => {
+            if (cond && cond !== 'none') {
+              conditionCounts[cond] = (conditionCounts[cond] || 0) + 1;
+            }
+          });
+        }
+      });
+      const condLabels = Object.keys(conditionCounts);
+      const condData = condLabels.map(k => conditionCounts[k]);
+      const condColors = [colors.red, colors.gold, '#F39C12', colors.blue, colors.purple];
+
+      const condCtx = document.getElementById('conditionChart');
+      if (condCtx) {
+        new Chart(condCtx, {
+          type: 'bar',
+          data: {
+            labels: condLabels.length > 0 ? condLabels : ['No Conditions'],
+            datasets: [{ label: 'Clients', data: condData.length > 0 ? condData : [0], backgroundColor: condColors.slice(0, condData.length || 1), borderRadius: 6 }]
+          },
+          options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } } }
+        });
+      }
+
+      // Compliance (line chart)
+      const complianceData = clients.map(c => c.compliance || 80);
+      const avgCompliance = complianceData.length > 0 ? Math.round(complianceData.reduce((a, b) => a + b, 0) / complianceData.length) : 85;
+      const compCtx = document.getElementById('complianceChart');
+      if (compCtx) {
+        new Chart(compCtx, {
+          type: 'line',
+          data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{ label: 'Compliance %', data: [82, 84, 86, 85, 88, avgCompliance], borderColor: colors.green, backgroundColor: colors.green + '20', fill: true, tension: 0.4, pointBackgroundColor: colors.green, pointRadius: 4 }]
+          },
+          options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 100, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } } }
+        });
+      }
+    }
+
+    // ============================================================
+    // SIDEBAR TOGGLE
+    // ============================================================
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const hamburger = document.getElementById('hamburgerBtn');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.createElement('div');
+      overlay.className = 'sidebar-overlay';
+      overlay.id = 'sidebarOverlay';
+      document.body.appendChild(overlay);
+
+      hamburger.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('show');
+      });
+      overlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show');
+      });
+      document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+          sidebar.classList.remove('open');
+          overlay.classList.remove('show');
+        });
+      });
+
+      // Bell icon click – show notifications (maybe open a page or mark all read)
+      document.getElementById('notifBtn').addEventListener('click', function() {
+        showToast('Notifications: ' + notifications.filter(n => !n.is_read).length + ' unread');
+      });
+
+      // Floating AI button
+      document.getElementById('floatingAiBtn').addEventListener('click', () => {
+        window.location.href = 'ai-assistant.html';
+      });
+
+      // Load data
+      loadDashboardData();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Meal Assistant — Smart Lishe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ============================================================
+       USER AI ASSISTANT — STYLES (Mobile-First)
+       ============================================================ */
+
+    .ai-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 24px;
+      margin-top: 20px;
+    }
+    @media (max-width: 1024px) {
+      .ai-wrapper {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+    }
+
+    .chat-panel {
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--basket-line);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 520px;
+    }
+    .chat-welcome {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--basket-line);
+      background: var(--bg-elevated);
+    }
+    .chat-welcome h2 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+    .chat-welcome h2 span {
+      color: var(--sukuma);
+    }
+    .chat-welcome p {
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      margin-top: 4px;
+    }
+    .chat-welcome .feature-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .chat-welcome .feature-tags span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: rgba(45,80,22,0.08);
+      color: var(--sukuma);
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+    .chat-welcome .feature-tags span i { font-size: 0.65rem; }
+
+    .suggested-prompts {
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--basket-line);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      background: var(--bg-elevated);
+    }
+    .suggested-prompts .prompt-chip {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--basket-line);
+      background: var(--bg-card);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .suggested-prompts .prompt-chip:hover {
+      background: var(--sukuma);
+      color: #fff;
+      border-color: var(--sukuma);
+      transform: translateY(-2px);
+    }
+    .suggested-prompts .prompt-chip i { margin-right: 4px; }
+
+    .chat-messages {
+      flex: 1;
+      padding: 16px 20px;
+      overflow-y: auto;
+      max-height: 420px;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: var(--bg-elevated);
+    }
+    .chat-messages .message {
+      max-width: 88%;
+      animation: msgIn 0.35s ease;
+    }
+    .chat-messages .message.user { align-self: flex-end; }
+    .chat-messages .message.ai { align-self: flex-start; }
+    .chat-messages .message .bubble {
+      padding: 12px 16px;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      word-wrap: break-word;
+    }
+    .chat-messages .message.user .bubble {
+      background: var(--sukuma);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-messages .message.ai .bubble {
+      background: var(--bg-card);
+      border: 1px solid var(--basket-line);
+      border-bottom-left-radius: 4px;
+      color: var(--text-primary);
+    }
+    .chat-messages .message .msg-time {
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      display: block;
+      padding: 0 4px;
+    }
+    .chat-messages .message.user .msg-time { text-align: right; }
+
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .ai-response-card {
+      background: var(--bg-card);
+      border: 1px solid var(--basket-line);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      margin-top: 10px;
+    }
+    .ai-response-card .rc-header {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--sukuma);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ai-response-card .rc-meal {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--basket-line);
+      font-size: 0.85rem;
+    }
+    .ai-response-card .rc-meal:last-child { border-bottom: none; }
+    .ai-response-card .rc-meal .rc-name { font-weight: 500; }
+    .ai-response-card .rc-meal .rc-cal { color: var(--text-muted); font-size: 0.78rem; }
+    .ai-response-card .rc-footer {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--basket-line);
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+
+    .response-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .response-actions .btn-sm {
+      font-size: 0.68rem;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--basket-line);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .response-actions .btn-sm:hover {
+      background: var(--sukuma);
+      color: #fff;
+      border-color: var(--sukuma);
+    }
+    .response-actions .btn-sm.primary {
+      background: var(--sukuma);
+      color: #fff;
+      border-color: var(--sukuma);
+    }
+    .response-actions .btn-sm.primary:hover { background: #0d4f40; }
+
+    .typing-indicator {
+      display: none;
+      gap: 4px;
+      padding: 8px 14px;
+      background: var(--bg-card);
+      border-radius: 14px;
+      border: 1px solid var(--basket-line);
+      align-self: flex-start;
+      width: fit-content;
+      margin-top: 4px;
+    }
+    .typing-indicator.show { display: flex; }
+    .typing-indicator span {
+      width: 8px;
+      height: 8px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      animation: pulse 1.2s infinite ease-in-out;
+    }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse {
+      0%, 60%, 100% { transform: scale(1); opacity: 0.4; }
+      30% { transform: scale(1.2); opacity: 1; }
+    }
+
+    .chat-input-area {
+      padding: 12px 20px;
+      border-top: 1px solid var(--basket-line);
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      background: var(--bg-card);
+    }
+    .chat-input-area textarea {
+      flex: 1;
+      border: 1px solid var(--basket-line);
+      border-radius: 24px;
+      padding: 10px 16px;
+      resize: none;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      min-height: 44px;
+      max-height: 120px;
+      transition: border-color 0.2s ease;
+    }
+    .chat-input-area textarea:focus {
+      outline: none;
+      border-color: var(--sukuma);
+    }
+    .chat-input-area .btn-send {
+      background: var(--sukuma);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .chat-input-area .btn-send:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(26,122,100,0.3);
+    }
+    .chat-input-area .btn-send:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .summary-panel {
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--basket-line);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-self: start;
+    }
+    .summary-panel .panel-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.05rem;
+      border-bottom: 1px solid var(--basket-line);
+      padding-bottom: 10px;
+    }
+    .summary-panel .summary-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      font-size: 0.88rem;
+    }
+    .summary-panel .summary-item .label { color: var(--text-secondary); }
+    .summary-panel .summary-item .value { font-weight: 700; color: var(--text-primary); }
+    .summary-panel .summary-item .value.goal { color: var(--sukuma); }
+    .summary-panel .divider {
+      height: 1px;
+      background: var(--basket-line);
+      margin: 4px 0;
+    }
+
+    .membership-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .membership-badge.free {
+      background: rgba(193,68,14,0.1);
+      color: var(--char);
+    }
+    .membership-badge.premium {
+      background: rgba(232,163,61,0.15);
+      color: var(--maize-deep);
+    }
+
+    .toast-stack {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 360px;
+      width: calc(100% - 48px);
+    }
+    .toast {
+      background: var(--bg-elevated);
+      border: 1px solid var(--basket-line);
+      border-left: 4px solid var(--sukuma);
+      border-radius: 12px;
+      padding: 14px 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      animation: slideUp 0.3s ease;
+      backdrop-filter: blur(8px);
+    }
+    .toast.error {
+      border-left-color: #dc2626;
+    }
+    .toast i {
+      font-size: 1.2rem;
+      color: var(--sukuma);
+    }
+    .toast.error i { color: #dc2626; }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Mobile-first: default is mobile, adjust up */
+    .chat-messages::-webkit-scrollbar {
+      width: 6px;
+    }
+    .chat-messages::-webkit-scrollbar-track {
+      background: var(--bg-elevated);
+    }
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: var(--basket-line);
+      border-radius: 10px;
+    }
+
+    .floating-ai-btn { display: none; }
+
+    /* Mobile adjustments */
+    @media (max-width: 600px) {
+      .chat-welcome { padding: 14px 16px; }
+      .chat-welcome h2 { font-size: 1.1rem; }
+      .chat-welcome .feature-tags span { font-size: 0.65rem; padding: 2px 10px; }
+      .suggested-prompts { padding: 10px 14px; gap: 6px; }
+      .suggested-prompts .prompt-chip { font-size: 0.65rem; padding: 4px 10px; }
+      .chat-messages { padding: 12px 14px; max-height: 320px; min-height: 200px; }
+      .chat-messages .message .bubble { font-size: 0.82rem; padding: 10px 12px; }
+      .chat-input-area { padding: 10px 14px; }
+      .chat-input-area textarea { font-size: 0.82rem; padding: 8px 12px; min-height: 38px; }
+      .chat-input-area .btn-send { width: 38px; height: 38px; font-size: 0.95rem; }
+      .ai-response-card { padding: 10px 12px; }
+      .ai-response-card .rc-meal { font-size: 0.8rem; padding: 4px 0; }
+      .summary-panel { padding: 16px; }
+      .summary-panel .summary-item { font-size: 0.82rem; }
+      .response-actions .btn-sm { font-size: 0.62rem; padding: 3px 10px; }
+    }
+    @media (max-width: 400px) {
+      .chat-messages { max-height: 260px; min-height: 160px; }
+      .chat-welcome h2 { font-size: 1rem; }
+      .suggested-prompts .prompt-chip { font-size: 0.6rem; padding: 3px 8px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== AUTH CHECK ===== -->
+  <script>
+    (function() {
+      const email = localStorage.getItem('email');
+      const role = localStorage.getItem('smartlishe_role') || localStorage.getItem('role');
+      const loggedIn = localStorage.getItem('smartlishe_logged_in') === 'true';
+
+      if (!email && !loggedIn) {
+        window.location.href = 'home.html';
+        return;
+      }
+      if (role === 'Professional') {
+        window.location.href = '../professional/home.html';
+        return;
+      }
+      if (role === 'Client') {
+        window.location.href = '../client/dashboard.html';
+        return;
+      }
+    })();
+  </script>
+
+  <!-- ===== SIDEBAR ===== -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="mark"><i class="fa-solid fa-seedling"></i></div>
+        <div class="name">Smart Lishe<span>User</span></div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+        <a href="ai-assistant.html" class="nav-link active"><i class="fa-solid fa-robot"></i> AI Meal Assistant</a>
+        <a href="meal-planner.html" class="nav-link"><i class="fa-solid fa-calendar-days"></i> Meal Planner</a>
+        <a href="recipes.html" class="nav-link"><i class="fa-solid fa-book-open"></i> Recipes</a>
+        <a href="shopping-list.html" class="nav-link"><i class="fa-solid fa-basket-shopping"></i> Shopping List</a>
+        <a href="goal-tracker.html" class="nav-link"><i class="fa-solid fa-bullseye"></i> Goal Tracker</a>
+        <a href="water-tracker.html" class="nav-link"><i class="fa-solid fa-droplet"></i> Water Tracker</a>
+        <a href="analytics.html" class="nav-link"><i class="fa-solid fa-chart-line"></i> Analytics</a>
+        <a href="profile.html" class="nav-link"><i class="fa-solid fa-user"></i> Profile</a>
+        <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> Settings</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="../auth/logout.html" class="nav-link" style="color:var(--char);">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+      </div>
+    </aside>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content">
+
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle navigation">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div class="search-box">
+            <i class="fa-solid fa-search"></i>
+            <input type="text" placeholder="Search meals, recipes...">
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+          <a href="profile.html" class="profile-chip" id="profileChip">
+            <div class="avatar" id="profileAvatar">U</div>
+            <span class="label" id="profileName">User</span>
+          </a>
+        </div>
+      </header>
+
+      <div class="page-inner">
+
+        <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:6px;">
+          <div>
+            <h1 style="font-family:var(--font-display); font-size:1.6rem; font-weight:700;">🤖 AI Meal Assistant</h1>
+            <p style="color:var(--text-secondary); font-size:0.95rem;">Get personalised meal plans, nutrition advice, and recipe suggestions.</p>
+          </div>
+          <span class="membership-badge free" id="membershipBadge">
+            <i class="fa-regular fa-crown"></i> Free Plan
+          </span>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px; font-size:0.85rem; color:var(--text-secondary);">
+          <span id="aiUsageText">AI Requests Remaining: <strong id="aiRemaining">5</strong> of 5 today</span>
+          <span style="width:120px; height:6px; background:var(--basket-line); border-radius:10px; overflow:hidden;">
+            <span id="aiUsageBar" style="display:block; height:100%; width:100%; background:var(--sukuma); border-radius:10px; transition:width 0.5s ease;"></span>
+          </span>
+          <a href="../auth/register.html" style="font-weight:700; color:var(--accent-2); font-size:0.78rem;">Upgrade to Premium →</a>
+        </div>
+
+        <div class="ai-wrapper">
+
+          <div class="chat-panel">
+
+            <div class="chat-welcome">
+              <h2>Hello, <span id="userGreeting">User</span> 👋</h2>
+              <p>I'm Smart Lishe AI. I can help you with meal planning, nutrition advice, recipes, and more.</p>
+              <div class="feature-tags">
+                <span><i class="fa-regular fa-check"></i> Meal Plans</span>
+                <span><i class="fa-regular fa-check"></i> Nutrition</span>
+                <span><i class="fa-regular fa-check"></i> Recipes</span>
+                <span><i class="fa-regular fa-check"></i> Goal Tracking</span>
+                <span><i class="fa-regular fa-check"></i> Alternatives</span>
+              </div>
+            </div>
+
+            <div class="suggested-prompts" id="suggestedPrompts">
+              <span class="prompt-chip" data-prompt="Generate today's meal plan"><i class="fa-regular fa-utensils"></i> Today's Meal Plan</span>
+              <span class="prompt-chip" data-prompt="Weight gain meal plan"><i class="fa-regular fa-weight"></i> Weight Gain</span>
+              <span class="prompt-chip" data-prompt="Weight loss meal plan"><i class="fa-regular fa-fire"></i> Weight Loss</span>
+              <span class="prompt-chip" data-prompt="Healthy breakfast ideas"><i class="fa-regular fa-mug-hot"></i> Breakfast</span>
+              <span class="prompt-chip" data-prompt="High-protein foods"><i class="fa-regular fa-dumbbell"></i> High Protein</span>
+              <span class="prompt-chip" data-prompt="Foods for diabetes"><i class="fa-regular fa-droplet"></i> Diabetes</span>
+              <span class="prompt-chip" data-prompt="Foods for hypertension"><i class="fa-regular fa-heart"></i> Hypertension</span>
+              <span class="prompt-chip" data-prompt="Weekly shopping list"><i class="fa-regular fa-basket-shopping"></i> Shopping List</span>
+              <span class="prompt-chip" data-prompt="Healthy snacks"><i class="fa-regular fa-apple-alt"></i> Snacks</span>
+              <span class="prompt-chip" data-prompt="Calculate my daily calories"><i class="fa-regular fa-calculator"></i> Calories</span>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+              <div class="message ai">
+                <div class="bubble">
+                  👋 Hello! I'm your Smart Lishe AI assistant. Ask me about meal plans, nutrition, recipes, or health goals. Try one of the suggested prompts above to get started!
+                </div>
+                <span class="msg-time">Just now</span>
+              </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+              <span></span><span></span><span></span>
+            </div>
+
+            <div class="chat-input-area">
+              <textarea id="chatInput" rows="1" placeholder="Ask Smart Lishe AI..." aria-label="Message"></textarea>
+              <button class="btn-send" id="sendBtn"><i class="fa-regular fa-paper-plane"></i></button>
+            </div>
+
+          </div>
+
+          <div class="summary-panel" id="summaryPanel">
+            <div class="panel-title"><i class="fa-regular fa-user" style="color:var(--sukuma);margin-right:8px;"></i> Your Profile</div>
+
+            <div class="summary-item">
+              <span class="label">Current Goal</span>
+              <span class="value goal" id="userGoal">—</span>
+            </div>
+            <div class="summary-item">
+              <span class="label">Weight</span>
+              <span class="value" id="userWeight">—</span>
+            </div>
+            <div class="summary-item">
+              <span class="label">Height</span>
+              <span class="value" id="userHeight">—</span>
+            </div>
+            <div class="summary-item">
+              <span class="label">BMI</span>
+              <span class="value" id="userBmi">—</span>
+            </div>
+            <div class="summary-item">
+              <span class="label">Water Goal</span>
+              <span class="value" id="userWater">—</span>
+            </div>
+            <div class="summary-item">
+              <span class="label">Calories Target</span>
+              <span class="value" id="userCalories">—</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="summary-item">
+              <span class="label">Membership</span>
+              <span class="value" id="userMembership"><span class="membership-badge free" style="font-size:0.65rem;">Free</span></span>
+            </div>
+            <div class="summary-item">
+              <span class="label">AI Requests Today</span>
+              <span class="value" id="userRequests">0 / 5</span>
+            </div>
+
+            <div style="margin-top:8px; padding-top:12px; border-top:1px solid var(--basket-line);">
+              <button class="btn btn-secondary btn-sm" style="width:100%;justify-content:center;" id="upgradeBtn">
+                <i class="fa-regular fa-crown"></i> Upgrade to Premium
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-stack" id="toastStack"></div>
+
+  <script>
+    // ============================================================
+    // SMART LISHE — USER AI MEAL ASSISTANT (No Hardcoded Data)
+    // All user data is read from localStorage.
+    // AI responses come from a structured sample object (can be replaced by API).
+    // ============================================================
+
+    (function() {
+      'use strict';
+
+      // ---- DOM refs ----
+      const messagesContainer = document.getElementById('chatMessages');
+      const chatInput = document.getElementById('chatInput');
+      const sendBtn = document.getElementById('sendBtn');
+      const typingIndicator = document.getElementById('typingIndicator');
+      const suggestedPrompts = document.querySelectorAll('.prompt-chip');
+      const toastStack = document.getElementById('toastStack');
+
+      // ---- SAMPLE RESPONSES (structured data, no hardcoded text in logic) ----
+      // This object can be replaced with API responses later.
+      const sampleResponses = {
+        'weight gain': {
+          title: 'Weight Gain Meal Plan',
+          meals: [
+            { name: 'Breakfast: Body Builder Porridge', cal: 520 },
+            { name: 'Lunch: Rice with Beef Stew', cal: 780 },
+            { name: 'Dinner: Ugali with Fried Fish', cal: 650 },
+            { name: 'Snack: Nuts & Greek Yogurt', cal: 350 }
+          ],
+          totalCalories: 2300,
+          tips: 'Add an extra banana and a glass of milk to increase calories further.'
+        },
+        'weight loss': {
+          title: 'Weight Loss Meal Plan',
+          meals: [
+            { name: 'Breakfast: Oatmeal with Berries', cal: 320 },
+            { name: 'Lunch: Grilled Chicken Salad', cal: 420 },
+            { name: 'Dinner: Steamed Fish with Vegetables', cal: 480 },
+            { name: 'Snack: Apple slices', cal: 80 }
+          ],
+          totalCalories: 1300,
+          tips: 'Focus on portion control and increase water intake to 2.5L/day.'
+        },
+        'breakfast': {
+          title: 'Healthy Breakfast Ideas',
+          meals: [
+            { name: 'Oatmeal with Honey & Berries', cal: 350 },
+            { name: 'Scrambled Eggs with Avocado Toast', cal: 420 },
+            { name: 'Smoothie Bowl with Granola', cal: 380 },
+            { name: 'Ugali with Sukuma Wiki (small portion)', cal: 300 }
+          ],
+          totalCalories: 1450,
+          tips: 'Start your day with protein and fibre for sustained energy.'
+        },
+        'diabetes': {
+          title: 'Diabetes-Friendly Meal Guide',
+          meals: [
+            { name: 'Breakfast: Millet Porridge', cal: 280 },
+            { name: 'Lunch: Brown Rice with Lentils', cal: 420 },
+            { name: 'Dinner: Fish with Steamed Vegetables', cal: 390 },
+            { name: 'Snack: Apple with Peanut Butter', cal: 160 }
+          ],
+          totalCalories: 1250,
+          tips: 'Choose low-GI foods, moderate portions, and eat at regular intervals.'
+        },
+        'hypertension': {
+          title: 'Hypertension-Friendly Nutrition',
+          meals: [
+            { name: 'Breakfast: Oatmeal with Banana', cal: 300 },
+            { name: 'Lunch: Beans with Brown Rice', cal: 450 },
+            { name: 'Dinner: Baked Fish with Sweet Potato', cal: 480 }
+          ],
+          totalCalories: 1230,
+          tips: 'Reduce salt, increase potassium-rich foods like bananas and sweet potatoes.'
+        },
+        'shopping list': {
+          title: 'Weekly Shopping List',
+          meals: [
+            { name: '🛒 Vegetables: Spinach, Bell Peppers, Onions', cal: '' },
+            { name: '🛒 Proteins: Chicken, Fish, Eggs', cal: '' },
+            { name: '🛒 Grains: Brown Rice, Oats, Whole Wheat Bread', cal: '' },
+            { name: '🛒 Fruits: Bananas, Apples, Berries', cal: '' },
+            { name: '🛒 Dairy: Milk, Yogurt', cal: '' }
+          ],
+          totalCalories: '',
+          tips: 'Estimated Budget: KES 4,200. Check your local market for best prices.'
+        },
+        'snack': {
+          title: 'Healthy Snack Ideas',
+          meals: [
+            { name: 'Apple slices with peanut butter', cal: 160 },
+            { name: 'Greek yogurt with honey', cal: 150 },
+            { name: 'Handful of mixed nuts', cal: 180 },
+            { name: 'Carrot sticks with hummus', cal: 120 }
+          ],
+          totalCalories: 610,
+          tips: 'Choose snacks that combine protein and fibre for satiety.'
+        },
+        'calories': {
+          title: 'Your Daily Calorie Estimate',
+          meals: [
+            { name: 'Basal Metabolic Rate (BMR)', cal: '—' },
+            { name: 'Daily Calorie Need (Moderate Activity)', cal: '—' },
+            { name: 'Calories for Weight Gain', cal: '—' },
+            { name: 'Calories for Weight Loss', cal: '—' }
+          ],
+          totalCalories: '',
+          tips: 'Your daily calorie needs depend on your activity level. Adjust accordingly.'
+        },
+        'meal plan': {
+          title: 'Today\'s Meal Plan',
+          meals: [
+            { name: 'Breakfast: Oatmeal with Berries', cal: 350 },
+            { name: 'Lunch: Grilled Chicken with Quinoa', cal: 520 },
+            { name: 'Dinner: Salmon with Roasted Vegetables', cal: 480 },
+            { name: 'Snack: Mixed Nuts', cal: 180 }
+          ],
+          totalCalories: 1530,
+          tips: 'Drink 2.5L of water today. Add a side of greens to lunch.'
+        },
+        'protein': {
+          title: 'High Protein Meal Plan',
+          meals: [
+            { name: 'Breakfast: Scrambled Eggs (4) with Avocado', cal: 480 },
+            { name: 'Lunch: Grilled Chicken Breast (200g) with Rice', cal: 620 },
+            { name: 'Dinner: Beef Steak with Sweet Potato', cal: 590 },
+            { name: 'Snack: Greek Yogurt (200g)', cal: 150 }
+          ],
+          totalCalories: 1840,
+          tips: 'Protein: 140g. Aim for 1.6–2g protein per kg bodyweight.'
+        },
+        'default': {
+          title: 'AI Recommendation',
+          meals: [
+            { name: '🍎 Focus on balanced meals', cal: '' },
+            { name: '💧 Stay hydrated (2.5L/day)', cal: '' },
+            { name: '🥗 Include vegetables in every meal', cal: '' },
+            { name: '🏃 Stay active daily', cal: '' }
+          ],
+          totalCalories: '',
+          tips: 'I can help with meal plans, weight goals, health conditions, or recipes. Try a suggested prompt!'
+        }
+      };
+
+      // ---- Match user message to a response key ----
+      function findResponseKey(message) {
+        const lower = message.toLowerCase();
+        for (const key in sampleResponses) {
+          if (lower.includes(key)) return key;
+        }
+        return 'default';
+      }
+
+      // ---- Get AI response (data only, no hardcoded text in logic) ----
+      function getAIResponse(message) {
+        const key = findResponseKey(message);
+        return sampleResponses[key] || sampleResponses['default'];
+      }
+
+      // ---- Load user profile from localStorage (no hardcoded values) ----
+      function getUserProfile() {
+        const profile = JSON.parse(localStorage.getItem('smartlishe_profile') || '{}');
+        const userProfile = JSON.parse(localStorage.getItem('smartlishe_userProfile') || '{}');
+        return {
+          name: profile.firstName || profile.name || 'User',
+          goal: userProfile.goal || profile.goal || 'Not set',
+          weight: userProfile.weight || '—',
+          height: userProfile.height || '—',
+          bmi: userProfile.bmi || '—',
+          waterGoal: userProfile.waterIntake || '—',
+          calories: userProfile.calories || '—',
+          membership: localStorage.getItem('user_membership') || 'free'
+        };
+      }
+
+      // ---- Update UI with profile data ----
+      function updateProfileUI() {
+        const data = getUserProfile();
+        document.getElementById('userGreeting').textContent = data.name;
+        document.getElementById('profileName').textContent = data.name;
+        document.getElementById('profileAvatar').textContent = data.name.charAt(0).toUpperCase();
+
+        document.getElementById('userGoal').textContent = data.goal;
+        document.getElementById('userWeight').textContent = data.weight + (data.weight !== '—' ? ' kg' : '');
+        document.getElementById('userHeight').textContent = data.height + (data.height !== '—' ? ' cm' : '');
+        document.getElementById('userBmi').textContent = data.bmi;
+        document.getElementById('userWater').textContent = data.waterGoal + (data.waterGoal !== '—' ? ' L' : '');
+        document.getElementById('userCalories').textContent = data.calories + (data.calories !== '—' ? ' kcal' : '');
+
+        const membershipEl = document.getElementById('userMembership');
+        const badge = document.getElementById('membershipBadge');
+        if (data.membership === 'premium') {
+          membershipEl.innerHTML = '<span class="membership-badge premium" style="font-size:0.65rem;">Premium</span>';
+          badge.className = 'membership-badge premium';
+          badge.innerHTML = '<i class="fa-regular fa-crown"></i> Premium Member';
+        } else {
+          membershipEl.innerHTML = '<span class="membership-badge free" style="font-size:0.65rem;">Free</span>';
+          badge.className = 'membership-badge free';
+          badge.innerHTML = '<i class="fa-regular fa-crown"></i> Free Plan';
+        }
+
+        // AI usage (session-based)
+        let usage = parseInt(sessionStorage.getItem('aiUsage') || '0');
+        let remaining = 5 - usage;
+        if (remaining < 0) remaining = 0;
+        document.getElementById('userRequests').textContent = usage + ' / 5';
+        document.getElementById('aiRemaining').textContent = remaining;
+        document.getElementById('aiUsageBar').style.width = ((usage / 5) * 100) + '%';
+        document.getElementById('aiUsageText').innerHTML = 'AI Requests Remaining: <strong>' + remaining + '</strong> of 5 today';
+      }
+
+      // ---- Add message to chat ----
+      function addMessage(text, sender, responseData) {
+        const div = document.createElement('div');
+        div.className = 'message ' + sender;
+
+        let content = text;
+        if (responseData) {
+          content = renderResponseCard(responseData);
+        }
+
+        const time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        div.innerHTML = '<div class="bubble">' + content + '</div><span class="msg-time">' + time + '</span>';
+        messagesContainer.appendChild(div);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      // ---- Render AI response as card ----
+      function renderResponseCard(data) {
+        let html = '<div class="ai-response-card">';
+        html += '<div class="rc-header"><i class="fa-regular fa-utensils"></i> ' + data.title + '</div>';
+
+        if (data.meals) {
+          data.meals.forEach(function(meal) {
+            html += '<div class="rc-meal"><span class="rc-name">' + meal.name + '</span><span class="rc-cal">' + meal
+              .cal + ' kcal</span></div>';
+          });
+        }
+
+        if (data.totalCalories && data.totalCalories !== '') {
+          html += '<div class="rc-footer">🔥 Total: <strong>' + data.totalCalories + ' kcal</strong></div>';
+        }
+
+        if (data.tips) {
+          html += '<div class="rc-footer" style="border-top-color:var(--basket-line);">💡 ' + data.tips + '</div>';
+        }
+
+        html += '</div>';
+
+        // Action buttons
+        html += '<div class="response-actions">';
+        html += '<button class="btn-sm primary" data-action="save">💾 Save Meal Plan</button>';
+        html += '<button class="btn-sm" data-action="regenerate">🔄 Generate Again</button>';
+        html += '<button class="btn-sm" data-action="planner">📅 Add to Meal Planner</button>';
+        html += '<button class="btn-sm" data-action="shopping">🛒 Generate Shopping List</button>';
+        html += '</div>';
+
+        return html;
+      }
+
+      // ---- Action button handler ----
+      function handleAction(e) {
+        const action = this.dataset.action;
+        const messages = {
+          'save': '💾 Meal plan saved successfully!',
+          'regenerate': '🔄 Regenerating your meal plan...',
+          'planner': '📅 Meal plan added to your Meal Planner!',
+          'shopping': '🛒 Shopping list generated successfully!'
+        };
+        showToast(messages[action] || 'Action completed!');
+        if (action === 'regenerate') {
+          const lastUserMsg = messagesContainer.querySelector('.message.user:last-child');
+          if (lastUserMsg) {
+            const text = lastUserMsg.textContent.trim();
+            const lastAi = messagesContainer.querySelector('.message.ai:last-child');
+            if (lastAi) lastAi.remove();
+            isProcessing = false;
+            sendBtn.disabled = false;
+            setTimeout(function() {
+              const response = getAIResponse(text);
+              addMessage(response.title, 'ai', response);
+              attachActionEvents();
+            }, 600);
+          }
+        }
+      }
+
+      function attachActionEvents() {
+        document.querySelectorAll('.response-actions .btn-sm').forEach(function(btn) {
+          btn.removeEventListener('click', handleAction);
+          btn.addEventListener('click', handleAction);
+        });
+      }
+
+      // ---- Send message ----
+      let isProcessing = false;
+
+      function sendMessage() {
+        const text = chatInput.value.trim();
+        if (!text || isProcessing) return;
+
+        let usage = parseInt(sessionStorage.getItem('aiUsage') || '0');
+        if (usage >= 5) {
+          showToast('You have reached your daily AI request limit. Upgrade to Premium for unlimited requests.', 'error');
+          return;
+        }
+
+        addMessage(text, 'user');
+        chatInput.value = '';
+        chatInput.style.height = 'auto';
+        isProcessing = true;
+        sendBtn.disabled = true;
+
+        typingIndicator.classList.add('show');
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        setTimeout(function() {
+          usage++;
+          sessionStorage.setItem('aiUsage', String(usage));
+          updateProfileUI();
+
+          const response = getAIResponse(text);
+          addMessage(response.title, 'ai', response);
+
+          typingIndicator.classList.remove('show');
+          isProcessing = false;
+          sendBtn.disabled = false;
+          attachActionEvents();
+
+        }, 800 + Math.random() * 600);
+      }
+
+      // ---- Prompt chips ----
+      suggestedPrompts.forEach(function(chip) {
+        chip.addEventListener('click', function() {
+          chatInput.value = this.dataset.prompt;
+          chatInput.focus();
+          chatInput.dispatchEvent(new Event('input'));
+          setTimeout(sendMessage, 300);
+        });
+      });
+
+      // ---- Input events ----
+      chatInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+
+      chatInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+      });
+
+      sendBtn.addEventListener('click', sendMessage);
+
+      // ---- Toast ----
+      function showToast(message, type) {
+        const toast = document.createElement('div');
+        toast.className = 'toast' + (type === 'error' ? ' error' : '');
+        const icon = type === 'error' ? 'fa-circle-exclamation' : 'fa-check-circle';
+        toast.innerHTML = '<i class="fa-regular ' + icon + '"></i><span>' + message + '</span>';
+        toastStack.appendChild(toast);
+        setTimeout(function() {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateX(40px)';
+          setTimeout(function() { toast.remove(); }, 300);
+        }, 3500);
+      }
+
+      // ---- Sidebar toggle ----
+      const hamburger = document.getElementById('hamburgerBtn');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+
+      if (hamburger) {
+        hamburger.addEventListener('click', function() {
+          sidebar.classList.toggle('open');
+          overlay.classList.toggle('show');
+        });
+      }
+
+      if (overlay) {
+        overlay.addEventListener('click', function() {
+          sidebar.classList.remove('open');
+          overlay.classList.remove('show');
+        });
+      }
+
+      document.querySelectorAll('.sidebar-nav .nav-link').forEach(function(link) {
+        link.addEventListener('click', function() {
+          sidebar.classList.remove('open');
+          overlay.classList.remove('show');
+        });
+      });
+
+      // ---- Notifications ----
+      document.getElementById('notifBtn')?.addEventListener('click', function() {
+        showToast('You have no new notifications.');
+      });
+
+      // ---- Upgrade button ----
+      document.getElementById('upgradeBtn')?.addEventListener('click', function() {
+        showToast('Upgrade to Premium for unlimited AI requests and advanced features.');
+      });
+
+      // ---- Init ----
+      updateProfileUI();
+
+      // ---- Hide floating AI button ----
+      const floatingBtn = document.querySelector('.floating-ai-btn');
+      if (floatingBtn) floatingBtn.style.display = 'none';
+
+    })();
+  </script>
+
+</body>
+</html>

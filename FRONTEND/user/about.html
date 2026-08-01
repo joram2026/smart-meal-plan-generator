@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<title>About — Smart Lishe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* ===== ABOUT PAGE STYLES ===== */
+  .about-hero {
+    background: linear-gradient(135deg, var(--maize-deep) 0%, #8B6B3D 100%);
+    border-radius: var(--radius-lg);
+    padding: 48px 56px;
+    color: white;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+    margin-bottom: 40px;
+  }
+  .about-hero h1 {
+    font-size: 2.4rem;
+    font-weight: 700;
+    font-family: 'Fraunces', serif;
+    line-height: 1.2;
+  }
+  .about-hero h1 em {
+    font-style: italic;
+    font-weight: 400;
+    opacity: 0.9;
+  }
+  .about-hero p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-top: 12px;
+    line-height: 1.7;
+  }
+  .about-hero-img {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .about-hero-img img {
+    width: 100%;
+    max-height: 280px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  }
+
+  .about-mission {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin: 40px 0;
+  }
+  .mission-card {
+    background: var(--bg-card);
+    padding: 28px 32px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--basket-line);
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+  .mission-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+  }
+  .mission-card .icon-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--sukuma);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    margin: 0 auto 16px;
+  }
+  .mission-card:nth-child(2) .icon-circle { background: var(--maize-deep); }
+  .mission-card:nth-child(3) .icon-circle { background: var(--char); }
+  .mission-card:nth-child(4) .icon-circle { background: #3D6FA8; }
+  .mission-card h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .mission-card p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .values-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin: 32px 0 40px;
+  }
+  .value-card {
+    background: var(--bg-card);
+    padding: 24px 20px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--basket-line);
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+  .value-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--sukuma);
+  }
+  .value-card .value-icon {
+    font-size: 2.2rem;
+    color: var(--sukuma);
+    margin-bottom: 12px;
+  }
+  .value-card h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .value-card p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .about-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    background: var(--bg-card);
+    padding: 32px 40px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--basket-line);
+    margin: 32px 0;
+  }
+  .about-stat {
+    text-align: center;
+  }
+  .about-stat .number {
+    font-size: 2.2rem;
+    font-weight: 800;
+    font-family: 'Fraunces', serif;
+    color: var(--sukuma);
+    display: block;
+    line-height: 1.2;
+  }
+  .about-stat .label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .about-story {
+    background: var(--bg-card);
+    padding: 36px 40px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--basket-line);
+    margin: 32px 0 40px;
+  }
+  .about-story h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    font-family: 'Fraunces', serif;
+    margin-bottom: 16px;
+  }
+  .about-story h3 i {
+    color: var(--sukuma);
+    margin-right: 10px;
+  }
+  .about-story p {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+  }
+  .about-story p:last-child {
+    margin-bottom: 0;
+  }
+
+  .about-team {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin: 32px 0 40px;
+  }
+  .team-card {
+    background: var(--bg-card);
+    padding: 24px 20px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--basket-line);
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+  .team-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+  }
+  .team-card .team-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    color: white;
+    background: var(--sukuma);
+  }
+  .team-card:nth-child(2) .team-avatar { background: var(--maize-deep); }
+  .team-card:nth-child(3) .team-avatar { background: var(--char); }
+  .team-card h4 {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  .team-card .role {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  .team-card p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  /* Back-to-home arrow style */
+  .back-home-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+  }
+  .back-home-arrow:hover {
+    color: var(--sukuma);
+  }
+
+  /* No sidebar – main content full width */
+  .app-shell {
+    display: block;
+  }
+  .main-content {
+    margin-left: 0;
+    padding: 0 24px 40px;
+  }
+  .mobile-topbar {
+    display: none;
+  }
+  .sidebar-overlay {
+    display: none;
+  }
+
+  @media (max-width: 992px) {
+    .about-hero {
+      grid-template-columns: 1fr;
+      padding: 32px 28px;
+      text-align: center;
+    }
+    .about-hero h1 { font-size: 2rem; }
+    .about-mission { grid-template-columns: 1fr 1fr; }
+    .values-grid { grid-template-columns: 1fr 1fr; }
+    .about-stats { grid-template-columns: 1fr 1fr; }
+    .about-team { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .about-hero { padding: 24px 16px; }
+    .about-hero h1 { font-size: 1.6rem; }
+    .about-mission { grid-template-columns: 1fr; }
+    .values-grid { grid-template-columns: 1fr; }
+    .about-stats { grid-template-columns: 1fr 1fr; padding: 24px 16px; }
+    .about-team { grid-template-columns: 1fr; }
+    .about-story { padding: 24px 16px; }
+    .main-content { padding: 0 12px 30px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== NO AUTH CHECK ===== -->
+
+<!-- ===== NO SIDEBAR – ONLY TOPBAR ===== -->
+
+<div class="app-shell">
+
+  <!-- ===== MAIN CONTENT (full width) ===== -->
+  <div class="main-content" style="margin-left:0;">
+
+    <!-- ===== TOPBAR ===== -->
+    <header class="topbar" style="margin-top:16px;">
+      <div style="display:flex; align-items:center; gap:12px; flex:1;">
+        <!-- Back to Home Arrow -->
+        <a href="home.html" class="back-home-arrow" title="Back to Home">
+          <i class="fa-solid fa-arrow-left"></i> Back to Home
+        </a>
+        <div class="search-box" style="flex:1; max-width:280px; margin-left:auto;">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="globalSearch" placeholder="Search...">
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        <span style="font-size:0.8rem; color:var(--text-secondary); font-weight:500;">Guest</span>
+      </div>
+    </header>
+
+    <!-- ===== PAGE CONTENT ===== -->
+    <section class="page active">
+      <div class="page-inner">
+        
+        <!-- ===== ABOUT HERO ===== -->
+        <div class="about-hero">
+          <div>
+            <div class="hero-eyebrow" style="color:rgba(255,255,255,0.8);justify-content:flex-start;">
+              <i class="fa-solid fa-seedling"></i> About Smart Lishe
+            </div>
+            <h1>Nutrition for the <em>Kenyan Table</em></h1>
+            <p>We believe that healthy eating should celebrate the food you already love — not replace it with expensive imports or unrealistic diets.</p>
+          </div>
+          <div class="about-hero-img">
+            <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=900&auto=format&fit=crop" alt="Fresh Kenyan produce at local market" loading="lazy">
+          </div>
+        </div>
+
+        <!-- ===== MISSION CARDS ===== -->
+        <div class="about-mission">
+          <div class="mission-card">
+            <div class="icon-circle"><i class="fa-solid fa-flag"></i></div>
+            <h4>Our Mission</h4>
+            <p>To make nutrition accessible, affordable, and culturally relevant for every Kenyan — using the food you already know and love.</p>
+          </div>
+          <div class="mission-card">
+            <div class="icon-circle"><i class="fa-solid fa-eye"></i></div>
+            <h4>Our Vision</h4>
+            <p>A Kenya where everyone can eat healthy without breaking the bank or giving up their favourite meals.</p>
+          </div>
+          <div class="mission-card">
+            <div class="icon-circle"><i class="fa-solid fa-utensils"></i></div>
+            <h4>What We Do</h4>
+            <p>We use AI to turn local Kenyan dishes into personalised nutrition plans that work for your health goals and budget.</p>
+          </div>
+          <div class="mission-card">
+            <div class="icon-circle"><i class="fa-solid fa-heart"></i></div>
+            <h4>Why We Care</h4>
+            <p>We've seen too many Kenyans struggle with imported health advice that doesn't fit our food culture. We're here to change that.</p>
+          </div>
+        </div>
+
+        <!-- ===== VALUES ===== -->
+        <div class="section-head">
+          <div class="section-eyebrow" style="justify-content:center;">Our Core Values</div>
+          <h2 class="h2-display" style="text-align:center;">What We Stand For</h2>
+        </div>
+        <div class="values-grid">
+          <div class="value-card">
+            <div class="value-icon"><i class="fa-solid fa-kenya"></i></div>
+            <h4>Local First</h4>
+            <p>We build everything around food you can find at your local mama mboga — no imported ingredients required.</p>
+          </div>
+          <div class="value-card">
+            <div class="value-icon"><i class="fa-solid fa-robot"></i></div>
+            <h4>AI-Powered</h4>
+            <p>Using smart technology to give you personalised nutrition advice that adapts to your unique needs.</p>
+          </div>
+          <div class="value-card">
+            <div class="value-icon"><i class="fa-solid fa-hand-holding-heart"></i></div>
+            <h4>Affordable</h4>
+            <p>Healthy eating shouldn't cost a fortune. Every meal plan is priced with real Kenyan budgets in mind.</p>
+          </div>
+          <div class="value-card">
+            <div class="value-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+            <h4>Education First</h4>
+            <p>We teach you how to make better food choices — not just tell you what to eat.</p>
+          </div>
+          <div class="value-card">
+            <div class="value-icon"><i class="fa-solid fa-hospital-user"></i></div>
+            <h4>Health-Focused</h4>
+            <p>From diabetes to heart health, our guidance is aligned with what doctors recommend.</p>
+          </div>
+          <div class="value-card">
+            <div class="value-icon"><i class="fa-solid fa-people-group"></i></div>
+            <h4>Community</h4>
+            <p>Built for Kenyans, by Kenyans. We understand your food, your culture, and your lifestyle.</p>
+          </div>
+        </div>
+
+        <!-- ===== STATS ===== -->
+        <div class="about-stats">
+          <div class="about-stat">
+            <span class="number">50+</span>
+            <span class="label">Local Recipes</span>
+          </div>
+          <div class="about-stat">
+            <span class="number">10</span>
+            <span class="label">Health Conditions</span>
+          </div>
+          <div class="about-stat">
+            <span class="number">24/7</span>
+            <span class="label">AI Chat Support</span>
+          </div>
+          <div class="about-stat">
+            <span class="number">100%</span>
+            <span class="label">Kenyan-Focused</span>
+          </div>
+        </div>
+
+        <!-- ===== STORY ===== -->
+        <div class="about-story">
+          <h3><i class="fa-solid fa-book-open"></i> Our Story</h3>
+          <p>
+            Smart Lishe was created because most nutrition advice doesn't work for Kenyans. 
+            It's built around foods we don't eat, ingredients we can't afford, and habits that 
+            don't fit our culture.
+          </p>
+          <p>
+            We're changing that. Every meal plan, recipe, and recommendation in Smart Lishe is 
+            built around real Kenyan food — ugali, sukuma wiki, githeri, nyama choma, omena, 
+            and everything else you grew up eating.
+          </p>
+          <p>
+            Our AI understands the nutritional value of local ingredients, suggests swaps that 
+            work for your budget, and gives you guidance that actually fits your lifestyle.
+          </p>
+          <p>
+            Whether you're managing diabetes, trying to lose weight, or simply want to eat better 
+            — we're here to help. No imported supplements. No unrealistic meal plans. Just 
+            real food, real science, and real results.
+          </p>
+        </div>
+
+        <!-- ===== TEAM ===== -->
+        <div class="section-head">
+          <div class="section-eyebrow" style="justify-content:center;">Meet the Team</div>
+          <h2 class="h2-display" style="text-align:center;">The People Behind Smart Lishe</h2>
+        </div>
+        <div class="about-team">
+          <div class="team-card">
+            <div class="team-avatar"><i class="fa-solid fa-user-tie"></i></div>
+            <h4>Gregory Omondi</h4>
+            <span class="role">Founder & CEO</span>
+            <p>Passionate about using technology to solve Kenya's nutrition challenges. Gregory brings 10+ years of experience in health tech.</p>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar"><i class="fa-solid fa-user-doctor"></i></div>
+            <h4>Dr. Ian</h4>
+            <span class="role">Lead Nutritionist</span>
+            <p>A registered nutritionist with a deep understanding of Kenyan dietary patterns and health conditions like diabetes and hypertension.</p>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar"><i class="fa-solid fa-user-gear"></i></div>
+            <h4>Haddasah</h4>
+            <span class="role">AI Engineer</span>
+            <p>Building the intelligence behind our meal generator and NutriScan — making AI work for real Kenyan food.</p>
+          </div>
+        </div>
+
+        <!-- ===== CTA ===== -->
+        <div class="section-block">
+          <div class="cta-banner">
+            <h2>Ready to Transform Your Nutrition?</h2>
+            <p>Join thousands of Kenyans using Smart Lishe to eat better, manage health conditions, and reach their goals.</p>
+            <a href="../auth/register.html" class="btn btn-primary">
+              <i class="fa-solid fa-arrow-right"></i> Get Started Free
+            </a>
+          </div>
+        </div>
+
+        <!-- ===== FOOTER ===== -->
+        <footer class="site-footer" id="footer">
+          <div class="footer-grid">
+            <div class="footer-brand">
+              <div class="name font-display">Smart Lishe Kenya</div>
+              <p>An AI-guided nutrition and meal planning platform built around real Kenyan food — from ugali to omena to mukimo.</p>
+              <div class="footer-social">
+                <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+                <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+              </div>
+            </div>
+            <div class="footer-col">
+              <h4>Quick Links</h4>
+              <ul>
+                <li><a href="home.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+              </ul>
+            </div>
+            <div class="footer-col">
+              <h4>Account</h4>
+              <ul>
+                <li><a href="../auth/login.html">Login</a></li>
+                <li><a href="../auth/register.html">Register</a></li>
+              </ul>
+            </div>
+            <div class="footer-col">
+              <h4>Contact</h4>
+              <div class="contact-line"><i class="fa-solid fa-location-dot"></i> Jhub Africa, Juja, Nairobi</div>
+              <div class="contact-line"><i class="fa-solid fa-phone"></i> +254 700 123 456</div>
+              <div class="contact-line"><i class="fa-solid fa-envelope"></i> hello@smartlishe.co.ke</div>
+            </div>
+          </div>
+          <div class="footer-bottom">
+            <span>© 2026 Smart Lishe Kenya. All rights reserved.</span>
+            <span>Made with <i class="fa-solid fa-heart" style="color:var(--char);"></i> in Nairobi</span>
+          </div>
+        </footer>
+
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- ===== NO AI CHATBOT ===== -->
+
+<button class="scroll-top-btn" id="scrollTopBtn"><i class="fa-solid fa-arrow-up"></i></button>
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+// ============================================================
+// SMART LISHE — ABOUT (Public, No Sidebar)
+// ============================================================
+
+function showToast(message, type) {
+  type = type || 'success';
+  const stack = document.getElementById('toastStack');
+  if (!stack) return;
+  const toast = document.createElement('div');
+  toast.className = 'toast' + (type === 'error' ? ' error' : '');
+  const icon = type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check';
+  toast.innerHTML = '<i class="fa-solid ' + icon + '"></i><span>' + message + '</span>';
+  stack.appendChild(toast);
+  setTimeout(function() {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(40px)';
+    setTimeout(function() { toast.remove(); }, 300);
+  }, 3500);
+}
+window.showToast = showToast;
+
+// ---- SCROLL TOP ----
+function initScrollTop() {
+  const btn = document.getElementById('scrollTopBtn');
+  if (!btn) return;
+  window.addEventListener('scroll', function() {
+    btn.classList.toggle('show', window.scrollY > 400);
+  });
+  btn.addEventListener('click', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+// ---- NOTIFICATIONS ----
+document.getElementById('notifBtn')?.addEventListener('click', function() {
+  showToast("You're all caught up — no new notifications.");
+});
+
+// ---- GLOBAL SEARCH ----
+document.getElementById('globalSearch')?.addEventListener('keypress', function(e) {
+  if (e.key === 'Enter' && e.target.value.trim()) {
+    showToast('Searching for "' + e.target.value.trim() + '"...');
+  }
+});
+
+// ---- BOOT ----
+document.addEventListener('DOMContentLoaded', function() {
+  initScrollTop();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,436 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<title>Contact — Smart Lishe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* ===== CONTACT PAGE STYLES ===== */
+  .contact-hero {
+    background: linear-gradient(135deg, var(--sukuma) 0%, #1a6e5a 100%);
+    border-radius: var(--radius-lg);
+    padding: 48px 56px;
+    color: white;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+    margin-bottom: 40px;
+  }
+  .contact-hero h1 {
+    font-size: 2.4rem;
+    font-weight: 700;
+    font-family: 'Fraunces', serif;
+    line-height: 1.2;
+  }
+  .contact-hero h1 em {
+    font-style: italic;
+    font-weight: 400;
+    opacity: 0.9;
+  }
+  .contact-hero p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-top: 12px;
+    line-height: 1.7;
+  }
+  .contact-hero-img {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .contact-hero-img img {
+    width: 100%;
+    max-height: 280px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 40px;
+  }
+  .contact-info-card {
+    background: var(--bg-card);
+    padding: 28px 32px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--basket-line);
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+  .contact-info-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+  }
+  .contact-info-card .icon-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--sukuma);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    margin: 0 auto 16px;
+  }
+  .contact-info-card h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .contact-info-card p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+
+  .contact-form-wrap {
+    background: var(--bg-card);
+    padding: 36px 40px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--basket-line);
+  }
+  .contact-form-wrap h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    font-family: 'Fraunces', serif;
+  }
+  .contact-form-wrap .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .contact-form-wrap input,
+  .contact-form-wrap textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--basket-line);
+    border-radius: var(--radius-sm);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    transition: border 0.3s ease;
+  }
+  .contact-form-wrap input:focus,
+  .contact-form-wrap textarea:focus {
+    outline: none;
+    border-color: var(--sukuma);
+    box-shadow: 0 0 0 3px rgba(35, 158, 130, 0.1);
+  }
+  .contact-form-wrap textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  .map-placeholder {
+    background: var(--bg-elevated);
+    border-radius: var(--radius-md);
+    padding: 40px;
+    text-align: center;
+    border: 1px solid var(--basket-line);
+    margin-top: 40px;
+  }
+  .map-placeholder i {
+    font-size: 3rem;
+    color: var(--sukuma);
+    margin-bottom: 12px;
+  }
+  .map-placeholder p {
+    color: var(--text-secondary);
+  }
+
+  /* Back-to-home arrow style */
+  .back-home-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+  }
+  .back-home-arrow:hover {
+    color: var(--sukuma);
+  }
+
+  /* No sidebar – main content full width */
+  .app-shell {
+    display: block;
+  }
+  .main-content {
+    margin-left: 0;
+    padding: 0 24px 40px;
+  }
+  .mobile-topbar {
+    display: none; /* we use the regular topbar */
+  }
+  .sidebar-overlay {
+    display: none;
+  }
+
+  @media (max-width: 992px) {
+    .contact-hero {
+      grid-template-columns: 1fr;
+      padding: 32px 28px;
+      text-align: center;
+    }
+    .contact-hero h1 { font-size: 2rem; }
+    .contact-grid { grid-template-columns: 1fr; }
+    .contact-form-wrap .form-row { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .contact-hero { padding: 24px 16px; }
+    .contact-hero h1 { font-size: 1.6rem; }
+    .contact-form-wrap { padding: 24px 16px; }
+    .contact-info-card { padding: 20px 16px; }
+    .main-content { padding: 0 12px 30px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== NO AUTH CHECK ===== -->
+
+<!-- ===== NO SIDEBAR – ONLY TOPBAR ===== -->
+
+<div class="app-shell">
+
+  <!-- ===== MAIN CONTENT (full width) ===== -->
+  <div class="main-content" style="margin-left:0;">
+
+    <!-- ===== TOPBAR ===== -->
+    <header class="topbar" style="margin-top:16px;">
+      <div style="display:flex; align-items:center; gap:12px; flex:1;">
+        <!-- Back to Home Arrow -->
+        <a href="home.html" class="back-home-arrow" title="Back to Home">
+          <i class="fa-solid fa-arrow-left"></i> Back to Home
+        </a>
+        <div class="search-box" style="flex:1; max-width:280px; margin-left:auto;">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="globalSearch" placeholder="Search...">
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        <!-- No profile chip – just guest label -->
+        <span style="font-size:0.8rem; color:var(--text-secondary); font-weight:500;">Guest</span>
+      </div>
+    </header>
+
+    <!-- ===== PAGE CONTENT ===== -->
+    <section class="page active">
+      <div class="page-inner">
+        
+        <!-- ===== CONTACT HERO ===== -->
+        <div class="contact-hero">
+          <div>
+            <div class="hero-eyebrow" style="color:rgba(255,255,255,0.8);justify-content:flex-start;">
+              <i class="fa-solid fa-envelope"></i> Get in Touch
+            </div>
+            <h1>We'd Love to <em>Hear From You</em></h1>
+            <p>Have questions, feedback, or partnership ideas? Reach out to us — we're here to help make Kenyan nutrition better for everyone.</p>
+          </div>
+          <div class="contact-hero-img">
+            <img src="https://images.unsplash.com/photo-1488590528505-98d2b853aba4?q=80&w=900&auto=format&fit=crop" alt="Contact Smart Lishe" loading="lazy">
+          </div>
+        </div>
+
+        <!-- ===== CONTACT INFO GRID ===== -->
+        <div class="contact-grid">
+          <div class="contact-info-card">
+            <div class="icon-circle"><i class="fa-solid fa-location-dot"></i></div>
+            <h4>Visit Us</h4>
+            <p>Jhub Africa, Juja, Nairobi</p>
+          </div>
+          <div class="contact-info-card">
+            <div class="icon-circle"><i class="fa-solid fa-phone"></i></div>
+            <h4>Call Us</h4>
+            <p>+254 700 123 456</p>
+          </div>
+          <div class="contact-info-card">
+            <div class="icon-circle"><i class="fa-solid fa-envelope"></i></div>
+            <h4>Email Us</h4>
+            <p>hello@smartlishe.co.ke</p>
+          </div>
+          <div class="contact-info-card">
+            <div class="icon-circle"><i class="fa-solid fa-clock"></i></div>
+            <h4>Working Hours</h4>
+            <p>Mon-Fri, 8:00 AM - 6:00 PM</p>
+          </div>
+        </div>
+
+        <!-- ===== CONTACT FORM ===== -->
+        <div class="contact-form-wrap">
+          <h3><i class="fa-solid fa-paper-plane" style="color:var(--sukuma);margin-right:10px;"></i> Send Us a Message</h3>
+          <form id="contactForm">
+            <div class="form-row">
+              <input type="text" placeholder="Your Full Name" required>
+              <input type="email" placeholder="Your Email Address" required>
+            </div>
+            <input type="text" placeholder="Subject" style="margin-top:16px;">
+            <textarea rows="5" placeholder="Your Message" style="margin-top:16px;"></textarea>
+            <button type="submit" class="btn btn-primary" style="margin-top:20px;width:100%;">
+              <i class="fa-solid fa-paper-plane"></i> Send Message
+            </button>
+          </form>
+        </div>
+
+        <!-- ===== MAP PLACEHOLDER ===== -->
+        <div class="map-placeholder">
+          <i class="fa-solid fa-map-location-dot"></i>
+          <h4>Find Us in Nairobi</h4>
+          <p>Jhub Africa, Juja — We're right in the heart of the innovation hub.</p>
+          <div style="background:var(--basket-line);height:2px;width:60px;margin:12px auto;"></div>
+          <p style="font-size:0.85rem;color:var(--text-secondary);">
+            <i class="fa-solid fa-location-dot" style="color:var(--sukuma);"></i> Jhub Africa, Juja, Nairobi, Kenya
+          </p>
+        </div>
+
+        <!-- ===== FOOTER ===== -->
+        <footer class="site-footer" id="footer">
+          <div class="footer-grid">
+            <div class="footer-brand">
+              <div class="name font-display">Smart Lishe Kenya</div>
+              <p>An AI-guided nutrition and meal planning platform built around real Kenyan food — from ugali to omena to mukimo.</p>
+              <div class="footer-social">
+                <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+                <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+              </div>
+            </div>
+            <div class="footer-col">
+              <h4>Quick Links</h4>
+              <ul>
+                <li><a href="home.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+              </ul>
+            </div>
+            <div class="footer-col">
+              <h4>Account</h4>
+              <ul>
+                <li><a href="../auth/login.html">Login</a></li>
+                <li><a href="../auth/register.html">Register</a></li>
+              </ul>
+            </div>
+            <div class="footer-col">
+              <h4>Contact</h4>
+              <div class="contact-line"><i class="fa-solid fa-location-dot"></i> Jhub Africa, Juja, Nairobi</div>
+              <div class="contact-line"><i class="fa-solid fa-phone"></i> +254 700 123 456</div>
+              <div class="contact-line"><i class="fa-solid fa-envelope"></i> hello@smartlishe.co.ke</div>
+            </div>
+          </div>
+          <div class="footer-bottom">
+            <span>© 2026 Smart Lishe Kenya. All rights reserved.</span>
+            <span>Made with <i class="fa-solid fa-heart" style="color:var(--char);"></i> in Nairobi</span>
+          </div>
+        </footer>
+
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- ===== NO AI CHATBOT ===== -->
+
+<button class="scroll-top-btn" id="scrollTopBtn"><i class="fa-solid fa-arrow-up"></i></button>
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+// ============================================================
+// SMART LISHE — CONTACT (Public, No Sidebar)
+// ============================================================
+
+function showToast(message, type) {
+  type = type || 'success';
+  const stack = document.getElementById('toastStack');
+  if (!stack) return;
+  const toast = document.createElement('div');
+  toast.className = 'toast' + (type === 'error' ? ' error' : '');
+  const icon = type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check';
+  toast.innerHTML = '<i class="fa-solid ' + icon + '"></i><span>' + message + '</span>';
+  stack.appendChild(toast);
+  setTimeout(function() {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(40px)';
+    setTimeout(function() { toast.remove(); }, 300);
+  }, 3500);
+}
+window.showToast = showToast;
+
+// ---- THEME ----
+function initTheme() {
+  const Store = {
+    get: function(key, fallback) {
+      try {
+        const raw = localStorage.getItem('smartlishe_' + key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch(e) { return fallback; }
+    },
+    set: function(key, value) {
+      try {
+        localStorage.setItem('smartlishe_' + key, JSON.stringify(value));
+        return true;
+      } catch(e) { return false; }
+    }
+  };
+  const saved = Store.get('theme', 'light');
+  document.body.setAttribute('data-theme', saved);
+  const themeIcon = document.getElementById('themeIcon');
+  // There's no theme toggle in this page, so we don't need it.
+  // But we can still add a hidden toggle if needed – not required.
+}
+// The theme is controlled by style.css variables – no toggle on contact page.
+
+// ---- SCROLL TOP ----
+function initScrollTop() {
+  const btn = document.getElementById('scrollTopBtn');
+  if (!btn) return;
+  window.addEventListener('scroll', function() {
+    btn.classList.toggle('show', window.scrollY > 400);
+  });
+  btn.addEventListener('click', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+// ---- CONTACT FORM ----
+document.getElementById('contactForm')?.addEventListener('submit', function(e) {
+  e.preventDefault();
+  showToast('Thank you! Your message has been sent. We\'ll get back to you soon.', 'success');
+  this.reset();
+});
+
+// ---- NOTIFICATIONS ----
+document.getElementById('notifBtn')?.addEventListener('click', function() {
+  showToast("You're all caught up — no new notifications.");
+});
+
+// ---- GLOBAL SEARCH ----
+document.getElementById('globalSearch')?.addEventListener('keypress', function(e) {
+  if (e.key === 'Enter' && e.target.value.trim()) {
+    showToast('Searching for "' + e.target.value.trim() + '"...');
+  }
+});
+
+// ---- BOOT ----
+document.addEventListener('DOMContentLoaded', function() {
+  initTheme();
+  initScrollTop();
+});
+</script>
+</body>
+</html>

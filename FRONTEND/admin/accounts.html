@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Accounts — Smart Lishe Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="admin.css">
+  <style>
+    /* (All CSS unchanged – same as your original) */
+    .accounts-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .accounts-stats .stat-mini {
+      background: var(--bg-card);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      border: 1px solid var(--basket-line);
+    }
+    .accounts-stats .stat-mini .val {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.4rem;
+    }
+    .accounts-stats .stat-mini .lbl {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    .action-btns {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .action-btns .btn-sm {
+      padding: 2px 8px;
+      font-size: 0.65rem;
+      min-height: 26px;
+    }
+    .action-btns .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      border: none;
+    }
+    .action-btns .btn-ghost:hover {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+    .action-btns .btn-ghost.danger { color: #dc2626; }
+    .action-btns .btn-ghost.danger:hover { background: #fce4e4; }
+    .action-btns .btn-ghost.success { color: var(--sukuma); }
+    .action-btns .btn-ghost.success:hover { background: var(--sukuma-light); }
+    .action-btns .btn-ghost.warning { color: #d97706; }
+    .action-btns .btn-ghost.warning:hover { background: #fef3c7; }
+
+    .approval-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .approval-badge.pending { background: #fef3c7; color: #92400e; }
+    .approval-badge.approved { background: #d1fae5; color: #065f46; }
+    .approval-badge.rejected { background: #fce4e4; color: #b91c1c; }
+    .approval-badge.verified { background: #dbeafe; color: #1e40af; }
+
+    .tab-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .tab-toolbar .search-box-sm {
+      display: flex;
+      align-items: center;
+      background: var(--bg-card);
+      border: 1px solid var(--basket-line);
+      border-radius: 30px;
+      padding: 4px 14px;
+      max-width: 260px;
+    }
+    .tab-toolbar .search-box-sm input {
+      border: none;
+      background: transparent;
+      padding: 6px 0 6px 8px;
+      font-size: 0.82rem;
+      width: 100%;
+      outline: none;
+      font-family: var(--font-body);
+      color: var(--text-primary);
+    }
+    .tab-toolbar .search-box-sm i {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+    .tab-toolbar .btn {
+      min-height: 32px;
+    }
+
+    .modal-field {
+      margin-bottom: 14px;
+    }
+    .modal-field label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    .modal-field input,
+    .modal-field select,
+    .modal-field textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--basket-line);
+      background: var(--bg-body);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      transition: border 0.2s ease;
+    }
+    .modal-field input:focus,
+    .modal-field select:focus {
+      outline: none;
+      border-color: var(--sukuma);
+    }
+    .modal-field textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+    .modal-field .readonly {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: flex-end;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state i {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .status-badge.active { background: #d1fae5; color: #065f46; }
+    .status-badge.suspended { background: #fce4e4; color: #b91c1c; }
+    .status-badge.inactive { background: #fef3c7; color: #92400e; }
+
+    @media (max-width: 600px) {
+      .accounts-stats { grid-template-columns: 1fr; }
+      .tab-toolbar { flex-direction: column; align-items: stretch; }
+      .tab-toolbar .search-box-sm { max-width: 100%; }
+      .action-btns .btn-sm { font-size: 0.6rem; padding: 2px 6px; }
+      .table td, .table th { padding: 6px 8px; font-size: 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== AUTH CHECK ===== -->
+<script>
+(function() {
+  const token = localStorage.getItem('access_token') || localStorage.getItem('smartlishe_token');
+  const role = localStorage.getItem('smartlishe_role') || localStorage.getItem('role');
+  if (!token || (role && role.toLowerCase() !== 'admin')) {
+    window.location.href = '../login.html';
+  }
+})();
+</script>
+
+<!-- ===== MOBILE TOPBAR ===== -->
+<div class="mobile-topbar">
+  <div class="brand-mini">
+    <div class="mark"><i class="fa-solid fa-seedling"></i></div>
+    <span>Smart Lishe Admin</span>
+  </div>
+  <button class="hamburger-btn" id="hamburgerBtn"><i class="fa-solid fa-bars"></i></button>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="app-shell">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="mark"><i class="fa-solid fa-seedling"></i></div>
+      <div class="name">Smart Lishe<span>Admin</span></div>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+
+      <!-- Accounts dropdown -->
+      <div class="nav-link" id="accountsToggle">
+        <i class="fa-solid fa-users"></i> Accounts
+        <span class="dropdown-chevron open"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="nav-dropdown open" id="accountsDropdown">
+        <a href="accounts.html#users" class="nav-link active" data-tab="users"><i class="fa-solid fa-user"></i> Users</a>
+        <a href="accounts.html#professionals" class="nav-link" data-tab="professionals"><i class="fa-solid fa-user-md"></i> Professionals</a>
+        <a href="accounts.html#clients" class="nav-link" data-tab="clients"><i class="fa-solid fa-user-group"></i> Clients</a>
+      </div>
+
+      <!-- Operations dropdown -->
+      <div class="nav-link" id="operationsToggle">
+        <i class="fa-solid fa-gears"></i> Operations
+        <span class="dropdown-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="nav-dropdown" id="operationsDropdown">
+        <a href="operations.html#recipes" class="nav-link"><i class="fa-solid fa-book-open"></i> Recipes</a>
+        <a href="operations.html#datasets" class="nav-link"><i class="fa-solid fa-database"></i> Datasets</a>
+        <a href="operations.html#billing" class="nav-link"><i class="fa-solid fa-credit-card"></i> Billing</a>
+        <a href="operations.html#reports" class="nav-link"><i class="fa-solid fa-chart-bar"></i> Reports</a>
+        <a href="operations.html#ai-monitoring" class="nav-link"><i class="fa-solid fa-robot"></i> AI Monitoring</a>
+      </div>
+
+      <a href="support.html" class="nav-link"><i class="fa-solid fa-headset"></i> Support</a>
+      <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> Settings</a>
+      <a href="profile.html" class="nav-link"><i class="fa-solid fa-user-circle"></i> Profile</a>
+
+      <div style="margin-top:12px;">
+        <a href="#" class="nav-link" onclick="event.preventDefault(); logout();" style="color:var(--char);">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="theme-toggle" id="themeToggle">
+        <span><i class="fa-solid fa-moon" id="themeIcon"></i> Dark mode</span>
+        <span class="switch"></span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn" id="topbarHamburger"><i class="fa-solid fa-bars"></i></button>
+        <div class="search-box">
+          <i class="fa-solid fa-search"></i>
+          <input type="text" id="globalSearch" placeholder="Search accounts...">
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        <a href="#" class="profile-chip" onclick="event.preventDefault();">
+          <div class="avatar" id="adminAvatar">A</div>
+          <span class="label" id="adminName">Admin</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="page-header">
+      <div>
+        <div class="section-eyebrow"><i class="fa-solid fa-users"></i> Accounts</div>
+        <h1>Manage Users, Professionals &amp; Clients</h1>
+        <p>View, edit, and manage all accounts on the platform.</p>
+      </div>
+    </div>
+
+    <!-- Mini Stats -->
+    <div class="accounts-stats">
+      <div class="stat-mini"><div class="val" id="statUsers">0</div><div class="lbl">Total Users</div></div>
+      <div class="stat-mini"><div class="val" id="statProfessionals">0</div><div class="lbl">Professionals</div></div>
+      <div class="stat-mini"><div class="val" id="statClients">0</div><div class="lbl">Clients</div></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs" id="accountTabs">
+      <button class="tab-btn active" data-tab="users"><i class="fa-solid fa-user"></i> Users</button>
+      <button class="tab-btn" data-tab="professionals"><i class="fa-solid fa-user-md"></i> Professionals</button>
+      <button class="tab-btn" data-tab="clients"><i class="fa-solid fa-user-group"></i> Clients</button>
+    </div>
+
+    <!-- ===== USERS TAB ===== -->
+    <div class="tab-panel active" id="tab-users">
+      <div class="tab-toolbar">
+        <div class="search-box-sm">
+          <i class="fa-solid fa-search"></i>
+          <input type="text" id="userSearchInput" placeholder="Search users...">
+        </div>
+        <div>
+          <button class="btn btn-primary btn-sm" id="addUserBtn"><i class="fa-solid fa-plus"></i> Add User</button>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-wrap">
+          <table class="table" id="usersTable">
+            <thead>
+              <tr>
+                <th>User &amp; Contact</th>
+                <th>Physical Metrics</th>
+                <th>Health &amp; Dietary Profile</th>
+                <th>Nutrition Targets</th>
+                <th>Plan &amp; Status</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PROFESSIONALS TAB ===== -->
+    <div class="tab-panel" id="tab-professionals">
+      <div class="tab-toolbar">
+        <div class="search-box-sm">
+          <i class="fa-solid fa-search"></i>
+          <input type="text" id="proSearchInput" placeholder="Search professionals...">
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <span class="badge badge-pending" id="pendingCount" style="padding:4px 12px;">0 Pending</span>
+          <button class="btn btn-primary btn-sm" id="approveAllBtn"><i class="fa-solid fa-check-double"></i> Approve All</button>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-wrap">
+          <table class="table" id="professionalsTable">
+            <thead>
+              <tr>
+                <th>Name &amp; Contact</th>
+                <th>Profession &amp; Title</th>
+                <th>Specialization &amp; License</th>
+                <th>Status</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="professionalsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== CLIENTS TAB ===== -->
+    <div class="tab-panel" id="tab-clients">
+      <div class="tab-toolbar">
+        <div class="search-box-sm">
+          <i class="fa-solid fa-search"></i>
+          <input type="text" id="clientSearchInput" placeholder="Search clients...">
+        </div>
+        <div>
+          <button class="btn btn-primary btn-sm" id="addClientBtn"><i class="fa-solid fa-plus"></i> Add Client</button>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-wrap">
+          <table class="table" id="clientsTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Assigned Professional</th>
+                <th>Goal</th>
+                <th>Progress</th>
+                <th>Status</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="clientsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+  MODALS
+  ============================================================ -->
+
+<!-- USER MODAL (EDIT/ADD) -->
+<div class="modal-overlay" id="userModal">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-header">
+      <h3 id="userModalTitle">User Details</h3>
+      <button class="modal-close" data-modal="userModal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="userForm">
+      <input type="hidden" id="userFormId">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="modal-field">
+          <label>Full Name</label>
+          <input type="text" id="userFormName" required>
+        </div>
+        <div class="modal-field">
+          <label>Email</label>
+          <input type="email" id="userFormEmail" required>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="modal-field">
+          <label>Phone Number</label>
+          <input type="text" id="userFormPhone" placeholder="+254 ...">
+        </div>
+        <div class="modal-field">
+          <label>Gender</label>
+          <select id="userFormGender">
+            <option value="">Select Gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+        <div class="modal-field">
+          <label>Plan</label>
+          <select id="userFormPlan">
+            <option value="Free">Free</option>
+            <option value="Premium">Premium</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label>Status</label>
+          <select id="userFormStatus">
+            <option value="Active">Active</option>
+            <option value="Suspended">Suspended</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label>Diet Preference</label>
+          <select id="userFormDiet">
+            <option value="Standard">Standard</option>
+            <option value="Vegetarian">Vegetarian</option>
+            <option value="Vegan">Vegan</option>
+            <option value="Keto">Keto</option>
+            <option value="Low Carb">Low Carb</option>
+            <option value="Hypertension Diet">Hypertension Diet</option>
+            <option value="Diabetic Friendly">Diabetic Friendly</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="modal-field">
+          <label>Height (cm)</label>
+          <input type="number" id="userFormHeight" placeholder="175">
+        </div>
+        <div class="modal-field">
+          <label>Weight (kg)</label>
+          <input type="number" id="userFormWeight" placeholder="70">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="modal-field">
+          <label>Daily Calorie Target (kcal)</label>
+          <input type="number" id="userFormCalorie" placeholder="2000">
+        </div>
+        <div class="modal-field">
+          <label>Daily Water Goal (ml)</label>
+          <input type="number" id="userFormWater" placeholder="2500">
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Allergies (comma separated)</label>
+        <input type="text" id="userFormAllergies" placeholder="e.g. Gluten, Dairy, Peanuts">
+      </div>
+      <div class="modal-field">
+        <label>Medical Conditions (comma separated)</label>
+        <input type="text" id="userFormConditions" placeholder="e.g. Diabetes, Cholesterol, Hypertension">
+      </div>
+      <div class="modal-field">
+        <label>Bio / Admin Notes</label>
+        <textarea id="userFormBio" rows="2" style="width:100%;padding:8px;border-radius:var(--radius-sm);border:1px solid var(--basket-line);background:var(--bg-body);font-family:var(--font-body);font-size:0.85rem;" placeholder="User notes or bio..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" data-modal="userModal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="userFormSubmit">Save User</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- USER FULL PROFILE VIEW MODAL -->
+<div class="modal-overlay" id="userDetailModal">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-header">
+      <h3 style="display:flex;align-items:center;gap:8px;">
+        <i class="fa-solid fa-address-card" style="color:var(--sukuma);"></i>
+        User Full Profile
+      </h3>
+      <button class="modal-close" data-modal="userDetailModal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="userDetailContent" style="padding:10px 0;">
+      <!-- Populated via JS -->
+    </div>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button type="button" class="btn btn-secondary" data-modal="userDetailModal">Close</button>
+      <button type="button" class="btn btn-primary" id="userDetailEditBtn"><i class="fa-regular fa-pen"></i> Edit Profile</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROFESSIONAL FULL PROFILE VIEW MODAL -->
+<div class="modal-overlay" id="proDetailModal">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-header">
+      <h3 style="display:flex;align-items:center;gap:8px;">
+        <i class="fa-solid fa-user-md" style="color:var(--sukuma);"></i>
+        Professional Full Profile
+      </h3>
+      <button class="modal-close" data-modal="proDetailModal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="proDetailContent" style="padding:10px 0;">
+      <!-- Populated via JS -->
+    </div>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button type="button" class="btn btn-secondary" data-modal="proDetailModal">Close</button>
+      <button type="button" class="btn btn-primary" id="proDetailEditBtn"><i class="fa-regular fa-pen"></i> Edit Profile</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROFESSIONAL MODAL -->
+<div class="modal-overlay" id="proModal">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-header">
+      <h3 id="proModalTitle">Professional Details</h3>
+      <button class="modal-close" data-modal="proModal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="proForm">
+      <input type="hidden" id="proFormId">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="modal-field">
+          <label>Full Name</label>
+          <input type="text" id="proFormName" required>
+        </div>
+        <div class="modal-field">
+          <label>Email</label>
+          <input type="email" id="proFormEmail" required>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="modal-field">
+          <label>Phone Number</label>
+          <input type="text" id="proFormPhone" placeholder="+254 ...">
+        </div>
+        <div class="modal-field">
+          <label>License / Registration No.</label>
+          <input type="text" id="proFormLicense" placeholder="e.g. KNDI/2026/089">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+        <div class="modal-field">
+          <label>Profession / Title</label>
+          <input type="text" id="proFormProfession" placeholder="e.g. Clinical Dietitian">
+        </div>
+        <div class="modal-field">
+          <label>Specialization</label>
+          <input type="text" id="proFormSpecialization" placeholder="e.g. Clinical Nutrition">
+        </div>
+        <div class="modal-field">
+          <label>Status</label>
+          <select id="proFormStatus">
+            <option value="Active">Active (Approved)</option>
+            <option value="Pending">Pending</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Suspended">Suspended</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Bio / Clinical Background</label>
+        <textarea id="proFormBio" rows="3" style="width:100%;padding:8px;border-radius:var(--radius-sm);border:1px solid var(--basket-line);background:var(--bg-body);font-family:var(--font-body);font-size:0.85rem;" placeholder="Professional bio, background, or notes..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" data-modal="proModal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="proFormSubmit">Save Professional</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- CLIENT MODAL -->
+<div class="modal-overlay" id="clientModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="clientModalTitle">Client Details</h3>
+      <button class="modal-close" data-modal="clientModal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="clientForm">
+      <input type="hidden" id="clientFormId">
+      <div class="modal-field">
+        <label>Full Name</label>
+        <input type="text" id="clientFormName" required>
+      </div>
+      <div class="modal-field">
+        <label>Email</label>
+        <input type="email" id="clientFormEmail" required>
+      </div>
+      <div class="modal-field">
+        <label>Assigned Professional</label>
+        <select id="clientFormProfessional"></select>
+      </div>
+      <div class="modal-field">
+        <label>Goal</label>
+        <select id="clientFormGoal">
+          <option value="Weight Loss">Weight Loss</option>
+          <option value="Diabetes Management">Diabetes Management</option>
+          <option value="Pregnancy Nutrition">Pregnancy Nutrition</option>
+          <option value="Heart Health">Heart Health</option>
+          <option value="General Wellness">General Wellness</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Progress (%)</label>
+        <input type="number" id="clientFormProgress" min="0" max="100" value="0">
+      </div>
+      <div class="modal-field">
+        <label>Status</label>
+        <select id="clientFormStatus">
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+          <option value="Suspended">Suspended</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" data-modal="clientModal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="clientFormSubmit">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- CONFIRMATION MODAL -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-header">
+      <h3 id="confirmTitle">Confirm Action</h3>
+      <button class="modal-close" data-modal="confirmModal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <p id="confirmMessage" style="color:var(--text-secondary);margin-bottom:20px;">Are you sure you want to perform this action?</p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-secondary" data-modal="confirmModal">Cancel</button>
+      <button type="button" class="btn btn-danger" id="confirmActionBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+// ============================================================
+// SMART LISHE — ACCOUNTS (Backend-Integrated Full CRUD)
+// ============================================================
+
+const BASE_URL = '/api';
+
+// ----- API fetch helper -----
+async function apiFetch(endpoint, options = {}) {
+  const currentToken = localStorage.getItem('access_token') || localStorage.getItem('smartlishe_token');
+  const resp = await fetch(`${BASE_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      'Authorization': `Bearer ${currentToken}`,
+      'Content-Type': 'application/json',
+      ...options.headers
+    }
+  });
+  if (resp.status === 401) {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('smartlishe_token');
+    window.location.href = '../login.html';
+    throw new Error('Unauthorized');
+  }
+  const data = await resp.json();
+  if (!resp.ok) {
+    throw new Error(data.error || data.message || 'Request failed');
+  }
+  return data;
+}
+
+function showToast(msg, type = 'success') {
+  const stack = document.getElementById('toastStack');
+  const old = document.querySelector('.toast');
+  if (old) old.remove();
+  const t = document.createElement('div');
+  t.className = 'toast' + (type === 'error' ? ' error' : '');
+  t.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check'}"></i> ${msg}`;
+  stack.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+window.showToast = showToast;
+
+// ----- Data state -----
+let allUsers = [];
+let allProfessionals = [];
+let allClients = [];
+
+// ----- Load data -----
+async function loadUsers() {
+  try {
+    const data = await apiFetch('/admin/users');
+    if (data.success) {
+      allUsers = data.data || [];
+      renderUsers();
+      document.getElementById('statUsers').textContent = allUsers.length;
+    }
+  } catch (e) { showToast('Error loading users: ' + e.message, 'error'); }
+}
+
+async function loadProfessionals() {
+  try {
+    const data = await apiFetch('/admin/professionals');
+    if (data.success) {
+      allProfessionals = data.data || [];
+      renderProfessionals();
+      document.getElementById('statProfessionals').textContent = allProfessionals.length;
+      const pending = allProfessionals.filter(p => p.approval_status === 'pending').length;
+      document.getElementById('pendingCount').textContent = pending + ' Pending';
+    }
+  } catch (e) { showToast('Error loading professionals: ' + e.message, 'error'); }
+}
+
+async function loadClients() {
+  try {
+    const data = await apiFetch('/admin/clients');
+    if (data.success) {
+      allClients = data.data || [];
+      renderClients();
+      document.getElementById('statClients').textContent = allClients.length;
+    }
+  } catch (e) { showToast('Error loading clients: ' + e.message, 'error'); }
+}
+
+// ----- Render functions -----
+function renderUsers() {
+  const search = document.getElementById('userSearchInput').value.toLowerCase().trim();
+  const filtered = allUsers.filter(u => {
+    const fullName = `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email || '';
+    const phone = u.phone || '';
+    const email = u.email || '';
+    const diet = u.diet_preference || '';
+    return fullName.toLowerCase().includes(search) || 
+           email.toLowerCase().includes(search) || 
+           phone.toLowerCase().includes(search) ||
+           diet.toLowerCase().includes(search);
+  });
+
+  const tbody = document.getElementById('usersTableBody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><i class="fa-regular fa-user"></i><div>${allUsers.length === 0 ? 'No users registered yet.' : 'No users match your search.'}</div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(u => {
+    const isPremium = (u.tier || u.plan || '').toLowerCase() === 'premium';
+    const statusLower = (u.status || '').toLowerCase();
+    const isSuspended = statusLower === 'suspended' || statusLower === 'inactive' || statusLower === 'rejected' || u.is_active === false;
+    const isActive = !isSuspended;
+
+    const fullName = `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email || 'User';
+    const phone = u.phone || '—';
+    const gender = u.gender ? (u.gender.charAt(0).toUpperCase() + u.gender.slice(1)) : '—';
+    const height = u.height_cm ? `${u.height_cm} cm` : '—';
+    const weight = u.weight_kg ? `${u.weight_kg} kg` : '—';
+    
+    let bmiDisplay = '—';
+    if (u.bmi) {
+      bmiDisplay = `${u.bmi} BMI`;
+    } else if (u.height_cm && u.weight_kg) {
+      const hM = u.height_cm / 100;
+      bmiDisplay = `${(u.weight_kg / (hM * hM)).toFixed(1)} BMI`;
+    }
+
+    const diet = u.diet_preference ? `<span class="badge" style="background:#e0f2fe;color:#0369a1;margin-bottom:2px;">${u.diet_preference}</span>` : '';
+    
+    const allergiesList = Array.isArray(u.allergies) ? u.allergies : (u.allergies ? u.allergies.split(',') : []);
+    const allergiesTags = allergiesList.slice(0, 2).map(a => `<span class="badge" style="background:#fef2f2;color:#991b1b;">${a.trim()}</span>`).join(' ');
+    
+    const medicalList = Array.isArray(u.medical_conditions) ? u.medical_conditions : (u.medical_conditions ? u.medical_conditions.split(',') : []);
+    const medicalTags = medicalList.slice(0, 2).map(m => `<span class="badge" style="background:#fef3c7;color:#92400e;">${m.trim()}</span>`).join(' ');
+
+    const caloriesGoal = u.calorie_goal || u.target_calories ? `${u.calorie_goal || u.target_calories} kcal` : '—';
+    const waterGoal = u.water_goal_ml || u.daily_water_target_ml ? `${((u.water_goal_ml || u.daily_water_target_ml)/1000).toFixed(1)} L` : '—';
+
+    return `
+    <tr data-id="${u.id}">
+      <td>
+        <strong style="font-size:0.9rem;display:block;color:var(--text-primary);">${fullName}</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);">${u.email}</div>
+        <div style="font-size:0.75rem;color:var(--text-secondary);"><i class="fa-solid fa-phone" style="font-size:0.68rem;margin-right:2px;"></i> ${phone}</div>
+      </td>
+      <td>
+        <div style="font-size:0.82rem;font-weight:600;">${gender}</div>
+        <div style="font-size:0.75rem;color:var(--text-secondary);">${height} • ${weight}</div>
+        <div style="font-size:0.72rem;color:var(--sukuma);font-weight:600;">${bmiDisplay}</div>
+      </td>
+      <td>
+        <div style="display:flex;flex-wrap:wrap;gap:3px;max-width:200px;">
+          ${diet}
+          ${allergiesTags}
+          ${medicalTags}
+          ${(!diet && !allergiesTags && !medicalTags) ? '<span style="color:var(--text-muted);font-size:0.75rem;">Standard Diet</span>' : ''}
+        </div>
+      </td>
+      <td>
+        <div style="font-size:0.8rem;font-weight:600;"><i class="fa-solid fa-fire" style="color:#e11d48;font-size:0.72rem;"></i> ${caloriesGoal}</div>
+        <div style="font-size:0.75rem;color:var(--text-secondary);"><i class="fa-solid fa-droplet" style="color:#0284c7;font-size:0.72rem;"></i> ${waterGoal}</div>
+      </td>
+      <td>
+        <div style="margin-bottom:4px;"><span class="badge ${isPremium ? 'badge-premium' : 'badge-free'}">${isPremium ? 'Premium' : 'Free'}</span></div>
+        <span class="status-badge ${isActive ? 'active' : 'inactive'}">${isActive ? 'Active' : 'Suspended'}</span>
+      </td>
+      <td style="text-align:right;">
+        <div class="action-btns">
+          <button class="btn btn-ghost btn-sm view-user" data-id="${u.id}" title="View Full Details"><i class="fa-regular fa-eye"></i></button>
+          <button class="btn btn-ghost btn-sm edit-user" data-id="${u.id}" title="Edit User"><i class="fa-regular fa-pen"></i></button>
+          ${isActive ? 
+            `<button class="btn btn-ghost btn-sm danger suspend-user" data-id="${u.id}" title="Suspend"><i class="fa-solid fa-ban"></i></button>` :
+            `<button class="btn btn-ghost btn-sm success activate-user" data-id="${u.id}" title="Activate"><i class="fa-solid fa-check"></i></button>`
+          }
+          ${!isPremium ? 
+            `<button class="btn btn-ghost btn-sm success upgrade-user" data-id="${u.id}" title="Upgrade to Premium"><i class="fa-regular fa-crown"></i></button>` : ''
+          }
+          <button class="btn btn-ghost btn-sm danger delete-user" data-id="${u.id}" title="Delete"><i class="fa-regular fa-trash"></i></button>
+        </div>
+      </td>
+    </tr>
+  `}).join('');
+  attachUserEvents();
+}
+
+function renderProfessionals() {
+  const search = document.getElementById('proSearchInput').value.toLowerCase().trim();
+  const filtered = allProfessionals.filter(p => {
+    const pName = `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.name || p.email || '';
+    const prof = p.title || p.profession || '';
+    return pName.toLowerCase().includes(search) || 
+           (p.email || '').toLowerCase().includes(search) ||
+           prof.toLowerCase().includes(search);
+  });
+  const tbody = document.getElementById('professionalsTableBody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><i class="fa-regular fa-user-md"></i><div>${allProfessionals.length === 0 ? 'No professionals registered yet.' : 'No professionals found.'}</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map(p => {
+    const pName = `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.name || p.email || 'Professional';
+    const prof = p.title || p.profession || 'Nutritionist';
+    const status = (p.approval_status || p.status || 'pending').toLowerCase();
+    const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
+    const isActive = status === 'active' || status === 'approved' || p.is_active === true;
+    const license = p.license_no || p.license || 'KNDI Reg.';
+    const specs = Array.isArray(p.specialization) ? p.specialization.join(', ') : p.specialization || 'Clinical Dietetics';
+
+    return `
+    <tr data-id="${p.id}">
+      <td>
+        <strong style="font-size:0.9rem;display:block;color:var(--text-primary);">${pName}</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);">${p.email}</div>
+        <div style="font-size:0.75rem;color:var(--text-secondary);"><i class="fa-solid fa-phone" style="font-size:0.68rem;"></i> ${p.phone || '—'}</div>
+      </td>
+      <td>
+        <div style="font-weight:600;font-size:0.83rem;">${prof}</div>
+      </td>
+      <td>
+        <div style="font-size:0.8rem;color:var(--text-primary);">${specs}</div>
+        <div style="font-size:0.72rem;color:var(--text-muted);"><i class="fa-solid fa-id-card"></i> ${license}</div>
+      </td>
+      <td><span class="approval-badge ${status}">${statusLabel}</span></td>
+      <td style="text-align:right;">
+        <div class="action-btns">
+          <button class="btn btn-ghost btn-sm view-pro" data-id="${p.id}" title="View Full Details"><i class="fa-regular fa-eye"></i></button>
+          ${status === 'pending' ? `
+            <button class="btn btn-ghost btn-sm success approve-pro" data-id="${p.id}" title="Approve"><i class="fa-solid fa-check"></i></button>
+            <button class="btn btn-ghost btn-sm danger reject-pro" data-id="${p.id}" title="Reject"><i class="fa-solid fa-xmark"></i></button>
+          ` : `
+            ${isActive ? 
+              `<button class="btn btn-ghost btn-sm danger suspend-pro" data-id="${p.id}" title="Suspend"><i class="fa-solid fa-ban"></i></button>` :
+              `<button class="btn btn-ghost btn-sm success activate-pro" data-id="${p.id}" title="Activate"><i class="fa-solid fa-check"></i></button>`
+            }
+            <button class="btn btn-ghost btn-sm edit-pro" data-id="${p.id}" title="Edit"><i class="fa-regular fa-pen"></i></button>
+          `}
+          <button class="btn btn-ghost btn-sm danger delete-pro" data-id="${p.id}" title="Delete"><i class="fa-regular fa-trash"></i></button>
+        </div>
+      </td>
+    </tr>
+  `}).join('');
+  attachProEvents();
+}
+
+function renderClients() {
+  const search = document.getElementById('clientSearchInput').value.toLowerCase().trim();
+  const filtered = allClients.filter(c => {
+    const cName = `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.name || c.email || '';
+    const pro = c.assigned_professional || '';
+    return cName.toLowerCase().includes(search) || 
+           (c.email || '').toLowerCase().includes(search) ||
+           pro.toLowerCase().includes(search);
+  });
+  const tbody = document.getElementById('clientsTableBody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><i class="fa-regular fa-user-group"></i><div>${allClients.length === 0 ? 'No clients added yet.' : 'No clients found.'}</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map(c => {
+    const cName = `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.name || c.email || 'Client';
+    const status = c.status || 'Active';
+    const isSuspended = status.toLowerCase() === 'suspended' || c.is_active === false;
+    return `
+    <tr data-id="${c.id}">
+      <td>
+        <strong style="font-size:0.9rem;display:block;">${cName}</strong>
+        <div style="font-size:0.75rem;color:var(--text-muted);">${c.email}</div>
+      </td>
+      <td>${c.assigned_professional || '<span style="color:var(--text-muted);">Unassigned</span>'}</td>
+      <td><span class="badge" style="background:#f1f5f9;color:#334155;">${c.goal || 'General Health'}</span></td>
+      <td><span style="font-weight:600;color:${c.progress >= 70 ? 'var(--sukuma)' : c.progress >= 40 ? 'var(--maize-deep)' : '#dc2626'};">${c.progress || 0}%</span></td>
+      <td><span class="status-badge ${isSuspended ? 'inactive' : 'active'}">${isSuspended ? 'Suspended' : 'Active'}</span></td>
+      <td style="text-align:right;">
+        <div class="action-btns">
+          <button class="btn btn-ghost btn-sm view-client" data-id="${c.id}" title="View"><i class="fa-regular fa-eye"></i></button>
+          <button class="btn btn-ghost btn-sm edit-client" data-id="${c.id}" title="Edit"><i class="fa-regular fa-pen"></i></button>
+          ${isSuspended ? 
+            `<button class="btn btn-ghost btn-sm success activate-client" data-id="${c.id}" title="Activate"><i class="fa-solid fa-check"></i></button>` :
+            `<button class="btn btn-ghost btn-sm danger suspend-client" data-id="${c.id}" title="Suspend"><i class="fa-solid fa-ban"></i></button>`
+          }
+          <button class="btn btn-ghost btn-sm danger delete-client" data-id="${c.id}" title="Delete"><i class="fa-regular fa-trash"></i></button>
+        </div>
+      </td>
+    </tr>
+  `}).join('');
+  attachClientEvents();
+}
+
+// ----- Event attachment -----
+function attachUserEvents() {
+  document.querySelectorAll('.view-user').forEach(b => b.addEventListener('click', () => openUserDetailModal(b.dataset.id)));
+  document.querySelectorAll('.edit-user').forEach(b => b.addEventListener('click', () => openUserModal(b.dataset.id, false)));
+  document.querySelectorAll('.suspend-user').forEach(b => b.addEventListener('click', () => {
+    const u = getUser(b.dataset.id);
+    confirmAction('Suspend User', `Suspend ${u ? (u.first_name || u.email) : 'User'}?`, () => suspendUser(b.dataset.id));
+  }));
+  document.querySelectorAll('.activate-user').forEach(b => b.addEventListener('click', () => {
+    const u = getUser(b.dataset.id);
+    confirmAction('Activate User', `Activate ${u ? (u.first_name || u.email) : 'User'}?`, () => activateUser(b.dataset.id));
+  }));
+  document.querySelectorAll('.delete-user').forEach(b => b.addEventListener('click', () => {
+    const u = getUser(b.dataset.id);
+    confirmAction('Delete User', `Delete ${u ? (u.first_name || u.email) : 'User'}? This cannot be undone.`, () => deleteUser(b.dataset.id));
+  }));
+  document.querySelectorAll('.upgrade-user').forEach(b => b.addEventListener('click', () => {
+    const u = getUser(b.dataset.id);
+    confirmAction('Upgrade User', `Upgrade ${u ? (u.first_name || u.email) : 'User'} to Premium?`, () => upgradeUser(b.dataset.id));
+  }));
+}
+
+function attachProEvents() {
+  document.querySelectorAll('.view-pro').forEach(b => b.addEventListener('click', () => openProDetailModal(b.dataset.id)));
+  document.querySelectorAll('.edit-pro').forEach(b => b.addEventListener('click', () => openProModal(b.dataset.id, false)));
+  document.querySelectorAll('.approve-pro').forEach(b => b.addEventListener('click', () => approvePro(b.dataset.id)));
+  document.querySelectorAll('.reject-pro').forEach(b => b.addEventListener('click', () => {
+    const p = getPro(b.dataset.id);
+    const pName = p ? (`${p.first_name||''} ${p.last_name||''}`.trim() || p.name || p.email) : 'Professional';
+    confirmAction('Reject Professional', `Reject ${pName}?`, () => rejectPro(b.dataset.id));
+  }));
+  document.querySelectorAll('.suspend-pro').forEach(b => b.addEventListener('click', () => {
+    const p = getPro(b.dataset.id);
+    const pName = p ? (`${p.first_name||''} ${p.last_name||''}`.trim() || p.name || p.email) : 'Professional';
+    confirmAction('Suspend Professional', `Suspend ${pName}?`, () => suspendPro(b.dataset.id));
+  }));
+  document.querySelectorAll('.activate-pro').forEach(b => b.addEventListener('click', () => {
+    const p = getPro(b.dataset.id);
+    const pName = p ? (`${p.first_name||''} ${p.last_name||''}`.trim() || p.name || p.email) : 'Professional';
+    confirmAction('Activate Professional', `Activate ${pName}?`, () => activatePro(b.dataset.id));
+  }));
+  document.querySelectorAll('.delete-pro').forEach(b => b.addEventListener('click', () => {
+    const p = getPro(b.dataset.id);
+    const pName = p ? (`${p.first_name||''} ${p.last_name||''}`.trim() || p.name || p.email) : 'Professional';
+    confirmAction('Delete Professional', `Delete ${pName}? This cannot be undone.`, () => deletePro(b.dataset.id));
+  }));
+}
+
+function attachClientEvents() {
+  document.querySelectorAll('.view-client').forEach(b => b.addEventListener('click', () => openClientModal(b.dataset.id, true)));
+  document.querySelectorAll('.edit-client').forEach(b => b.addEventListener('click', () => openClientModal(b.dataset.id, false)));
+  document.querySelectorAll('.suspend-client').forEach(b => b.addEventListener('click', () => {
+    const c = getClient(b.dataset.id);
+    const cName = c ? (`${c.first_name||''} ${c.last_name||''}`.trim() || c.name || c.email) : 'Client';
+    confirmAction('Suspend Client', `Suspend ${cName}?`, () => suspendClient(b.dataset.id));
+  }));
+  document.querySelectorAll('.activate-client').forEach(b => b.addEventListener('click', () => {
+    const c = getClient(b.dataset.id);
+    const cName = c ? (`${c.first_name||''} ${c.last_name||''}`.trim() || c.name || c.email) : 'Client';
+    confirmAction('Activate Client', `Activate ${cName}?`, () => activateClient(b.dataset.id));
+  }));
+  document.querySelectorAll('.delete-client').forEach(b => b.addEventListener('click', () => {
+    const c = getClient(b.dataset.id);
+    const cName = c ? (`${c.first_name||''} ${c.last_name||''}`.trim() || c.name || c.email) : 'Client';
+    confirmAction('Delete Client', `Delete ${cName}? This cannot be undone.`, () => deleteClient(b.dataset.id));
+  }));
+}
+
+// ----- Helper functions -----
+function getUser(id) { return allUsers.find(u => u.id === id); }
+function getPro(id) { return allProfessionals.find(p => p.id === id); }
+function getClient(id) { return allClients.find(c => c.id === id); }
+
+// ============================================================
+// FULL PROFILE DETAIL VIEW MODALS
+// ============================================================
+
+function openUserDetailModal(id) {
+  const user = getUser(id);
+  if (!user) return;
+
+  const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email || 'User';
+  const initial = (user.first_name || user.email || 'U').charAt(0).toUpperCase();
+  const phone = user.phone || 'Not provided';
+  const email = user.email || 'N/A';
+  
+  const statusLower = (user.status || '').toLowerCase();
+  const isSuspended = statusLower === 'suspended' || statusLower === 'inactive' || statusLower === 'rejected' || user.is_active === false;
+  const isActive = !isSuspended;
+  const isPremium = (user.tier || user.plan || '').toLowerCase() === 'premium';
+
+  const gender = user.gender ? (user.gender.charAt(0).toUpperCase() + user.gender.slice(1)) : 'Not specified';
+  const dob = user.date_of_birth ? new Date(user.date_of_birth).toLocaleDateString() : 'Not provided';
+  const height = user.height_cm ? `${user.height_cm} cm` : 'Not provided';
+  const weight = user.weight_kg ? `${user.weight_kg} kg` : 'Not provided';
+  
+  let bmiVal = 'N/A';
+  let bmiCategory = '';
+  if (user.bmi) {
+    bmiVal = user.bmi;
+  } else if (user.height_cm && user.weight_kg) {
+    const hM = user.height_cm / 100;
+    bmiVal = (user.weight_kg / (hM * hM)).toFixed(1);
+  }
+  if (bmiVal !== 'N/A') {
+    const num = parseFloat(bmiVal);
+    if (num < 18.5) bmiCategory = ' (Underweight)';
+    else if (num < 25) bmiCategory = ' (Normal)';
+    else if (num < 30) bmiCategory = ' (Overweight)';
+    else bmiCategory = ' (Obese)';
+  }
+
+  const activity = user.lifestyle || user.activity_level ? `${user.lifestyle || 'Level ' + user.activity_level}` : 'Standard';
+  const dietPref = user.diet_preference || user.diet_type || 'Standard';
+
+  const allergiesList = Array.isArray(user.allergies) ? user.allergies : (user.allergies ? user.allergies.split(',') : []);
+  const medicalList = Array.isArray(user.medical_conditions) ? user.medical_conditions : (user.medical_conditions ? user.medical_conditions.split(',') : []);
+  const favFoods = Array.isArray(user.favorite_foods) ? user.favorite_foods.join(', ') : (user.favorite_foods || 'None specified');
+  const disFoods = Array.isArray(user.disliked_foods) ? user.disliked_foods.join(', ') : (user.disliked_foods || 'None specified');
+
+  const calorieTarget = user.calorie_goal || user.target_calories ? `${user.calorie_goal || user.target_calories} kcal/day` : 'Default (~2,000 kcal)';
+  const waterTarget = user.water_goal_ml || user.daily_water_target_ml ? `${user.water_goal_ml || user.daily_water_target_ml} ml/day` : 'Default (~2,500 ml)';
+  const bio = user.bio || 'No bio provided.';
+  const joinedDate = user.created_at ? new Date(user.created_at).toLocaleString() : 'N/A';
+
+  const content = document.getElementById('userDetailContent');
+  content.innerHTML = `
+    <!-- User Header Card -->
+    <div style="display:flex;align-items:center;gap:16px;background:var(--bg-elevated);padding:16px;border-radius:var(--radius-md);margin-bottom:16px;border:1px solid var(--basket-line);">
+      <div style="width:54px;height:54px;border-radius:50%;background:var(--sukuma);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;">${initial}</div>
+      <div style="flex:1;">
+        <h4 style="font-size:1.15rem;margin-bottom:2px;font-family:var(--font-display);">${fullName}</h4>
+        <div style="font-size:0.83rem;color:var(--text-secondary);"><i class="fa-regular fa-envelope"></i> ${email} | <i class="fa-solid fa-phone"></i> ${phone}</div>
+        <div style="display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap;">
+          <span class="badge ${isPremium ? 'badge-premium' : 'badge-free'}">${isPremium ? 'Premium Plan' : 'Free Plan'}</span>
+          <span class="status-badge ${isActive ? 'active' : 'inactive'}">${isActive ? 'Active Account' : 'Suspended Account'}</span>
+          <span class="badge" style="background:#e2e8f0;color:#334155;">ID: ${user.id}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Biometrics Grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+      <div style="background:var(--bg-card);border:1px solid var(--basket-line);border-radius:var(--radius-sm);padding:12px;">
+        <div style="font-size:0.75rem;color:var(--text-muted);font-weight:600;margin-bottom:6px;"><i class="fa-solid fa-child" style="color:var(--sukuma);"></i> DEMOGRAPHICS &amp; BODY</div>
+        <div style="font-size:0.83rem;line-height:1.6;">
+          <div><strong>Gender:</strong> ${gender}</div>
+          <div><strong>Date of Birth:</strong> ${dob}</div>
+          <div><strong>Height &amp; Weight:</strong> ${height} / ${weight}</div>
+          <div><strong>BMI:</strong> ${bmiVal}${bmiCategory}</div>
+          <div><strong>Activity Level:</strong> ${activity}</div>
+        </div>
+      </div>
+
+      <div style="background:var(--bg-card);border:1px solid var(--basket-line);border-radius:var(--radius-sm);padding:12px;">
+        <div style="font-size:0.75rem;color:var(--text-muted);font-weight:600;margin-bottom:6px;"><i class="fa-solid fa-bullseye" style="color:var(--sukuma);"></i> DAILY NUTRITION TARGETS</div>
+        <div style="font-size:0.83rem;line-height:1.6;">
+          <div><strong>Calorie Goal:</strong> ${calorieTarget}</div>
+          <div><strong>Water Goal:</strong> ${waterTarget}</div>
+          <div><strong>Diet Preference:</strong> ${dietPref}</div>
+          <div><strong>Joined Date:</strong> ${joinedDate}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Health & Dietary Conditions -->
+    <div style="background:var(--bg-card);border:1px solid var(--basket-line);border-radius:var(--radius-sm);padding:12px;margin-bottom:16px;">
+      <div style="font-size:0.75rem;color:var(--text-muted);font-weight:600;margin-bottom:8px;"><i class="fa-solid fa-notes-medical" style="color:#e11d48;"></i> HEALTH CONSTRAINTS &amp; FOOD PREFERENCES</div>
+      <div style="font-size:0.83rem;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <strong style="color:var(--text-secondary);display:block;margin-bottom:4px;">Allergies:</strong>
+          ${allergiesList.length > 0 ? allergiesList.map(a => `<span class="badge" style="background:#fef2f2;color:#991b1b;margin-right:4px;">${a.trim()}</span>`).join('') : '<span style="color:var(--text-muted);">None reported</span>'}
+        </div>
+        <div>
+          <strong style="color:var(--text-secondary);display:block;margin-bottom:4px;">Medical Conditions:</strong>
+          ${medicalList.length > 0 ? medicalList.map(m => `<span class="badge" style="background:#fef3c7;color:#92400e;margin-right:4px;">${m.trim()}</span>`).join('') : '<span style="color:var(--text-muted);">None reported</span>'}
+        </div>
+        <div style="grid-column:1 / -1;margin-top:4px;">
+          <strong>Favorite Foods:</strong> <span style="color:var(--text-secondary);">${favFoods}</span>
+        </div>
+        <div style="grid-column:1 / -1;">
+          <strong>Disliked Foods:</strong> <span style="color:var(--text-secondary);">${disFoods}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bio / Admin Notes -->
+    <div style="background:var(--bg-card);border:1px solid var(--basket-line);border-radius:var(--radius-sm);padding:12px;">
+      <div style="font-size:0.75rem;color:var(--text-muted);font-weight:600;margin-bottom:4px;"><i class="fa-solid fa-quote-left" style="color:var(--sukuma);"></i> BIO / NOTES</div>
+      <div style="font-size:0.85rem;color:var(--text-primary);font-style:italic;">"${bio}"</div>
+    </div>
+  `;
+
+  document.getElementById('userDetailEditBtn').onclick = () => {
+    document.getElementById('userDetailModal').classList.remove('open');
+    openUserModal(id, false);
+  };
+
+  document.getElementById('userDetailModal').classList.add('open');
+}
+
+function openProDetailModal(id) {
+  const pro = getPro(id);
+  if (!pro) return;
+
+  const pName = `${pro.first_name || ''} ${pro.last_name || ''}`.trim() || pro.name || pro.email || 'Professional';
+  const title = pro.title || pro.profession || 'Nutritionist';
+  const license = pro.license_no || pro.license || 'KNDI Registered';
+  const email = pro.email || 'N/A';
+  const phone = pro.phone || 'Not provided';
+  const specs = Array.isArray(pro.specialization) ? pro.specialization.join(', ') : (pro.specialization || 'Clinical Dietetics');
+  
+  const status = (pro.approval_status || pro.status || 'pending').toLowerCase();
+  const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
+  const bio = pro.bio || 'Registered Smart Lishe healthcare professional.';
+  const joinedDate = pro.created_at ? new Date(pro.created_at).toLocaleString() : 'N/A';
+
+  const content = document.getElementById('proDetailContent');
+  content.innerHTML = `
+    <div style="display:flex;align-items:center;gap:16px;background:var(--bg-elevated);padding:16px;border-radius:var(--radius-md);margin-bottom:16px;border:1px solid var(--basket-line);">
+      <div style="width:54px;height:54px;border-radius:50%;background:var(--sukuma-dark);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;"><i class="fa-solid fa-user-md"></i></div>
+      <div style="flex:1;">
+        <h4 style="font-size:1.15rem;margin-bottom:2px;font-family:var(--font-display);">${pName}</h4>
+        <div style="font-size:0.83rem;color:var(--sukuma);font-weight:600;"><i class="fa-solid fa-stethoscope"></i> ${title}</div>
+        <div style="font-size:0.8rem;color:var(--text-secondary);"><i class="fa-regular fa-envelope"></i> ${email} | <i class="fa-solid fa-phone"></i> ${phone}</div>
+        <div style="display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap;">
+          <span class="approval-badge ${status}">${statusLabel}</span>
+          <span class="badge" style="background:#e0f2fe;color:#0369a1;"><i class="fa-solid fa-id-card"></i> License: ${license}</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--bg-card);border:1px solid var(--basket-line);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;">
+      <div style="font-size:0.75rem;color:var(--text-muted);font-weight:600;margin-bottom:6px;"><i class="fa-solid fa-award" style="color:var(--sukuma);"></i> SPECIALIZATIONS &amp; PRACTICE</div>
+      <div style="font-size:0.85rem;margin-bottom:8px;"><strong>Areas of Focus:</strong> ${specs}</div>
+      <div style="font-size:0.85rem;"><strong>Registration Date:</strong> ${joinedDate}</div>
+    </div>
+
+    <div style="background:var(--bg-card);border:1px solid var(--basket-line);border-radius:var(--radius-sm);padding:14px;">
+      <div style="font-size:0.75rem;color:var(--text-muted);font-weight:600;margin-bottom:4px;"><i class="fa-solid fa-file-lines" style="color:var(--sukuma);"></i> BIO &amp; CLINICAL BACKGROUND</div>
+      <div style="font-size:0.85rem;color:var(--text-primary);">${bio}</div>
+    </div>
+  `;
+
+  document.getElementById('proDetailEditBtn').onclick = () => {
+    document.getElementById('proDetailModal').classList.remove('open');
+    openProModal(id, false);
+  };
+
+  document.getElementById('proDetailModal').classList.add('open');
+}
+
+// ============================================================
+// USER EDIT/ADD FORM HANDLERS
+// ============================================================
+
+function openUserModal(id, readOnly) {
+  const user = id ? getUser(id) : null;
+  document.getElementById('userFormId').value = id || '';
+  document.getElementById('userModalTitle').textContent = user ? (readOnly ? 'View User' : 'Edit User Profile') : 'Add New User';
+  document.getElementById('userFormName').value = user ? `${user.first_name||''} ${user.last_name||''}`.trim() : '';
+  document.getElementById('userFormEmail').value = user ? user.email : '';
+  document.getElementById('userFormPhone').value = user ? (user.phone || '') : '';
+  document.getElementById('userFormGender').value = user ? (user.gender || '') : '';
+  document.getElementById('userFormPlan').value = user ? ((user.tier || user.plan || 'Free').charAt(0).toUpperCase() + (user.tier || user.plan || 'Free').slice(1)) : 'Free';
+  
+  const statusLower = user ? (user.status || '').toLowerCase() : 'active';
+  const isSuspended = user ? (statusLower === 'suspended' || statusLower === 'inactive' || statusLower === 'rejected' || user.is_active === false) : false;
+  document.getElementById('userFormStatus').value = isSuspended ? 'Suspended' : 'Active';
+
+  document.getElementById('userFormDiet').value = user ? (user.diet_preference || 'Standard') : 'Standard';
+  document.getElementById('userFormHeight').value = user ? (user.height_cm || '') : '';
+  document.getElementById('userFormWeight').value = user ? (user.weight_kg || '') : '';
+  document.getElementById('userFormCalorie').value = user ? (user.calorie_goal || user.target_calories || '') : '';
+  document.getElementById('userFormWater').value = user ? (user.water_goal_ml || user.daily_water_target_ml || '') : '';
+  
+  const allergiesList = user ? (Array.isArray(user.allergies) ? user.allergies.join(', ') : (user.allergies || '')) : '';
+  const medicalList = user ? (Array.isArray(user.medical_conditions) ? user.medical_conditions.join(', ') : (user.medical_conditions || '')) : '';
+  document.getElementById('userFormAllergies').value = allergiesList;
+  document.getElementById('userFormConditions').value = medicalList;
+  document.getElementById('userFormBio').value = user ? (user.bio || '') : '';
+
+  const inputs = document.querySelectorAll('#userForm input, #userForm select, #userForm textarea');
+  inputs.forEach(el => el.disabled = readOnly);
+  document.getElementById('userFormSubmit').style.display = readOnly ? 'none' : 'inline-flex';
+  document.getElementById('userModal').classList.add('open');
+}
+
+document.getElementById('userForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const id = document.getElementById('userFormId').value;
+  const nameParts = document.getElementById('userFormName').value.trim().split(' ');
+  const data = {
+    first_name: nameParts[0] || '',
+    last_name: nameParts.slice(1).join(' ') || '',
+    email: document.getElementById('userFormEmail').value.trim(),
+    phone: document.getElementById('userFormPhone').value.trim(),
+    gender: document.getElementById('userFormGender').value,
+    plan: document.getElementById('userFormPlan').value.toLowerCase(),
+    tier: document.getElementById('userFormPlan').value.toLowerCase(),
+    is_active: document.getElementById('userFormStatus').value === 'Active',
+    status: document.getElementById('userFormStatus').value === 'Active' ? 'active' : 'suspended',
+    diet_preference: document.getElementById('userFormDiet').value,
+    height_cm: document.getElementById('userFormHeight').value ? parseFloat(document.getElementById('userFormHeight').value) : null,
+    weight_kg: document.getElementById('userFormWeight').value ? parseFloat(document.getElementById('userFormWeight').value) : null,
+    calorie_goal: document.getElementById('userFormCalorie').value ? parseInt(document.getElementById('userFormCalorie').value) : null,
+    water_goal_ml: document.getElementById('userFormWater').value ? parseInt(document.getElementById('userFormWater').value) : null,
+    allergies: document.getElementById('userFormAllergies').value.split(',').map(s => s.trim()).filter(Boolean),
+    medical_conditions: document.getElementById('userFormConditions').value.split(',').map(s => s.trim()).filter(Boolean),
+    bio: document.getElementById('userFormBio').value.trim()
+  };
+
+  if (!data.first_name || !data.email) { showToast('Please enter full name and email.', 'error'); return; }
+  try {
+    if (id) {
+      await apiFetch(`/admin/users/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+      showToast('User profile updated successfully.');
+    } else {
+      const result = await apiFetch('/admin/users', { method: 'POST', body: JSON.stringify(data) });
+      showToast('User account created.');
+    }
+    await loadUsers();
+  } catch (e) { showToast(e.message, 'error'); }
+  document.getElementById('userModal').classList.remove('open');
+});
+
+async function suspendUser(id) {
+  try {
+    await apiFetch(`/admin/users/${id}/suspend`, { method: 'PUT' });
+    showToast('User suspended.');
+    await loadUsers();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function activateUser(id) {
+  try {
+    await apiFetch(`/admin/users/${id}/activate`, { method: 'PUT' });
+    showToast('User activated.');
+    await loadUsers();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function deleteUser(id) {
+  try {
+    await apiFetch(`/admin/users/${id}`, { method: 'DELETE' });
+    showToast('User deleted.');
+    await loadUsers();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function upgradeUser(id) {
+  try {
+    await apiFetch(`/admin/users/${id}/upgrade`, { method: 'PUT' });
+    showToast('User upgraded to Premium.');
+    await loadUsers();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+// ============================================================
+// PROFESSIONAL CRUD (Backend API calls)
+// ============================================================
+
+function openProModal(id, readOnly) {
+  const pro = id ? getPro(id) : null;
+  const pName = pro ? (`${pro.first_name || ''} ${pro.last_name || ''}`.trim() || pro.name || '') : '';
+  document.getElementById('proFormId').value = id || '';
+  document.getElementById('proModalTitle').textContent = pro ? (readOnly ? 'View Professional' : 'Edit Professional Profile') : 'Add Professional Account';
+  document.getElementById('proFormName').value = pName;
+  document.getElementById('proFormEmail').value = pro ? pro.email : '';
+  document.getElementById('proFormPhone').value = pro ? (pro.phone || '') : '';
+  document.getElementById('proFormLicense').value = pro ? (pro.license_no || pro.license || '') : '';
+  document.getElementById('proFormProfession').value = pro ? (pro.title || pro.profession || '') : '';
+  document.getElementById('proFormSpecialization').value = pro ? (Array.isArray(pro.specialization) ? pro.specialization.join(', ') : pro.specialization || '') : '';
+  
+  const statusLower = pro ? (pro.approval_status || pro.status || 'active').toLowerCase() : 'active';
+  let statusDisplay = 'Active';
+  if (statusLower === 'pending') statusDisplay = 'Pending';
+  else if (statusLower === 'rejected') statusDisplay = 'Rejected';
+  else if (statusLower === 'suspended' || statusLower === 'revoked') statusDisplay = 'Suspended';
+  document.getElementById('proFormStatus').value = statusDisplay;
+
+  document.getElementById('proFormBio').value = pro ? (pro.bio || '') : '';
+
+  const inputs = document.querySelectorAll('#proForm input, #proForm select, #proForm textarea');
+  inputs.forEach(el => el.disabled = readOnly);
+  document.getElementById('proFormSubmit').style.display = readOnly ? 'none' : 'inline-flex';
+  document.getElementById('proModal').classList.add('open');
+}
+
+document.getElementById('proForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const id = document.getElementById('proFormId').value;
+  const data = {
+    name: document.getElementById('proFormName').value.trim(),
+    email: document.getElementById('proFormEmail').value.trim(),
+    phone: document.getElementById('proFormPhone').value.trim(),
+    license_no: document.getElementById('proFormLicense').value.trim(),
+    profession: document.getElementById('proFormProfession').value.trim(),
+    title: document.getElementById('proFormProfession').value.trim(),
+    specialization: document.getElementById('proFormSpecialization').value.split(',').map(s => s.trim()).filter(Boolean),
+    bio: document.getElementById('proFormBio').value.trim(),
+    status: document.getElementById('proFormStatus').value
+  };
+  if (!data.name || !data.email) { showToast('Please enter full name and email.', 'error'); return; }
+  try {
+    if (id) {
+      await apiFetch(`/admin/professionals/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+      showToast('Professional profile updated successfully.');
+    } else {
+      const result = await apiFetch('/admin/professionals', { method: 'POST', body: JSON.stringify(data) });
+      showToast('Professional account created.');
+    }
+    await loadProfessionals();
+  } catch (e) { showToast(e.message, 'error'); }
+  document.getElementById('proModal').classList.remove('open');
+});
+
+async function approvePro(id) {
+  try {
+    await apiFetch(`/admin/professionals/${id}/approve`, { method: 'PUT' });
+    showToast('Professional approved.');
+    await loadProfessionals();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function rejectPro(id) {
+  try {
+    await apiFetch(`/admin/professionals/${id}/reject`, { method: 'PUT' });
+    showToast('Professional rejected.');
+    await loadProfessionals();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function suspendPro(id) {
+  try {
+    await apiFetch(`/admin/professionals/${id}/suspend`, { method: 'PUT' });
+    showToast('Professional suspended.');
+    await loadProfessionals();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function activatePro(id) {
+  try {
+    await apiFetch(`/admin/professionals/${id}/activate`, { method: 'PUT' });
+    showToast('Professional activated.');
+    await loadProfessionals();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function deletePro(id) {
+  try {
+    await apiFetch(`/admin/professionals/${id}`, { method: 'DELETE' });
+    showToast('Professional deleted.');
+    await loadProfessionals();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+// ============================================================
+// CLIENT CRUD (Backend API calls)
+// ============================================================
+
+function populateProSelect() {
+  const pros = allProfessionals.filter(p => (p.approval_status === 'approved' || (p.status || '').toLowerCase() === 'active') && p.is_active !== false);
+  const select = document.getElementById('clientFormProfessional');
+  select.innerHTML = '<option value="">Unassigned</option>' + pros.map(p => {
+    const pName = `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.name || p.email;
+    return `<option value="${pName}">${pName}</option>`;
+  }).join('');
+}
+
+function openClientModal(id, readOnly) {
+  const client = id ? allClients.find(c => c.id === id) : null;
+  const cName = client ? (`${client.first_name || ''} ${client.last_name || ''}`.trim() || client.name || '') : '';
+  populateProSelect();
+  document.getElementById('clientFormId').value = id || '';
+  document.getElementById('clientModalTitle').textContent = client ? (readOnly ? 'View Client' : 'Edit Client') : 'Add Client';
+  document.getElementById('clientFormName').value = cName;
+  document.getElementById('clientFormEmail').value = client ? client.email : '';
+  document.getElementById('clientFormProfessional').value = client ? (client.assigned_professional || '') : '';
+  document.getElementById('clientFormGoal').value = client ? (client.goal || 'Weight Loss') : 'Weight Loss';
+  document.getElementById('clientFormProgress').value = client ? (client.progress || 0) : 0;
+  document.getElementById('clientFormStatus').value = client ? (client.status || 'Active') : 'Active';
+  const inputs = document.querySelectorAll('#clientForm input, #clientForm select');
+  inputs.forEach(el => el.disabled = readOnly);
+  document.getElementById('clientFormSubmit').style.display = readOnly ? 'none' : 'inline-flex';
+  document.getElementById('clientModal').classList.add('open');
+}
+
+document.getElementById('clientForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const id = document.getElementById('clientFormId').value;
+  const data = {
+    name: document.getElementById('clientFormName').value.trim(),
+    email: document.getElementById('clientFormEmail').value.trim(),
+    assigned_professional: document.getElementById('clientFormProfessional').value || '',
+    goal: document.getElementById('clientFormGoal').value,
+    progress: parseInt(document.getElementById('clientFormProgress').value) || 0,
+    status: document.getElementById('clientFormStatus').value
+  };
+  if (!data.name || !data.email) { showToast('Please fill in all fields.', 'error'); return; }
+  try {
+    if (id) {
+      await apiFetch(`/admin/clients/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+      showToast('Client updated.');
+    } else {
+      const result = await apiFetch('/admin/clients', { method: 'POST', body: JSON.stringify(data) });
+      showToast('Client added.');
+    }
+    await loadClients();
+  } catch (e) { showToast(e.message, 'error'); }
+  document.getElementById('clientModal').classList.remove('open');
+});
+
+async function suspendClient(id) {
+  try {
+    await apiFetch(`/admin/clients/${id}/suspend`, { method: 'PUT' });
+    showToast('Client suspended.');
+    await loadClients();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function activateClient(id) {
+  try {
+    await apiFetch(`/admin/clients/${id}/activate`, { method: 'PUT' });
+    showToast('Client activated.');
+    await loadClients();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function deleteClient(id) {
+  try {
+    await apiFetch(`/admin/clients/${id}`, { method: 'DELETE' });
+    showToast('Client deleted.');
+    await loadClients();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+// ============================================================
+// CONFIRM MODAL
+// ============================================================
+
+let confirmCallback = null;
+
+function confirmAction(title, message, callback) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMessage').textContent = message;
+  confirmCallback = callback;
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+document.getElementById('confirmActionBtn').addEventListener('click', function() {
+  if (confirmCallback) { confirmCallback(); confirmCallback = null; }
+  document.getElementById('confirmModal').classList.remove('open');
+});
+
+// ============================================================
+// MODAL CLOSE HANDLERS
+// ============================================================
+
+document.querySelectorAll('.modal-close, [data-modal]').forEach(el => {
+  el.addEventListener('click', function() {
+    const id = this.dataset.modal;
+    if (id) document.getElementById(id).classList.remove('open');
+  });
+});
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+});
+
+// ============================================================
+// SEARCH & APPROVE ALL
+// ============================================================
+
+document.getElementById('userSearchInput').addEventListener('input', renderUsers);
+document.getElementById('proSearchInput').addEventListener('input', renderProfessionals);
+document.getElementById('clientSearchInput').addEventListener('input', renderClients);
+
+document.getElementById('approveAllBtn').addEventListener('click', async function() {
+  const pending = allProfessionals.filter(p => p.approval_status === 'pending');
+  if (pending.length === 0) { showToast('No pending professionals to approve.', 'error'); return; }
+  confirmAction('Approve All', `Approve ${pending.length} pending professional(s)?`, async function() {
+    try {
+      for (const p of pending) {
+        await apiFetch(`/admin/professionals/${p.id}/approve`, { method: 'PUT' });
+      }
+      showToast(`${pending.length} professional(s) approved.`);
+      await loadProfessionals();
+    } catch (e) { showToast(e.message, 'error'); }
+  });
+});
+
+// ============================================================
+// ADD BUTTONS
+// ============================================================
+
+document.getElementById('addUserBtn').addEventListener('click', () => openUserModal(null, false));
+document.getElementById('addClientBtn').addEventListener('click', () => openClientModal(null, false));
+
+// ============================================================
+// SIDEBAR, THEME, TABS, ETC. (unchanged)
+// ============================================================
+
+function logout() {
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('smartlishe_role');
+  window.location.href = '../login.html';
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('smartlishe_theme') || 'light';
+  document.body.setAttribute('data-theme', saved);
+  if (saved === 'dark') document.body.classList.add('dark-mode');
+  const icon = document.getElementById('themeIcon');
+  if (icon) icon.className = saved === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+  const toggle = document.getElementById('themeToggle');
+  if (toggle) {
+    toggle.addEventListener('click', function() {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      if (icon) icon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+      localStorage.setItem('smartlishe_theme', isDark ? 'dark' : 'light');
+    });
+  }
+}
+
+function initSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const hamburger = document.getElementById('hamburgerBtn');
+  const topbarHamburger = document.getElementById('topbarHamburger');
+
+  function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('show'); }
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  if (hamburger) hamburger.addEventListener('click', openSidebar);
+  if (topbarHamburger) topbarHamburger.addEventListener('click', openSidebar);
+  if (overlay) overlay.addEventListener('click', closeSidebar);
+
+  function toggleDropdown(headerId, dropdownId) {
+    const header = document.getElementById(headerId);
+    const dropdown = document.getElementById(dropdownId);
+    if (!header || !dropdown) return;
+    header.addEventListener('click', function(e) {
+      e.preventDefault();
+      const isOpen = dropdown.classList.contains('open');
+      document.querySelectorAll('.nav-dropdown').forEach(d => d.classList.remove('open'));
+      document.querySelectorAll('.dropdown-chevron').forEach(c => c.classList.remove('open'));
+      if (!isOpen) {
+        dropdown.classList.add('open');
+        const chevron = header.querySelector('.dropdown-chevron');
+        if (chevron) chevron.classList.add('open');
+      }
+    });
+  }
+  toggleDropdown('accountsToggle', 'accountsDropdown');
+  toggleDropdown('operationsToggle', 'operationsDropdown');
+
+  document.querySelectorAll('.nav-link').forEach(function(link) {
+    link.addEventListener('click', function() {
+      if (window.innerWidth <= 768) closeSidebar();
+    });
+  });
+}
+
+function loadAdminInfo() {
+  apiFetch('/profile').then(data => {
+    if (data.success && data.data) {
+      const name = data.data.first_name || data.data.email || 'Admin';
+      document.getElementById('adminName').textContent = name;
+      document.getElementById('adminAvatar').textContent = name.charAt(0).toUpperCase();
+    }
+  }).catch(() => {});
+}
+
+function initNotifications() {
+  document.getElementById('notifBtn').addEventListener('click', function() {
+    const pending = allProfessionals.filter(p => p.approval_status === 'pending').length;
+    showToast(pending > 0 ? `You have ${pending} pending professional approvals.` : 'No pending professional approvals.');
+  });
+}
+
+function switchTab(target) {
+  if (!target || !['users', 'professionals', 'clients'].includes(target)) target = 'users';
+
+  const tabs = document.querySelectorAll('#accountTabs .tab-btn');
+  tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === target));
+
+  document.querySelectorAll('#accountsDropdown .nav-link').forEach(link => {
+    const isMatch = link.dataset.tab === target || (link.getAttribute('href') && link.getAttribute('href').endsWith('#' + target));
+    link.classList.toggle('active', isMatch);
+  });
+
+  const panels = {
+    users: document.getElementById('tab-users'),
+    professionals: document.getElementById('tab-professionals'),
+    clients: document.getElementById('tab-clients')
+  };
+  Object.keys(panels).forEach(key => {
+    if (panels[key]) panels[key].classList.toggle('active', key === target);
+  });
+
+  if (target === 'users') loadUsers();
+  else if (target === 'professionals') loadProfessionals();
+  else if (target === 'clients') loadClients();
+}
+
+function initTabs() {
+  const container = document.getElementById('accountTabs');
+  const tabs = container.querySelectorAll('.tab-btn');
+
+  tabs.forEach(function(tab) {
+    tab.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = this.dataset.tab;
+      history.pushState(null, '', '#' + target);
+      switchTab(target);
+    });
+  });
+
+  window.addEventListener('hashchange', function() {
+    const target = window.location.hash.replace('#', '');
+    if (target) switchTab(target);
+  });
+
+  const initialHash = window.location.hash.replace('#', '') || 'users';
+  switchTab(initialHash);
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+
+document.addEventListener('DOMContentLoaded', async function() {
+  initTheme();
+  initSidebar();
+  loadAdminInfo();
+  initTabs();
+  await Promise.all([loadUsers(), loadProfessionals(), loadClients()]);
+  initNotifications();
+
+  console.log('✅ Accounts page (full backend CRUD) ready – no toasts on sidebar');
+});
+</script>
+</body>
+</html>
