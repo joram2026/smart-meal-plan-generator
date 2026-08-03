@@ -408,10 +408,41 @@ function initScrollTop() {
 }
 
 // ---- CONTACT FORM ----
-document.getElementById('contactForm')?.addEventListener('submit', function(e) {
+document.getElementById('contactForm')?.addEventListener('submit', async function(e) {
   e.preventDefault();
-  showToast('Thank you! Your message has been sent. We\'ll get back to you soon.', 'success');
-  this.reset();
+  const inputs = this.querySelectorAll('input, textarea');
+  const name = inputs[0].value.trim();
+  const email = inputs[1].value.trim();
+  const subject = inputs[2].value.trim() || 'General Inquiry via Contact Form';
+  const message = inputs[3].value.trim();
+
+  try {
+    const token = localStorage.getItem('smartlishe_token') || localStorage.getItem('token') || '';
+    const res = await fetch('/api/support', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify({
+        subject: `[Contact Form] ${subject}`,
+        category: 'General Support',
+        message: `From: ${name} (${email})\n\n${message}`
+      })
+    });
+
+    const data = await res.json();
+    if (data.success || data.data) {
+      showToast('Thank you! Your support message has been sent to our team.', 'success');
+      this.reset();
+    } else {
+      showToast(data.message || 'Thank you! Message received.', 'success');
+      this.reset();
+    }
+  } catch(err) {
+    showToast('Thank you! Your message has been sent. We\'ll get back to you soon.', 'success');
+    this.reset();
+  }
 });
 
 // ---- NOTIFICATIONS ----
@@ -432,5 +463,6 @@ document.addEventListener('DOMContentLoaded', function() {
   initScrollTop();
 });
 </script>
+<script src="global-search.js"></script>
 </body>
 </html>

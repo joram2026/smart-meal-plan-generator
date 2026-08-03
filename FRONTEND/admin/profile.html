@@ -102,7 +102,7 @@
 (function() {
   const token = localStorage.getItem('access_token');
   const role = localStorage.getItem('smartlishe_role') || localStorage.getItem('role');
-  if (!token || (role && role.toLowerCase() !== 'admin')) { window.location.href = '../login.html'; }
+  if (!token || (role && role.toLowerCase() !== 'admin')) { window.location.href = '../auth/login.html'; }
 })();
 </script>
 
@@ -150,7 +150,7 @@
       <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> Settings</a>
       <a href="profile.html" class="nav-link active"><i class="fa-solid fa-user-circle"></i> Profile</a>
       <div style="margin-top:12px;">
-        <a href="#" class="nav-link" onclick="event.preventDefault(); localStorage.clear(); sessionStorage.clear(); window.location.href='../auth/login.html';" style="color:var(--char);">
+        <a href="#" class="nav-link" onclick="event.preventDefault(); logout();" style="color:var(--char);">
           <i class="fa-solid fa-right-from-bracket"></i> Logout
         </a>
       </div>
@@ -205,7 +205,7 @@
         <div class="profile-actions">
           <button class="btn btn-primary btn-sm" id="editProfileBtn"><i class="fa-regular fa-pen"></i> Edit Profile</button>
           <button class="btn btn-secondary btn-sm" id="changePasswordBtn"><i class="fa-solid fa-key"></i> Change Password</button>
-          <button class="btn btn-danger btn-sm" onclick="if(confirm('Logout?')){localStorage.clear();sessionStorage.clear();window.location.href='../auth/login.html';}"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+          <button class="btn btn-danger btn-sm" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
         </div>
       </div>
     </div>
@@ -465,6 +465,12 @@ function initSearch() {
       showToast('Searching for "' + e.target.value.trim() + '"...');
     }
   });
+}
+
+function logout() {
+  localStorage.clear();
+  sessionStorage.clear();
+  window.location.href = '../auth/login.html';
 }
 
 document.addEventListener('DOMContentLoaded', function() {

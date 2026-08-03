@@ -2,26 +2,44 @@
    SMART LISHE — ADMIN MODULE STYLES
    ============================================================ */
 
-/* ===== FONT AWESOME FIX ===== */
-i.fas, i.far, i.fab, i.fa-solid, i.fa-regular, i.fa-brands, i.fa,
-.fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands, .fa,
-[class^="fa-"], [class*=" fa-"] {
-    font-family: "Font Awesome 6 Free", "Font Awesome 5 Free", "FontAwesome" !important;
+/* ===== FONT AWESOME FULL FIX ===== */
+.fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands,
+i.fa, i.fas, i.far, i.fab, i.fa-solid, i.fa-regular, i.fa-brands,
+[class^="fa-"], [class*=" fa-"],
+.fa::before, .fas::before, .far::before, .fab::before,
+.fa-solid::before, .fa-regular::before, .fa-brands::before,
+i::before, [class^="fa-"]::before, [class*=" fa-"]::before {
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    display: inline-block !important;
     font-style: normal !important;
     font-variant: normal !important;
     text-rendering: auto !important;
     line-height: 1 !important;
-    -webkit-font-smoothing: antialiased !important;
-    -moz-osx-font-smoothing: grayscale !important;
-    display: inline-block !important;
 }
-.fas, .fa-solid, i.fas, i.fa-solid {
+
+.fa, .fas, .fa-solid,
+i.fa, i.fas, i.fa-solid,
+[class^="fa-"], [class*=" fa-"],
+.fa::before, .fas::before, .fa-solid::before,
+i.fa::before, i.fas::before, i.fa-solid::before,
+[class^="fa-"]::before, [class*=" fa-"]::before {
+    font-family: "Font Awesome 6 Free", "Font Awesome 5 Free", "FontAwesome" !important;
     font-weight: 900 !important;
 }
-.far, .fa-regular, i.far, i.fa-regular {
+
+.far, .fa-regular,
+i.far, i.fa-regular,
+.far::before, .fa-regular::before,
+i.far::before, i.fa-regular::before {
+    font-family: "Font Awesome 6 Free", "Font Awesome 5 Free", "FontAwesome" !important;
     font-weight: 400 !important;
 }
-.fab, .fa-brands, i.fab, i.fa-brands {
+
+.fab, .fa-brands,
+i.fab, i.fa-brands,
+.fab::before, .fa-brands::before,
+i.fab::before, i.fa-brands::before {
     font-family: "Font Awesome 6 Brands", "Font Awesome 5 Brands", "FontAwesome" !important;
     font-weight: 400 !important;
 }

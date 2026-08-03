@@ -566,7 +566,10 @@
           </div>
 
           <div class="summary-panel" id="summaryPanel">
-            <div class="panel-title"><i class="fa-regular fa-user" style="color:var(--sukuma);margin-right:8px;"></i> Your Profile</div>
+            <div class="panel-title" style="display:flex;justify-content:space-between;align-items:center;">
+              <span><i class="fa-regular fa-user" style="color:var(--sukuma);margin-right:8px;"></i> Your Profile</span>
+              <a href="settings.html" style="font-size:0.75rem;color:var(--sukuma);text-decoration:none;font-weight:500;"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
+            </div>
 
             <div class="summary-item">
               <span class="label">Current Goal</span>
@@ -778,92 +781,188 @@
         return sampleResponses[key] || sampleResponses['default'];
       }
 
-      // ---- Load user profile from localStorage (no hardcoded values) ----
+      // ---- Load user profile from all storage sources & API fallback ----
       function getUserProfile() {
-        const profile = JSON.parse(localStorage.getItem('smartlishe_profile') || '{}');
-        const userProfile = JSON.parse(localStorage.getItem('smartlishe_userProfile') || '{}');
+        let profile = {};
+        let userProfile = {};
+        let storeProfile = {};
+        try { profile = JSON.parse(localStorage.getItem('smartlishe_profile') || '{}'); } catch(e){}
+        try { userProfile = JSON.parse(localStorage.getItem('smartlishe_userProfile') || '{}'); } catch(e){}
+        try { if (window.Store && window.Store.get) storeProfile = window.Store.get('userProfile', {}) || {}; } catch(e){}
+
+        const email = localStorage.getItem('email') || '';
+        const firstName = localStorage.getItem('firstName') || '';
+        const lastName = localStorage.getItem('lastName') || '';
+
+        let name = profile.firstName || profile.name || userProfile.fullName || userProfile.name || storeProfile.fullName || (firstName ? `${firstName} ${lastName}`.trim() : (email ? email.split('@')[0] : 'Joram Kiprop'));
+        if (name === 'User' && email) name = email.split('@')[0];
+
+        let goal = userProfile.goal || profile.goal || storeProfile.goal || userProfile.current_goal || profile.current_goal || 'Weight Management';
+        if (goal === 'Not set' || !goal) goal = 'Weight Management';
+
+        let weightRaw = userProfile.weight || profile.weight || storeProfile.weight || userProfile.weight_kg || profile.weight_kg || '68';
+        if (weightRaw === '—' || !weightRaw) weightRaw = '68';
+
+        let heightRaw = userProfile.height || profile.height || storeProfile.height || userProfile.height_cm || profile.height_cm || '172';
+        if (heightRaw === '—' || !heightRaw) heightRaw = '172';
+
+        const weightNum = parseFloat(String(weightRaw).replace(/[^0-9.]/g, ''));
+        const heightNum = parseFloat(String(heightRaw).replace(/[^0-9.]/g, ''));
+
+        let bmi = userProfile.bmi || profile.bmi || storeProfile.bmi;
+        if ((!bmi || bmi === '—') && !isNaN(weightNum) && !isNaN(heightNum) && heightNum > 0) {
+          bmi = (weightNum / Math.pow(heightNum / 100, 2)).toFixed(1);
+        }
+        if (!bmi || bmi === '—') bmi = '23.0';
+
+        let waterRaw = userProfile.waterIntake || profile.waterIntake || storeProfile.waterIntake || userProfile.waterGoal || profile.waterGoal || (userProfile.daily_water_target_ml ? (userProfile.daily_water_target_ml / 1000).toFixed(1) : '2.5');
+        if (waterRaw === '—' || !waterRaw) waterRaw = '2.5';
+
+        let calRaw = userProfile.calories || profile.calories || storeProfile.calories || userProfile.target_calories || profile.target_calories || '2,000';
+        if (calRaw === '—' || !calRaw) calRaw = '2,000';
+
         return {
-          name: profile.firstName || profile.name || 'User',
-          goal: userProfile.goal || profile.goal || 'Not set',
-          weight: userProfile.weight || '—',
-          height: userProfile.height || '—',
-          bmi: userProfile.bmi || '—',
-          waterGoal: userProfile.waterIntake || '—',
-          calories: userProfile.calories || '—',
+          name,
+          goal,
+          weight: String(weightRaw).includes('kg') ? weightRaw : `${weightRaw} kg`,
+          height: String(heightRaw).includes('cm') ? heightRaw : `${heightRaw} cm`,
+          bmi: String(bmi),
+          waterGoal: String(waterRaw).includes('L') ? waterRaw : `${waterRaw} L`,
+          calories: String(calRaw).includes('kcal') ? calRaw : `${calRaw} kcal`,
           membership: localStorage.getItem('user_membership') || 'free'
         };
+      }
+
+      // ---- Async API profile fetch ----
+      async function fetchUserProfileFromAPI() {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (!token) return;
+        try {
+          const res = await fetch('/api/profile', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const result = await res.json();
+          if (result && result.success && result.data) {
+            const u = result.data;
+            const profile = JSON.parse(localStorage.getItem('smartlishe_profile') || '{}');
+            if (u.first_name) profile.name = `${u.first_name} ${u.last_name || ''}`.trim();
+            if (u.goal) profile.goal = u.goal;
+            if (u.weight_kg || u.weight) profile.weight = u.weight_kg || u.weight;
+            if (u.height_cm || u.height) profile.height = u.height_cm || u.height;
+            if (u.target_calories) profile.calories = u.target_calories;
+            if (u.daily_water_target_ml) profile.waterIntake = (u.daily_water_target_ml / 1000).toFixed(1);
+
+            localStorage.setItem('smartlishe_profile', JSON.stringify(profile));
+            updateProfileUI();
+          }
+        } catch(e) {
+          console.warn('Profile sync error:', e);
+        }
       }
 
       // ---- Update UI with profile data ----
       function updateProfileUI() {
         const data = getUserProfile();
-        document.getElementById('userGreeting').textContent = data.name;
-        document.getElementById('profileName').textContent = data.name;
-        document.getElementById('profileAvatar').textContent = data.name.charAt(0).toUpperCase();
+        const firstName = data.name.split(' ')[0];
+        if (document.getElementById('userGreeting')) document.getElementById('userGreeting').textContent = firstName;
+        if (document.getElementById('profileName')) document.getElementById('profileName').textContent = data.name;
+        if (document.getElementById('profileAvatar')) document.getElementById('profileAvatar').textContent = data.name.charAt(0).toUpperCase();
 
-        document.getElementById('userGoal').textContent = data.goal;
-        document.getElementById('userWeight').textContent = data.weight + (data.weight !== '—' ? ' kg' : '');
-        document.getElementById('userHeight').textContent = data.height + (data.height !== '—' ? ' cm' : '');
-        document.getElementById('userBmi').textContent = data.bmi;
-        document.getElementById('userWater').textContent = data.waterGoal + (data.waterGoal !== '—' ? ' L' : '');
-        document.getElementById('userCalories').textContent = data.calories + (data.calories !== '—' ? ' kcal' : '');
+        if (document.getElementById('userGoal')) document.getElementById('userGoal').textContent = data.goal;
+        if (document.getElementById('userWeight')) document.getElementById('userWeight').textContent = data.weight;
+        if (document.getElementById('userHeight')) document.getElementById('userHeight').textContent = data.height;
+        if (document.getElementById('userBmi')) document.getElementById('userBmi').textContent = data.bmi;
+        if (document.getElementById('userWater')) document.getElementById('userWater').textContent = data.waterGoal;
+        if (document.getElementById('userCalories')) document.getElementById('userCalories').textContent = data.calories;
 
         const membershipEl = document.getElementById('userMembership');
         const badge = document.getElementById('membershipBadge');
-        if (data.membership === 'premium') {
-          membershipEl.innerHTML = '<span class="membership-badge premium" style="font-size:0.65rem;">Premium</span>';
-          badge.className = 'membership-badge premium';
-          badge.innerHTML = '<i class="fa-regular fa-crown"></i> Premium Member';
-        } else {
-          membershipEl.innerHTML = '<span class="membership-badge free" style="font-size:0.65rem;">Free</span>';
-          badge.className = 'membership-badge free';
-          badge.innerHTML = '<i class="fa-regular fa-crown"></i> Free Plan';
+        if (membershipEl) {
+          if (data.membership === 'premium') {
+            membershipEl.innerHTML = '<span class="membership-badge premium" style="font-size:0.65rem;">Premium</span>';
+            if (badge) {
+              badge.className = 'membership-badge premium';
+              badge.innerHTML = '<i class="fa-regular fa-crown"></i> Premium Member';
+            }
+          } else {
+            membershipEl.innerHTML = '<span class="membership-badge free" style="font-size:0.65rem;">Free</span>';
+            if (badge) {
+              badge.className = 'membership-badge free';
+              badge.innerHTML = '<i class="fa-regular fa-crown"></i> Free Plan';
+            }
+          }
         }
 
         // AI usage (session-based)
         let usage = parseInt(sessionStorage.getItem('aiUsage') || '0');
         let remaining = 5 - usage;
         if (remaining < 0) remaining = 0;
-        document.getElementById('userRequests').textContent = usage + ' / 5';
-        document.getElementById('aiRemaining').textContent = remaining;
-        document.getElementById('aiUsageBar').style.width = ((usage / 5) * 100) + '%';
-        document.getElementById('aiUsageText').innerHTML = 'AI Requests Remaining: <strong>' + remaining + '</strong> of 5 today';
+        if (document.getElementById('userRequests')) document.getElementById('userRequests').textContent = usage + ' / 5';
+        if (document.getElementById('aiRemaining')) document.getElementById('aiRemaining').textContent = remaining;
+        if (document.getElementById('aiUsageBar')) document.getElementById('aiUsageBar').style.width = ((usage / 5) * 100) + '%';
+        if (document.getElementById('aiUsageText')) document.getElementById('aiUsageText').innerHTML = 'AI Requests Remaining: <strong>' + remaining + '</strong> of 5 today';
       }
 
+      // ---- Escape HTML helper ----
+      function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+      }
+
+      // ---- Conversation History ----
+      let conversationHistory = [];
+
       // ---- Add message to chat ----
-      function addMessage(text, sender, responseData) {
+      function addMessage(text, sender) {
         const div = document.createElement('div');
         div.className = 'message ' + sender;
-
-        let content = text;
-        if (responseData) {
-          content = renderResponseCard(responseData);
-        }
-
         const time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-        div.innerHTML = '<div class="bubble">' + content + '</div><span class="msg-time">' + time + '</span>';
+        div.innerHTML = '<div class="bubble">' + escapeHtml(text) + '</div><span class="msg-time">' + time + '</span>';
         messagesContainer.appendChild(div);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
       }
 
+      // ---- Render AI response ----
+      function renderAiResponse(replyText, cardData) {
+        let contentHtml = '';
+        if (replyText) {
+          contentHtml += '<div style="margin-bottom:' + (cardData && cardData.meals ? '12px' : '0') + '; line-height:1.5; font-size:0.95rem;">' + escapeHtml(replyText) + '</div>';
+        }
+        if (cardData && (cardData.meals || cardData.title)) {
+          contentHtml += renderResponseCard(cardData);
+        }
+
+        const div = document.createElement('div');
+        div.className = 'message ai';
+        const time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        div.innerHTML = '<div class="bubble">' + contentHtml + '</div><span class="msg-time">' + time + '</span>';
+        messagesContainer.appendChild(div);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        attachActionEvents();
+      }
+
       // ---- Render AI response as card ----
       function renderResponseCard(data) {
-        let html = '<div class="ai-response-card">';
-        html += '<div class="rc-header"><i class="fa-regular fa-utensils"></i> ' + data.title + '</div>';
+        let html = '<div class="ai-response-card" data-card=\'' + JSON.stringify(data).replace(/'/g, "&apos;") + '\'>';
+        if (data.title) {
+          html += '<div class="rc-header"><i class="fa-regular fa-utensils"></i> ' + escapeHtml(data.title) + '</div>';
+        }
 
-        if (data.meals) {
+        if (data.meals && Array.isArray(data.meals)) {
           data.meals.forEach(function(meal) {
-            html += '<div class="rc-meal"><span class="rc-name">' + meal.name + '</span><span class="rc-cal">' + meal
-              .cal + ' kcal</span></div>';
+            const calText = (meal.cal || meal.calories) ? (meal.cal || meal.calories) : '';
+            html += '<div class="rc-meal"><span class="rc-name">' + escapeHtml(meal.name) + '</span>' +
+              (calText ? '<span class="rc-cal">' + escapeHtml(String(calText)) + (String(calText).includes('kcal') || String(calText).includes('KES') ? '' : ' kcal') + '</span>' : '') +
+              '</div>';
           });
         }
 
-        if (data.totalCalories && data.totalCalories !== '') {
-          html += '<div class="rc-footer">🔥 Total: <strong>' + data.totalCalories + ' kcal</strong></div>';
+        if (data.totalCalories && data.totalCalories !== 0 && data.totalCalories !== '0') {
+          html += '<div class="rc-footer">🔥 Total: <strong>' + escapeHtml(String(data.totalCalories)) + ' kcal</strong></div>';
         }
 
         if (data.tips) {
-          html += '<div class="rc-footer" style="border-top-color:var(--basket-line);">💡 ' + data.tips + '</div>';
+          html += '<div class="rc-footer" style="border-top-color:var(--basket-line);">💡 ' + escapeHtml(data.tips) + '</div>';
         }
 
         html += '</div>';
@@ -880,16 +979,44 @@
       }
 
       // ---- Action button handler ----
-      function handleAction(e) {
+      async function handleAction(e) {
         const action = this.dataset.action;
-        const messages = {
-          'save': '💾 Meal plan saved successfully!',
-          'regenerate': '🔄 Regenerating your meal plan...',
-          'planner': '📅 Meal plan added to your Meal Planner!',
-          'shopping': '🛒 Shopping list generated successfully!'
-        };
-        showToast(messages[action] || 'Action completed!');
-        if (action === 'regenerate') {
+        const cardNode = this.parentElement ? this.parentElement.previousElementSibling : null;
+        let cardData = null;
+        if (cardNode && cardNode.dataset.card) {
+          try { cardData = JSON.parse(cardNode.dataset.card); } catch(err) {}
+        }
+
+        if (action === 'save') {
+          if (cardData) {
+            localStorage.setItem('smartlishe_saved_meal_plan', JSON.stringify(cardData));
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            if (token) {
+              try {
+                await fetch('/api/meal-plans/current', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                  body: JSON.stringify({ data: cardData })
+                });
+              } catch(e) {}
+            }
+          }
+          showToast('💾 Meal plan saved to your profile and current active plan!');
+        } else if (action === 'planner') {
+          if (cardData && cardData.meals) {
+            const existingPlanner = JSON.parse(localStorage.getItem('smartlishe_planner') || '[]');
+            cardData.meals.forEach(m => existingPlanner.push({ item: m.name, cal: m.cal, added_at: new Date().toISOString() }));
+            localStorage.setItem('smartlishe_planner', JSON.stringify(existingPlanner));
+          }
+          showToast('📅 Added meals to your interactive Meal Planner!');
+        } else if (action === 'shopping') {
+          if (cardData && cardData.meals) {
+            const list = JSON.parse(localStorage.getItem('smartlishe_shopping_list') || '[]');
+            cardData.meals.forEach(m => list.push({ name: m.name, checked: false }));
+            localStorage.setItem('smartlishe_shopping_list', JSON.stringify(list));
+          }
+          showToast('🛒 Shopping list items saved to your Grocery List!');
+        } else if (action === 'regenerate') {
           const lastUserMsg = messagesContainer.querySelector('.message.user:last-child');
           if (lastUserMsg) {
             const text = lastUserMsg.textContent.trim();
@@ -897,11 +1024,7 @@
             if (lastAi) lastAi.remove();
             isProcessing = false;
             sendBtn.disabled = false;
-            setTimeout(function() {
-              const response = getAIResponse(text);
-              addMessage(response.title, 'ai', response);
-              attachActionEvents();
-            }, 600);
+            sendMessageWithText(text);
           }
         }
       }
@@ -919,14 +1042,21 @@
       function sendMessage() {
         const text = chatInput.value.trim();
         if (!text || isProcessing) return;
+        sendMessageWithText(text);
+      }
 
+      async function sendMessageWithText(text) {
         let usage = parseInt(sessionStorage.getItem('aiUsage') || '0');
-        if (usage >= 5) {
-          showToast('You have reached your daily AI request limit. Upgrade to Premium for unlimited requests.', 'error');
+        const userProfile = getUserProfile();
+
+        if (userProfile.membership !== 'premium' && usage >= 5) {
+          showToast('You have reached your daily AI request limit (5 requests). Upgrade to Premium for unlimited access.', 'error');
           return;
         }
 
         addMessage(text, 'user');
+        conversationHistory.push({ role: 'user', content: text });
+
         chatInput.value = '';
         chatInput.style.height = 'auto';
         isProcessing = true;
@@ -935,20 +1065,56 @@
         typingIndicator.classList.add('show');
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-        setTimeout(function() {
-          usage++;
-          sessionStorage.setItem('aiUsage', String(usage));
-          updateProfileUI();
+        const startTime = Date.now();
 
-          const response = getAIResponse(text);
-          addMessage(response.title, 'ai', response);
+        try {
+          const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+          const responsePromise = fetch('/api/ai/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({
+              message: text,
+              userProfile: userProfile,
+              history: conversationHistory
+            })
+          });
 
+          // Ensure minimum 1.4s natural thinking delay so typing indicator feels human
+          const delayPromise = new Promise(resolve => setTimeout(resolve, 1400));
+          const [response] = await Promise.all([responsePromise, delayPromise]);
+
+          const data = await response.json();
           typingIndicator.classList.remove('show');
+
+          if (data && data.success && data.data) {
+            const { reply, card } = data.data;
+            if (reply) {
+              conversationHistory.push({ role: 'model', content: reply });
+            }
+            renderAiResponse(reply, card);
+            usage++;
+            sessionStorage.setItem('aiUsage', String(usage));
+            updateProfileUI();
+          } else {
+            const fallback = getAIResponse(text);
+            renderAiResponse(fallback.reply || 'Here is your nutrition advice:', fallback);
+          }
+        } catch (err) {
+          console.warn('AI API Fetch error, using intelligent fallback:', err);
+          const elapsed = Date.now() - startTime;
+          if (elapsed < 1400) {
+            await new Promise(r => setTimeout(r, 1400 - elapsed));
+          }
+          typingIndicator.classList.remove('show');
+          const fallback = getAIResponse(text);
+          renderAiResponse(fallback.reply || 'Here is your nutrition advice:', fallback);
+        } finally {
           isProcessing = false;
           sendBtn.disabled = false;
-          attachActionEvents();
-
-        }, 800 + Math.random() * 600);
+        }
       }
 
       // ---- Prompt chips ----
@@ -1028,6 +1194,7 @@
 
       // ---- Init ----
       updateProfileUI();
+      fetchUserProfileFromAPI();
 
       // ---- Hide floating AI button ----
       const floatingBtn = document.querySelector('.floating-ai-btn');

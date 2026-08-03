@@ -160,10 +160,11 @@
         <button type="button" class="service-group-header" data-group-toggle="plan">
           <div class="sg-icon-wrap" style="background:var(--sukuma);"><i class="fa-solid fa-bowl-food"></i></div>
           <span class="sg-title">Plan &amp; Discover</span>
-          <span class="sg-count">5</span>
+          <span class="sg-count">6</span>
           <span class="sg-dropdown-hint"><i class="fa-solid fa-chevron-down sg-chevron"></i></span>
         </button>
         <div class="service-group-body">
+          <a href="ai-assistant.html" class="nav-link"><i class="fa-solid fa-robot"></i> AI Meal Assistant</a>
           <a href="meal-generator.html" class="nav-link"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Meal Generator</a>
           <a href="nutriscan.html" class="nav-link active"><i class="fa-solid fa-camera-retro"></i> NutriScan</a>
           <a href="health-conditions.html" class="nav-link"><i class="fa-solid fa-heart-pulse"></i> Health Conditions</a>
@@ -200,6 +201,7 @@
         <div class="service-group-body">
           <a href="profile.html" class="nav-link"><i class="fa-solid fa-id-card"></i> User Profile</a>
           <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> Settings</a>
+          <a href="#" class="nav-link open-support-btn" onclick="event.preventDefault(); window.openSupportModal();"><i class="fa-solid fa-headset" style="color:var(--sukuma);"></i> Support &amp; Tickets</a>
         </div>
       </div>
 
@@ -257,18 +259,14 @@
 
         <div class="scan-layout">
           <div>
-            <div class="upload-zone" id="uploadZone">
+            <div class="upload-zone" id="uploadZone" style="cursor:pointer;">
               <input type="file" id="scanFileInput" accept="image/*">
-              <i class="fa-solid fa-cloud-arrow-up"></i>
-              <h4>Drop an image or click to upload</h4>
-              <p>JPG or PNG, up to ~5MB. Works with photos of any meal.</p>
-            </div>
-
-            <div style="display:flex;gap:10px;margin-top:12px;">
-              <button class="btn btn-secondary btn-sm" id="cameraBtn" style="flex:1;justify-content:center;gap:8px;">
-                <i class="fa-solid fa-camera"></i> Snap with Camera
+              <i class="fa-solid fa-cloud-arrow-up" style="font-size:2.4rem;color:var(--sukuma);margin-bottom:10px;"></i>
+              <h4 style="margin:0 0 6px 0;font-size:1rem;">Drop a meal photo or click to browse</h4>
+              <p style="margin:0 0 12px 0;font-size:0.8rem;color:var(--text-muted);">Supports JPG, PNG or WebP up to 10MB. Works with homecooked, restaurant, or local Kenyan dishes.</p>
+              <button type="button" class="btn btn-secondary btn-sm" style="pointer-events:none;font-size:0.78rem;padding:6px 14px;gap:6px;">
+                <i class="fa-solid fa-folder-open"></i> Select Image File
               </button>
-              <input type="file" id="scanCameraInput" accept="image/*" capture="environment" style="display:none;">
             </div>
 
             <!-- Quick Sample Dishes for Instant Testing -->
@@ -289,6 +287,12 @@
                 <button class="btn btn-secondary btn-sm sample-dish-btn" data-name="Pilau with Kachumbari Salad" style="font-size:0.75rem;padding:5px 10px;">
                   <i class="fa-solid fa-bowl-rice"></i> Pilau & Kachumbari
                 </button>
+                <button class="btn btn-secondary btn-sm sample-dish-btn" data-name="Chapati & Dengu Curry" style="font-size:0.75rem;padding:5px 10px;">
+                  <i class="fa-solid fa-wheat-awn"></i> Chapati & Dengu
+                </button>
+                <button class="btn btn-secondary btn-sm sample-dish-btn" data-name="Kienyeji Chicken & Managu" style="font-size:0.75rem;padding:5px 10px;">
+                  <i class="fa-solid fa-drumstick-bite"></i> Kienyeji Chicken
+                </button>
               </div>
 
               <!-- Text Fallback Search -->
@@ -308,7 +312,7 @@
             <div class="scan-preview-wrap" id="scanPreviewWrap">
               <img id="scanPreviewImg" alt="Preview of your uploaded meal photo">
               <div class="scan-preview-actions">
-                <button class="btn btn-primary btn-sm" id="scanAnalyzeBtn" style="flex:1;justify-content:center;gap:8px;"><i class="fa-solid fa-wand-magic-sparkles"></i> Analyze with Gemini Vision</button>
+                <button class="btn btn-primary btn-sm" id="scanAnalyzeBtn" style="flex:1;justify-content:center;gap:8px;"><i class="fa-solid fa-wand-magic-sparkles"></i> ANALYZE With AI</button>
                 <button class="btn btn-secondary btn-sm" id="scanResetBtn" title="Reset Image"><i class="fa-solid fa-rotate-left"></i></button>
               </div>
             </div>
@@ -316,9 +320,9 @@
 
           <div class="scan-result-panel" id="scanResultPanel">
             <div class="gen-empty-state" style="border:none;padding:50px 20px;">
-              <i class="fa-solid fa-camera-retro"></i>
+              <i class="fa-solid fa-utensils" style="font-size:2.5rem;color:var(--text-muted);"></i>
               <h4>No photo analyzed yet</h4>
-              <p>Upload a meal photo, select a sample plate, or type a meal name to see Gemini AI vision dish identification & macronutrient breakdown.</p>
+              <p>Upload a meal photo, select a sample plate, or type a meal name to run Gemini AI vision dish identification & macronutrient breakdown.</p>
             </div>
           </div>
         </div>
@@ -342,29 +346,10 @@
 </div>
 
 <!-- ===== FLOATING AI BUTTON ===== -->
-<a href="ai-assistant.html" class="floating-ai-btn" aria-label="AI Assistant">
-  <i class="fa-regular fa-robot"></i>
+<a href="ai-assistant.html" class="floating-ai-btn" id="chatbotFab" aria-label="Smart Lishe AI Assistant" title="Open Smart Lishe AI Assistant">
+  <i class="fa-solid fa-robot"></i>
+  <span class="ping" style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:var(--char,#2e7d32);border:2px solid #fff;"></span>
 </a>
-
-<!-- ===== CHATBOT ===== -->
-<button class="chatbot-fab" id="chatbotFab"><i class="fa-solid fa-robot"></i><span class="ping"></span></button>
-<div class="chatbot-panel" id="chatbotPanel">
-  <div class="chatbot-head">
-    <div class="ai-avatar"><i class="fa-solid fa-robot"></i></div>
-    <div class="info"><strong>Smart Lishe Assistant</strong><span>Online</span></div>
-    <button class="chatbot-close" id="chatbotClose"><i class="fa-solid fa-xmark"></i></button>
-  </div>
-  <div class="chatbot-body" id="chatbotBody"></div>
-  <div class="chatbot-suggestions" id="chatbotSuggestions">
-    <button class="chip-suggestion" data-q="weight loss">Weight loss tips</button>
-    <button class="chip-suggestion" data-q="diabetes meal">Diabetes-friendly meal</button>
-    <button class="chip-suggestion" data-q="water intake">How much water?</button>
-  </div>
-  <div class="chatbot-input-row">
-    <input type="text" id="chatbotInput" placeholder="Ask about meals, health, recipes...">
-    <button class="chatbot-send" id="chatbotSend"><i class="fa-solid fa-paper-plane"></i></button>
-  </div>
-</div>
 
 <button class="scroll-top-btn" id="scrollTopBtn"><i class="fa-solid fa-arrow-up"></i></button>
 <div class="toast-stack" id="toastStack"></div>
@@ -520,8 +505,6 @@
     if (!zone) return;
 
     var fileInput = document.getElementById('scanFileInput');
-    var cameraBtn = document.getElementById('cameraBtn');
-    var cameraInput = document.getElementById('scanCameraInput');
     var previewWrap = document.getElementById('scanPreviewWrap');
     var previewImg = document.getElementById('scanPreviewImg');
     var analyzeBtn = document.getElementById('scanAnalyzeBtn');
@@ -535,6 +518,8 @@
 
     var currentImageData = null;
     var selectedDishName = '';
+    var activePortionScale = 1.0;
+    var rawScanResult = null;
 
     // Sample fallback images & data for instant testing
     var sampleBank = {
@@ -617,6 +602,46 @@
             { item: "Fresh Tomato-Onion Kachumbari", approx_grams: 60, calories: 25 }
           ]
         }
+      },
+      "Chapati & Dengu Curry": {
+        img: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=600&q=80",
+        data: {
+          food_identified: "Whole-Wheat Chapati with Stewed Green Grams (Ndengu)",
+          confidence_score: 93,
+          description: "Soft layered Kenyan chapati paired with rich plant-based green gram (mung bean) coconut curry gravy.",
+          estimated_calories: 520,
+          portion_size: "2 Chapatis + Bowl of Dengu (~420g)",
+          macronutrients: { carbs: "74g", protein: "21g", fats: "14g", fiber: "11g" },
+          glycemic_index: "Medium",
+          key_vitamins: ["B-Vitamins", "Folate", "Iron", "Magnesium", "Zinc"],
+          nutritional_grade: "A",
+          health_recommendation: "High-protein plant meal rich in complex fibers. Pair with fresh kachumbari to improve non-heme iron absorption.",
+          dish_breakdown: [
+            { item: "Whole Wheat Chapati (2 pcs)", approx_grams: 140, calories: 290 },
+            { item: "Stewed Green Grams (Ndengu)", approx_grams: 240, calories: 205 },
+            { item: "Coconut Onion Gravy", approx_grams: 40, calories: 25 }
+          ]
+        }
+      },
+      "Kienyeji Chicken & Managu": {
+        img: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80",
+        data: {
+          food_identified: "Boiled Kienyeji Chicken Stew with Managu Greens & Brown Ugali",
+          confidence_score: 97,
+          description: "Organic indigenous Kenyan free-range chicken stewed with indigenous nightshade greens (managu) and high-fibre brown millet ugali.",
+          estimated_calories: 620,
+          portion_size: "Full Plate (~460g)",
+          macronutrients: { carbs: "56g", protein: "42g", fats: "16g", fiber: "10g" },
+          glycemic_index: "Low",
+          key_vitamins: ["Vitamin A", "Vitamin C", "Calcium", "Iron", "Zinc", "B12"],
+          nutritional_grade: "A+",
+          health_recommendation: "Top-tier nutrient dense immunity-boosting meal. Extremely rich in bioavailable iron and lean muscle protein.",
+          dish_breakdown: [
+            { item: "Kienyeji Free-Range Chicken Drum & Thigh", approx_grams: 180, calories: 280 },
+            { item: "Brown Millet Ugali", approx_grams: 180, calories: 230 },
+            { item: "Sautéed Managu Greens", approx_grams: 100, calories: 110 }
+          ]
+        }
       }
     };
 
@@ -629,10 +654,11 @@
       reader.onload = function(e) {
         currentImageData = e.target.result;
         selectedDishName = '';
+        activePortionScale = 1.0;
         if (previewImg) previewImg.src = currentImageData;
         if (previewWrap) previewWrap.classList.add('show');
         if (resultPanel) {
-          resultPanel.innerHTML = '<div class="gen-empty-state" style="border:none;padding:50px 20px;"><i class="fa-solid fa-circle-check" style="color:var(--sukuma);"></i><h4>Photo Ready for AI Vision</h4><p>Click <strong>"Analyze with Gemini Vision"</strong> below to run dish identification and macro breakdown.</p></div>';
+          resultPanel.innerHTML = '<div class="gen-empty-state" style="border:none;padding:50px 20px;"><i class="fa-solid fa-circle-check" style="color:var(--sukuma);font-size:2.2rem;"></i><h4 style="margin-top:10px;">Photo Ready for AI Vision</h4><p>Click <strong>"ANALYZE With AI"</strong> below to run dish identification and macro breakdown.</p></div>';
         }
       };
       reader.readAsDataURL(file);
@@ -648,16 +674,6 @@
       });
     }
 
-    if (cameraBtn && cameraInput) {
-      cameraBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        cameraInput.click();
-      });
-      cameraInput.addEventListener('change', function() {
-        if (cameraInput.files[0]) processImageFile(cameraInput.files[0]);
-      });
-    }
-
     sampleBtns.forEach(function(btn) {
       btn.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -665,11 +681,12 @@
         var sampleInfo = sampleBank[dishName];
         if (sampleInfo) {
           selectedDishName = dishName;
+          activePortionScale = 1.0;
           previewImg.src = sampleInfo.img;
           currentImageData = sampleInfo.img;
           if (previewWrap) previewWrap.classList.add('show');
           if (resultPanel) {
-            resultPanel.innerHTML = '<div class="gen-empty-state" style="border:none;padding:40px 20px;"><i class="fa-solid fa-circle-check" style="color:var(--sukuma);font-size:2.2rem;"></i><h4 style="margin-top:10px;">' + dishName + ' Loaded</h4><p>Click <strong>"Analyze with Gemini Vision"</strong> to run multimodal vision analysis on this plate.</p></div>';
+            resultPanel.innerHTML = '<div class="gen-empty-state" style="border:none;padding:40px 20px;"><i class="fa-solid fa-circle-check" style="color:var(--sukuma);font-size:2.2rem;"></i><h4 style="margin-top:10px;">' + dishName + ' Loaded</h4><p>Click <strong>"ANALYZE With AI"</strong> to run multimodal vision analysis on this plate.</p></div>';
           }
           showToast('Loaded sample plate: ' + dishName);
         }
@@ -684,6 +701,7 @@
         return;
       }
       selectedDishName = query;
+      activePortionScale = 1.0;
       currentImageData = 'text_query';
       runAnalysisCall(query);
     }
@@ -719,12 +737,13 @@
       resetBtn.addEventListener('click', function() {
         currentImageData = null;
         selectedDishName = '';
+        activePortionScale = 1.0;
+        rawScanResult = null;
         if (previewWrap) previewWrap.classList.remove('show');
         if (fileInput) fileInput.value = '';
-        if (cameraInput) cameraInput.value = '';
         if (manualInput) manualInput.value = '';
         if (resultPanel) {
-          resultPanel.innerHTML = '<div class="gen-empty-state" style="border:none;padding:50px 20px;"><i class="fa-solid fa-camera-retro"></i><h4>No photo analyzed yet</h4><p>Upload a meal photo, select a sample plate, or type a meal name to see Gemini AI vision dish identification & macronutrient breakdown.</p></div>';
+          resultPanel.innerHTML = '<div class="gen-empty-state" style="border:none;padding:50px 20px;"><i class="fa-solid fa-utensils" style="font-size:2.5rem;color:var(--text-muted);"></i><h4>No photo analyzed yet</h4><p>Upload a meal photo, select a sample plate, or type a meal name to see Gemini AI vision dish identification & macronutrient breakdown.</p></div>';
         }
       });
     }
@@ -791,35 +810,58 @@
           };
         }
 
+        rawScanResult = data;
         setTimeout(function() {
-          renderScanResultData(data);
+          renderScanResultData(data, activePortionScale);
         }, 300);
       })
       .catch(function(err) {
         console.warn('NutriScan API call error, rendering rich fallback data:', err);
         clearInterval(interval);
         var fallback = dishName && sampleBank[dishName] ? sampleBank[dishName].data : sampleBank["Ugali, Sukuma Wiki & Tilapia"].data;
-        renderScanResultData(fallback);
+        rawScanResult = fallback;
+        renderScanResultData(fallback, activePortionScale);
       });
     }
 
     if (analyzeBtn) {
       analyzeBtn.addEventListener('click', function() {
         if (!currentImageData) {
-          showToast('Please upload, snap a photo, or select a sample plate first.', 'error');
+          showToast('Please upload an image or select a sample plate first.', 'error');
           return;
         }
         runAnalysisCall();
       });
     }
 
-    function renderScanResultData(res) {
+    function renderScanResultData(res, scale) {
+      scale = scale || 1.0;
       var foodName = res.food_identified || 'Kenyan Meal Plate';
       var confidence = res.confidence_score || 94;
       var desc = res.description || 'Nutrient-dense meal evaluated with AI vision.';
-      var calories = res.estimated_calories || 540;
-      var portion = res.portion_size || 'Standard Plate (~450g)';
-      var macros = res.macronutrients || { carbs: '64g', protein: '32g', fats: '14g', fiber: '8g' };
+      var baseCalories = res.estimated_calories || 540;
+      var scaledCalories = Math.round(baseCalories * scale);
+      
+      var basePortion = res.portion_size || 'Standard Plate (~450g)';
+      var portionLabel = scale === 0.75 ? 'Small Portion (~330g)' : scale === 1.25 ? 'Large Portion (~560g)' : scale === 1.5 ? 'Feast Portion (~670g)' : basePortion;
+
+      function parseMacroNum(mStr, fallback) {
+        if (typeof mStr === 'number') return mStr;
+        if (!mStr) return fallback;
+        var match = mStr.match(/([\d.]+)/);
+        return match ? parseFloat(match[1]) : fallback;
+      }
+
+      var rawCarbs = parseMacroNum(res.macronutrients ? res.macronutrients.carbs : null, 64);
+      var rawProtein = parseMacroNum(res.macronutrients ? res.macronutrients.protein : null, 32);
+      var rawFats = parseMacroNum(res.macronutrients ? res.macronutrients.fats : null, 14);
+      var rawFiber = parseMacroNum(res.macronutrients ? res.macronutrients.fiber : null, 8);
+
+      var scaledCarbs = Math.round(rawCarbs * scale) + 'g';
+      var scaledProtein = Math.round(rawProtein * scale) + 'g';
+      var scaledFats = Math.round(rawFats * scale) + 'g';
+      var scaledFiber = Math.round(rawFiber * scale) + 'g';
+
       var grade = res.nutritional_grade || 'A+';
       var glycemic = res.glycemic_index || 'Low to Medium';
       var vitamins = res.key_vitamins || ['Vitamin A', 'Iron', 'Calcium', 'Vitamin C'];
@@ -834,11 +876,13 @@
 
       var breakdownHtml = '';
       breakdown.forEach(function(b) {
-        var pct = Math.min(100, Math.round((b.calories / calories) * 100));
+        var scaledGrams = Math.round((b.approx_grams || 100) * scale);
+        var scaledItemCal = Math.round((b.calories || 100) * scale);
+        var pct = Math.min(100, Math.round((scaledItemCal / scaledCalories) * 100));
         breakdownHtml += '<div style="margin-bottom:10px;">' +
           '<div style="display:flex;justify-content:space-between;font-size:0.83rem;margin-bottom:4px;">' +
-            '<span><strong>' + b.item + '</strong> <span style="color:var(--text-muted);font-size:0.75rem;">(' + (b.approx_grams || 100) + 'g)</span></span>' +
-            '<span style="font-family:var(--font-mono);font-weight:600;">' + b.calories + ' kcal</span>' +
+            '<span><strong>' + b.item + '</strong> <span style="color:var(--text-muted);font-size:0.75rem;">(' + scaledGrams + 'g)</span></span>' +
+            '<span style="font-family:var(--font-mono);font-weight:600;">' + scaledItemCal + ' kcal</span>' +
           '</div>' +
           '<div style="height:6px;background:var(--bg-card);border-radius:10px;overflow:hidden;">' +
             '<div style="height:100%;width:' + pct + '%;background:var(--sukuma);border-radius:10px;"></div>' +
@@ -851,6 +895,33 @@
         vitaminsHtml += '<span style="background:var(--bg-card);border:1px solid var(--basket-line);padding:4px 10px;border-radius:14px;font-size:0.74rem;font-weight:600;"><i class="fa-solid fa-leaf" style="color:var(--sukuma);margin-right:4px;"></i>' + v + '</span>';
       });
 
+      // User Health Condition Check
+      var userProfile = Store.get('userProfile', {});
+      var savedProfile = JSON.parse(localStorage.getItem('smartlishe_profile') || '{}');
+      var userConditions = userProfile.healthConditions || savedProfile.conditions || [];
+      var conditionAlertHtml = '';
+
+      var isDiabetic = userConditions.some(function(c) { return /diabet/i.test(c); });
+      var isHypertensive = userConditions.some(function(c) { return /hypertens|bp|pressure/i.test(c); });
+      var isWeightLoss = userConditions.some(function(c) { return /weight|slim|loss/i.test(c); });
+
+      if (isDiabetic && Math.round(rawCarbs * scale) > 55) {
+        conditionAlertHtml = '<div style="background:rgba(234,88,12,0.1);border:1px solid #f97316;color:#c2410c;padding:12px 14px;border-radius:12px;margin-bottom:16px;font-size:0.83rem;display:flex;gap:10px;align-items:flex-start;">' +
+          '<i class="fa-solid fa-triangle-exclamation" style="font-size:1.2rem;margin-top:2px;color:#ea580c;"></i>' +
+          '<div><strong>Diabetes Profile Notice:</strong> This meal contains ~' + Math.round(rawCarbs * scale) + 'g carbs. To manage post-meal blood sugar spikes, pair with extra dark leafy greens (Managu or Sukuma) and avoid sweetened drinks.</div>' +
+        '</div>';
+      } else if (isHypertensive) {
+        conditionAlertHtml = '<div style="background:rgba(59,130,246,0.1);border:1px solid #3b82f6;color:#1d4ed8;padding:12px 14px;border-radius:12px;margin-bottom:16px;font-size:0.83rem;display:flex;gap:10px;align-items:flex-start;">' +
+          '<i class="fa-solid fa-heart-pulse" style="font-size:1.2rem;margin-top:2px;color:#2563eb;"></i>' +
+          '<div><strong>Hypertension Profile Notice:</strong> Great potassium content in this meal! Ensure low sodium during stew preparation and stay hydrated.</div>' +
+        '</div>';
+      } else if (isWeightLoss && scaledCalories > 600) {
+        conditionAlertHtml = '<div style="background:rgba(16,185,129,0.1);border:1px solid #10b981;color:#047857;padding:12px 14px;border-radius:12px;margin-bottom:16px;font-size:0.83rem;display:flex;gap:10px;align-items:flex-start;">' +
+          '<i class="fa-solid fa-bullseye" style="font-size:1.2rem;margin-top:2px;color:#059669;"></i>' +
+          '<div><strong>Weight Management Tip:</strong> This portion is ~' + scaledCalories + ' kcal. Consider scaling down to a Small (0.75x) portion if targeting a daily deficit.</div>' +
+        '</div>';
+      }
+
       if (resultPanel) {
         resultPanel.innerHTML =
           '<div class="scan-result-head">' +
@@ -858,7 +929,7 @@
               '<h3>' + foodName + '</h3>' +
               '<div style="display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap;">' +
                 '<span class="confidence-tag"><i class="fa-solid fa-wand-magic-sparkles" style="color:var(--sukuma);"></i> Gemini 2.5 Flash · ' + confidence + '% Confidence</span>' +
-                '<span style="font-size:0.75rem;color:var(--text-muted);"><i class="fa-solid fa-weight-scale"></i> ' + portion + '</span>' +
+                '<span style="font-size:0.75rem;color:var(--text-muted);"><i class="fa-solid fa-weight-scale"></i> ' + portionLabel + '</span>' +
               '</div>' +
             '</div>' +
             '<div style="text-align:center;background:var(--bg-card);border:2px solid ' + gradeColor + ';border-radius:14px;padding:8px 16px;">' +
@@ -867,13 +938,28 @@
             '</div>' +
           '</div>' +
 
-          '<p style="font-size:0.88rem;color:var(--text-secondary);margin-bottom:18px;">' + desc + '</p>' +
+          '<p style="font-size:0.88rem;color:var(--text-secondary);margin-bottom:14px;">' + desc + '</p>' +
+
+          conditionAlertHtml +
+
+          '<!-- PORTION MULTIPLIER BUTTONS -->' +
+          '<div style="background:var(--bg-card);border:1px solid var(--basket-line);border-radius:12px;padding:10px 14px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">' +
+            '<div style="font-size:0.8rem;font-weight:700;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">' +
+              '<i class="fa-solid fa-sliders" style="color:var(--sukuma);"></i> Adjust Portion Size:' +
+            '</div>' +
+            '<div style="display:flex;gap:4px;flex-wrap:wrap;">' +
+              '<button class="portion-btn ' + (scale === 0.75 ? 'active' : '') + '" data-scale="0.75" style="padding:4px 10px;font-size:0.75rem;border-radius:8px;border:1px solid var(--basket-line);background:' + (scale === 0.75 ? 'var(--sukuma)' : 'var(--bg-elevated)') + ';color:' + (scale === 0.75 ? '#fff' : 'var(--text-primary)') + ';cursor:pointer;font-weight:600;">Small (0.75x)</button>' +
+              '<button class="portion-btn ' + (scale === 1.0 ? 'active' : '') + '" data-scale="1.0" style="padding:4px 10px;font-size:0.75rem;border-radius:8px;border:1px solid var(--basket-line);background:' + (scale === 1.0 ? 'var(--sukuma)' : 'var(--bg-elevated)') + ';color:' + (scale === 1.0 ? '#fff' : 'var(--text-primary)') + ';cursor:pointer;font-weight:600;">Medium (1.0x)</button>' +
+              '<button class="portion-btn ' + (scale === 1.25 ? 'active' : '') + '" data-scale="1.25" style="padding:4px 10px;font-size:0.75rem;border-radius:8px;border:1px solid var(--basket-line);background:' + (scale === 1.25 ? 'var(--sukuma)' : 'var(--bg-elevated)') + ';color:' + (scale === 1.25 ? '#fff' : 'var(--text-primary)') + ';cursor:pointer;font-weight:600;">Large (1.25x)</button>' +
+              '<button class="portion-btn ' + (scale === 1.5 ? 'active' : '') + '" data-scale="1.5" style="padding:4px 10px;font-size:0.75rem;border-radius:8px;border:1px solid var(--basket-line);background:' + (scale === 1.5 ? 'var(--sukuma)' : 'var(--bg-elevated)') + ';color:' + (scale === 1.5 ? '#fff' : 'var(--text-primary)') + ';cursor:pointer;font-weight:600;">Feast (1.5x)</button>' +
+            '</div>' +
+          '</div>' +
 
           '<div class="scan-macro-grid">' +
-            '<div class="scan-macro-cell"><div class="val" style="color:var(--sukuma);">' + calories + '</div><div class="lbl">Calories</div></div>' +
-            '<div class="scan-macro-cell"><div class="val">' + (macros.protein || '30g') + '</div><div class="lbl">Protein</div></div>' +
-            '<div class="scan-macro-cell"><div class="val">' + (macros.carbs || '60g') + '</div><div class="lbl">Carbs</div></div>' +
-            '<div class="scan-macro-cell"><div class="val">' + (macros.fats || '14g') + '</div><div class="lbl">Fats</div></div>' +
+            '<div class="scan-macro-cell"><div class="val" style="color:var(--sukuma);">' + scaledCalories + '</div><div class="lbl">Calories</div></div>' +
+            '<div class="scan-macro-cell"><div class="val">' + scaledProtein + '</div><div class="lbl">Protein</div></div>' +
+            '<div class="scan-macro-cell"><div class="val">' + scaledCarbs + '</div><div class="lbl">Carbs</div></div>' +
+            '<div class="scan-macro-cell"><div class="val">' + scaledFats + '</div><div class="lbl">Fats</div></div>' +
           '</div>' +
 
           '<div style="background:var(--bg-card);border-radius:12px;padding:16px;margin-bottom:18px;border:1px solid var(--basket-line);">' +
@@ -890,12 +976,21 @@
           '</div>' +
 
           '<div class="scan-tip-box" style="margin-bottom:20px;">' +
-            '<strong><i class="fa-solid fa-user-doctor" style="color:var(--sukuma);margin-right:6px;"></i> Nutritionist Recommendation:</strong><br>' + tip +
+            '<strong><i class="fa-solid fa-user-doctor" style="color:var(--sukuma);margin-right:6px;"></i> Clinical Nutritionist Recommendation:</strong><br>' + tip +
           '</div>' +
 
           '<div style="display:flex;gap:12px;flex-wrap:wrap;">' +
             '<button class="btn btn-primary btn-sm" id="logMealBtn" style="flex:1;justify-content:center;gap:8px;"><i class="fa-solid fa-circle-plus"></i> Log to Daily Nutrition Tracker</button>' +
           '</div>';
+
+        resultPanel.querySelectorAll('.portion-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            var newScale = parseFloat(btn.getAttribute('data-scale'));
+            activePortionScale = newScale;
+            renderScanResultData(rawScanResult || res, newScale);
+            showToast('Portion updated to ' + (newScale === 0.75 ? 'Small' : newScale === 1.25 ? 'Large' : newScale === 1.5 ? 'Feast' : 'Medium'));
+          });
+        });
 
         var logBtn = document.getElementById('logMealBtn');
         if (logBtn) {
@@ -903,11 +998,11 @@
             var existingLogs = Store.get('meal_logs', []);
             var newEntry = {
               id: 'log-' + Date.now(),
-              name: foodName,
-              calories: calories,
-              protein: macros.protein || '30g',
-              carbs: macros.carbs || '60g',
-              fats: macros.fats || '14g',
+              name: foodName + (scale !== 1.0 ? ' (' + portionLabel + ')' : ''),
+              calories: scaledCalories,
+              protein: scaledProtein,
+              carbs: scaledCarbs,
+              fats: scaledFats,
               grade: grade,
               timestamp: new Date().toISOString()
             };
@@ -917,7 +1012,7 @@
             logBtn.style.background = '#10b981';
             logBtn.disabled = true;
             renderRecentScansHistory();
-            showToast('Meal logged successfully to your tracker!');
+            showToast('Meal logged successfully to your daily tracker!');
           });
         }
       }
@@ -1069,6 +1164,16 @@
     }, 700 + Math.random() * 500);
   }
 
+  // ---------- CHATBOT ----------
+  function initChatbot() {
+    var fab = document.getElementById('chatbotFab');
+    if (fab) {
+      fab.addEventListener('click', function(e) {
+        window.location.href = 'ai-assistant.html';
+      });
+    }
+  }
+
   // ---------- NOTIFICATIONS ----------
   function initNotifications() {
     var btn = document.getElementById('notifBtn');
@@ -1105,5 +1210,7 @@
 
 })();
 </script>
+<script src="global-search.js"></script>
+<script src="../support-widget.js"></script>
 </body>
 </html>

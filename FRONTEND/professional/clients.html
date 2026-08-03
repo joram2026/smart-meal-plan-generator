@@ -92,6 +92,7 @@
         <a href="billing.html" class="nav-link"><i class="fa-solid fa-credit-card"></i> Billing</a>
         <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> Settings</a>
         <a href="ai-assistant.html" class="nav-link"><i class="fa-solid fa-robot"></i> AI Assistant</a>
+        <a href="#" class="nav-link open-support-btn" onclick="event.preventDefault(); window.openSupportModal();"><i class="fa-solid fa-headset" style="color:var(--sukuma);"></i> Support &amp; Tickets</a>
       </nav>
       <div class="sidebar-footer"><a href="../auth/logout.html" class="nav-link" style="color:var(--char);"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></div>
     </aside>
@@ -790,7 +791,7 @@
 
       try {
         await apiRequest('/professional/clients', 'POST', payload);
-        showToast('Client invited successfully! An email has been sent.');
+        showToast(`Client invitation sent to ${email}! They will see an invitation in their Notifications to accept or decline.`);
         document.getElementById('wizardForm').reset();
         document.querySelectorAll('.chip-multiselect').forEach(c => {
           c.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
@@ -867,5 +868,6 @@
     // Preload the first tab's data (already loaded via loadClients)
     // For other tabs, they load when switched.
   </script>
+  <script src="../support-widget.js"></script>
 </body>
 </html>

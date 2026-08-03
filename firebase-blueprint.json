@@ -117,6 +117,25 @@
       },
       "required": ["name", "ingredients"]
     },
+    "foods": {
+      "title": "Kenyan Food Dataset",
+      "description": "Nutritional database of Kenyan ingredients and foods",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "calories_100g": { "type": "number" },
+        "carbs_g": { "type": "number" },
+        "protein_g": { "type": "number" },
+        "fats_g": { "type": "number" },
+        "fiber_g": { "type": "number" },
+        "iron_mg": { "type": "number" },
+        "vitamin_c_mg": { "type": "number" },
+        "glycemic_index": { "type": "string" }
+      },
+      "required": ["name"]
+    },
     "audit_logs": {
       "title": "Audit Log",
       "description": "Security and activity logs",
@@ -127,6 +146,104 @@
         "timestamp": { "type": "string" }
       },
       "required": ["action"]
+    },
+    "support_tickets": {
+      "title": "Support Ticket",
+      "description": "User help requests and admin support communications",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "user_name": { "type": "string" },
+        "user_email": { "type": "string" },
+        "user_role": { "type": "string" },
+        "subject": { "type": "string" },
+        "category": { "type": "string" },
+        "message": { "type": "string" },
+        "status": { "type": "string" },
+        "priority": { "type": "string" },
+        "created_at": { "type": "string" },
+        "replies": { "type": "array" }
+      },
+      "required": ["user_email", "subject", "message"]
+    },
+    "notifications": {
+      "title": "User Notification",
+      "description": "System alerts, support replies, and broadcast announcements",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "user_email": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "type": { "type": "string" },
+        "read": { "type": "boolean" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["title", "message"]
+    },
+    "broadcasts": {
+      "title": "System Broadcast Notice",
+      "description": "Global admin announcements to all app users",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "type": { "type": "string" },
+        "created_by": { "type": "string" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["title", "message"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "users",
+      "description": "User accounts and profiles"
+    },
+    "/meal_plans/{planId}": {
+      "schema": "meal_plans",
+      "description": "User meal plans"
+    },
+    "/goals/{goalId}": {
+      "schema": "goals",
+      "description": "User health goals"
+    },
+    "/water_logs/{logId}": {
+      "schema": "water_logs",
+      "description": "Water intake logs"
+    },
+    "/shopping_lists/{listId}": {
+      "schema": "shopping_lists",
+      "description": "User shopping lists"
+    },
+    "/appointments/{appointmentId}": {
+      "schema": "appointments",
+      "description": "Nutritionist appointments"
+    },
+    "/reports/{reportId}": {
+      "schema": "reports",
+      "description": "Client reports"
+    },
+    "/recipes/{recipeId}": {
+      "schema": "recipes",
+      "description": "Healthy recipes catalog"
+    },
+    "/foods/{foodId}": {
+      "schema": "foods",
+      "description": "Kenyan foods and nutritional dataset catalog"
+    },
+    "/support_tickets/{ticketId}": {
+      "schema": "support_tickets",
+      "description": "User and professional support tickets"
+    },
+    "/notifications/{notifId}": {
+      "schema": "notifications",
+      "description": "User notification alerts"
+    },
+    "/broadcasts/{broadcastId}": {
+      "schema": "broadcasts",
+      "description": "System broadcast announcements"
     }
   }
 }

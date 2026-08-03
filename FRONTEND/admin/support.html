@@ -56,7 +56,7 @@
 (function() {
   const token = localStorage.getItem('access_token');
   const role = localStorage.getItem('smartlishe_role') || localStorage.getItem('role');
-  if (!token || (role && role.toLowerCase() !== 'admin')) { window.location.href = '../login.html'; }
+  if (!token || (role && role.toLowerCase() !== 'admin')) { window.location.href = '../auth/login.html'; }
 })();
 </script>
 
@@ -104,7 +104,7 @@
       <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> Settings</a>
       <a href="profile.html" class="nav-link"><i class="fa-solid fa-user-circle"></i> Profile</a>
       <div style="margin-top:12px;">
-        <a href="#" class="nav-link" onclick="event.preventDefault(); localStorage.clear(); sessionStorage.clear(); window.location.href='../auth/login.html';" style="color:var(--char);">
+        <a href="#" class="nav-link" onclick="event.preventDefault(); logout();" style="color:var(--char);">
           <i class="fa-solid fa-right-from-bracket"></i> Logout
         </a>
       </div>
@@ -147,18 +147,18 @@
 
     <!-- Stats -->
     <div class="support-stats">
-      <div class="stat-mini"><div class="val">23</div><div class="lbl">Open Tickets</div></div>
-      <div class="stat-mini"><div class="val">8</div><div class="lbl">Bug Reports</div></div>
-      <div class="stat-mini"><div class="val">12</div><div class="lbl">Suggestions</div></div>
-      <div class="stat-mini"><div class="val">2</div><div class="lbl">Resolved Today</div></div>
+      <div class="stat-mini"><div class="val" id="statOpenTickets">0</div><div class="lbl">Open Tickets</div></div>
+      <div class="stat-mini"><div class="val" id="statPendingTickets">0</div><div class="lbl">Pending Action</div></div>
+      <div class="stat-mini"><div class="val" id="statResolvedTickets">0</div><div class="lbl">Resolved Tickets</div></div>
+      <div class="stat-mini"><div class="val" id="statTotalTickets">0</div><div class="lbl">Total Support Tickets</div></div>
     </div>
 
     <!-- Tabs -->
     <div class="tabs" id="supportTabs">
-      <button class="tab-btn active" data-tab="messages"><i class="fa-regular fa-envelope"></i> Messages</button>
-      <button class="tab-btn" data-tab="feedback"><i class="fa-regular fa-comment"></i> Feedback</button>
-      <button class="tab-btn" data-tab="bugs"><i class="fa-solid fa-bug"></i> Bug Reports</button>
-      <button class="tab-btn" data-tab="suggestions"><i class="fa-regular fa-lightbulb"></i> Suggestions</button>
+      <button class="tab-btn active" data-tab="messages"><i class="fa-regular fa-envelope"></i> Support Tickets (<span id="ticketCountBadge">0</span>)</button>
+      <button class="tab-btn" data-tab="feedback"><i class="fa-regular fa-comment"></i> Feedback &amp; Reviews</button>
+      <button class="tab-btn" data-tab="bugs"><i class="fa-solid fa-bug"></i> Technical &amp; AI Issues</button>
+      <button class="tab-btn" data-tab="suggestions"><i class="fa-regular fa-lightbulb"></i> Feature Requests</button>
     </div>
 
     <!-- ===== MESSAGES TAB ===== -->
@@ -166,11 +166,19 @@
       <div class="card" style="padding:0;overflow:hidden;">
         <div class="table-wrap">
           <table class="table">
-            <thead><tr><th>From</th><th>Subject</th><th>Date</th><th>Status</th><th style="text-align:right;">Actions</th></tr></thead>
-            <tbody>
-              <tr><td><strong>James Kamau</strong></td><td>Billing question</td><td>Today, 10:30 AM</td><td><span class="badge badge-warning">Open</span></td><td style="text-align:right;"><div class="action-btns"><button class="btn btn-ghost btn-sm"><i class="fa-regular fa-eye"></i></button><button class="btn btn-ghost btn-sm"><i class="fa-regular fa-reply"></i></button></div></td></tr>
-              <tr><td><strong>Mary Wanjiru</strong></td><td>Account access issue</td><td>Yesterday, 4:15 PM</td><td><span class="badge badge-success">Resolved</span></td><td style="text-align:right;"><div class="action-btns"><button class="btn btn-ghost btn-sm"><i class="fa-regular fa-eye"></i></button></div></td></tr>
-              <tr><td><strong>Peter Ochieng</strong></td><td>Meal planner not syncing</td><td>Yesterday, 11:20 AM</td><td><span class="badge badge-warning">Open</span></td><td style="text-align:right;"><div class="action-btns"><button class="btn btn-ghost btn-sm"><i class="fa-regular fa-eye"></i></button><button class="btn btn-ghost btn-sm"><i class="fa-regular fa-reply"></i></button></div></td></tr>
+            <thead>
+              <tr>
+                <th>User / Email</th>
+                <th>Role &amp; Category</th>
+                <th>Subject &amp; Message</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminTicketsTableBody">
+              <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-secondary);">Loading support tickets...</td></tr>
             </tbody>
           </table>
         </div>
@@ -182,25 +190,25 @@
       <div class="card" style="padding:0;overflow:hidden;">
         <div class="table-wrap">
           <table class="table">
-            <thead><tr><th>User</th><th>Feedback</th><th>Date</th><th style="text-align:right;">Actions</th></tr></thead>
+            <thead><tr><th>User</th><th>Feedback &amp; Rating</th><th>Date</th><th style="text-align:right;">Actions</th></tr></thead>
             <tbody>
-              <tr><td><strong>Grace Akinyi</strong></td><td>Love the new recipe suggestions!</td><td>Today</td><td style="text-align:right;"><button class="btn btn-ghost btn-sm"><i class="fa-regular fa-thumbs-up"></i></button></td></tr>
-              <tr><td><strong>David Otieno</strong></td><td>Would like more keto options</td><td>Yesterday</td><td style="text-align:right;"><button class="btn btn-ghost btn-sm"><i class="fa-regular fa-thumbs-up"></i></button></td></tr>
+              <tr><td><strong>Joram Kiprop</strong> (user@example.com)</td><td>NutriScan AI Vision scanner speed is excellent. Sukuma Wiki recognition was instant.</td><td>Today</td><td style="text-align:right;"><button class="btn btn-ghost btn-sm" onclick="showToast('Feedback noted!')"><i class="fa-regular fa-thumbs-up"></i></button></td></tr>
+              <tr><td><strong>Amina Ochieng</strong> (client@example.com)</td><td>App interface is super clean and easy to navigate for my diet plan.</td><td>Yesterday</td><td style="text-align:right;"><button class="btn btn-ghost btn-sm" onclick="showToast('Feedback noted!')"><i class="fa-regular fa-thumbs-up"></i></button></td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- ===== BUG REPORTS TAB ===== -->
+    <!-- ===== TECHNICAL / BUGS TAB ===== -->
     <div class="tab-panel" id="tab-bugs">
       <div class="card" style="padding:0;overflow:hidden;">
         <div class="table-wrap">
           <table class="table">
-            <thead><tr><th>Reported By</th><th>Issue</th><th>Status</th><th style="text-align:right;">Actions</th></tr></thead>
+            <thead><tr><th>Reported By</th><th>Technical Category</th><th>Issue Summary</th><th>Status</th><th style="text-align:right;">Actions</th></tr></thead>
             <tbody>
-              <tr><td><strong>James Kamau</strong></td><td>Dashboard not loading on mobile</td><td><span class="badge badge-warning">Investigating</span></td><td style="text-align:right;"><button class="btn btn-ghost btn-sm"><i class="fa-regular fa-eye"></i></button></td></tr>
-              <tr><td><strong>Mary Wanjiru</strong></td><td>NutriScan crashing on upload</td><td><span class="badge badge-success">Fixed</span></td><td style="text-align:right;"><button class="btn btn-ghost btn-sm"><i class="fa-regular fa-eye"></i></button></td></tr>
+              <tr><td><strong>Dr. Wanjiru Njuguna</strong></td><td>Account Verification</td><td>License verification document review KNDI-8842</td><td><span class="badge badge-warning">Pending Review</span></td><td style="text-align:right;"><button class="btn btn-ghost btn-sm" onclick="showToast('Reviewing license...')"><i class="fa-regular fa-eye"></i></button></td></tr>
+              <tr><td><strong>Joram Kiprop</strong></td><td>NutriScan AI</td><td>Ugali calories calculation query</td><td><span class="badge badge-success">Resolved</span></td><td style="text-align:right;"><button class="btn btn-ghost btn-sm" onclick="showToast('Issue already resolved')"><i class="fa-regular fa-eye"></i></button></td></tr>
             </tbody>
           </table>
         </div>
@@ -214,13 +222,49 @@
           <table class="table">
             <thead><tr><th>From</th><th>Suggestion</th><th>Date</th><th style="text-align:right;">Actions</th></tr></thead>
             <tbody>
-              <tr><td><strong>Peter Ochieng</strong></td><td>Add meal prep timers</td><td>Today</td><td style="text-align:right;"><button class="btn btn-ghost btn-sm"><i class="fa-regular fa-thumbs-up"></i></button></td></tr>
-              <tr><td><strong>Faith Akinyi</strong></td><td>Weekly meal planning template</td><td>Yesterday</td><td style="text-align:right;"><button class="btn btn-ghost btn-sm"><i class="fa-regular fa-thumbs-up"></i></button></td></tr>
+              <tr><td><strong>Amina Ochieng</strong></td><td>M-Pesa automatic recurring billing STK prompts</td><td>Today</td><td style="text-align:right;"><button class="btn btn-ghost btn-sm" onclick="showToast('Suggestion recorded!')"><i class="fa-regular fa-thumbs-up"></i></button></td></tr>
+              <tr><td><strong>Dr. Wanjiru Njuguna</strong></td><td>Client weekly export to PDF report feature</td><td>Yesterday</td><td style="text-align:right;"><button class="btn btn-ghost btn-sm" onclick="showToast('Suggestion recorded!')"><i class="fa-regular fa-thumbs-up"></i></button></td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
+
+  </div>
+</div>
+
+<!-- Admin Ticket Reply Modal -->
+<div class="modal-overlay" id="adminReplyModal">
+  <div class="modal-card" style="max-width:600px;background:var(--bg-card);border-radius:16px;padding:24px;border:1px solid var(--basket-line);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;border-bottom:1px solid var(--basket-line);padding-bottom:12px;">
+      <h3 style="margin:0;font-size:1.15rem;display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-reply" style="color:var(--sukuma);"></i> Respond to Support Ticket</h3>
+      <button class="icon-btn" onclick="document.getElementById('adminReplyModal').classList.remove('open')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    
+    <div id="replyModalBody">
+      <div id="replyTicketPreview" style="background:var(--bg-elevated);padding:14px 18px;border-radius:10px;margin-bottom:16px;border:1px solid var(--basket-line);"></div>
+      
+      <div class="form-group" style="margin-bottom:16px;">
+        <label style="display:block;font-weight:600;font-size:0.88rem;margin-bottom:6px;">Your Official Admin Reply</label>
+        <textarea id="adminReplyInput" rows="4" class="form-control" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--basket-line);background:var(--bg-card);color:var(--text-primary);" placeholder="Write clear support instructions or response for the user..."></textarea>
+      </div>
+
+      <div class="form-group" style="margin-bottom:20px;">
+        <label style="display:block;font-weight:600;font-size:0.88rem;margin-bottom:6px;">Update Ticket Status</label>
+        <select id="adminStatusSelect" class="form-control" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--basket-line);background:var(--bg-card);color:var(--text-primary);">
+          <option value="resolved">Resolved (Close Ticket)</option>
+          <option value="pending">Pending Further Details</option>
+          <option value="open">Keep Open</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;justify-content:flex-end;border-top:1px solid var(--basket-line);padding-top:16px;">
+      <button class="btn btn-secondary" onclick="document.getElementById('adminReplyModal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-primary" id="adminSendReplyBtn"><i class="fa-solid fa-paper-plane"></i> Send Reply to User</button>
+    </div>
+  </div>
+</div>
 
   </div>
 </div>
@@ -378,6 +422,134 @@ function initSearch() {
   });
 }
 
+let activeAdminTickets = [];
+let currentReplyTicketId = null;
+
+async function fetchAdminTickets() {
+  const tbody = document.getElementById('adminTicketsTableBody');
+  if (!tbody) return;
+  
+  try {
+    const token = localStorage.getItem('smartlishe_token') || localStorage.getItem('token') || '';
+    const res = await fetch('/api/admin/support', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    activeAdminTickets = data.data || [];
+
+    // Calculate stats
+    const openCount = activeAdminTickets.filter(t => t.status === 'open').length;
+    const pendingCount = activeAdminTickets.filter(t => t.status === 'pending').length;
+    const resolvedCount = activeAdminTickets.filter(t => t.status === 'resolved').length;
+
+    document.getElementById('statOpenTickets').textContent = openCount;
+    document.getElementById('statPendingTickets').textContent = pendingCount;
+    document.getElementById('statResolvedTickets').textContent = resolvedCount;
+    document.getElementById('statTotalTickets').textContent = activeAdminTickets.length;
+    document.getElementById('ticketCountBadge').textContent = activeAdminTickets.length;
+
+    if (!activeAdminTickets.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-secondary);">No support tickets submitted yet.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = activeAdminTickets.map(t => {
+      const statusClass = t.status === 'resolved' ? 'badge-success' : t.status === 'pending' ? 'badge-warning' : 'badge-warning';
+      const createdDate = t.created_at ? new Date(t.created_at).toLocaleString() : 'Recently';
+      const replyCount = t.replies ? t.replies.length : 0;
+
+      return `
+        <tr>
+          <td>
+            <strong>${t.user_name || 'User'}</strong>
+            <div style="font-size:0.78rem;color:var(--text-secondary);">${t.user_email || 'No Email'}</div>
+          </td>
+          <td>
+            <span class="badge" style="background:var(--bg-elevated);color:var(--text-primary);">${t.user_role || 'user'}</span>
+            <div style="font-size:0.78rem;color:var(--text-secondary);margin-top:2px;">${t.category || 'General'}</div>
+          </td>
+          <td>
+            <strong>${t.subject}</strong>
+            <div style="font-size:0.83rem;color:var(--text-secondary);max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.message}</div>
+            ${replyCount > 0 ? `<div style="font-size:0.75rem;color:var(--sukuma);margin-top:2px;"><i class="fa-solid fa-reply"></i> ${replyCount} admin reply(ies) sent</div>` : ''}
+          </td>
+          <td><span class="badge" style="background:${t.priority==='urgent'?'#fee2e2':'var(--bg-elevated)'};color:${t.priority==='urgent'?'#991b1b':'var(--text-primary)'};">${(t.priority || 'normal').toUpperCase()}</span></td>
+          <td><span class="badge ${statusClass}">${t.status || 'open'}</span></td>
+          <td style="font-size:0.8rem;color:var(--text-secondary);">${createdDate}</td>
+          <td style="text-align:right;">
+            <div class="action-btns">
+              <button class="btn btn-ghost btn-sm" onclick="openAdminReplyModal('${t.id}')" title="Respond & Reply"><i class="fa-solid fa-reply" style="color:var(--sukuma);"></i> Reply</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+  } catch (err) {
+    console.error('Error fetching support tickets:', err);
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:#ef4444;">Failed to load support tickets.</td></tr>';
+  }
+}
+
+function openAdminReplyModal(ticketId) {
+  const ticket = activeAdminTickets.find(t => t.id === ticketId);
+  if (!ticket) return;
+
+  currentReplyTicketId = ticketId;
+  const preview = document.getElementById('replyTicketPreview');
+  preview.innerHTML = `
+    <div style="font-weight:700;font-size:1.02rem;color:var(--text-primary);margin-bottom:4px;">${ticket.subject}</div>
+    <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:8px;">
+      <strong>From:</strong> ${ticket.user_name} (${ticket.user_email}) · <strong>Role:</strong> ${ticket.user_role} · <strong>Category:</strong> ${ticket.category}
+    </div>
+    <div style="font-size:0.9rem;color:var(--text-primary);background:var(--bg-card);padding:10px;border-radius:6px;border:1px solid var(--basket-line);">${ticket.message}</div>
+  `;
+
+  document.getElementById('adminReplyInput').value = '';
+  document.getElementById('adminStatusSelect').value = ticket.status === 'resolved' ? 'resolved' : 'resolved';
+  document.getElementById('adminReplyModal').classList.add('open');
+}
+
+document.getElementById('adminSendReplyBtn')?.addEventListener('click', async () => {
+  if (!currentReplyTicketId) return;
+  const reply = document.getElementById('adminReplyInput').value.trim();
+  const status = document.getElementById('adminStatusSelect').value;
+
+  if (!reply) {
+    showToast('Please type a reply message', 'error');
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('smartlishe_token') || localStorage.getItem('token') || '';
+    const res = await fetch(`/api/admin/support/${currentReplyTicketId}/reply`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ reply, status })
+    });
+
+    const data = await res.json();
+    if (data.success || data.data) {
+      showToast('Reply sent successfully! User has been notified.');
+      document.getElementById('adminReplyModal').classList.remove('open');
+      fetchAdminTickets();
+    } else {
+      showToast(data.message || 'Failed to send reply', 'error');
+    }
+  } catch (e) {
+    showToast('Error sending reply', 'error');
+  }
+});
+
+function logout() {
+  localStorage.clear();
+  sessionStorage.clear();
+  window.location.href = '../auth/login.html';
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   initTheme();
   initSidebar();
@@ -385,6 +557,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initTabs();
   initNotifications();
   initSearch();
+  fetchAdminTickets();
 });
 </script>
 </body>

@@ -300,6 +300,7 @@
         <a href="profile.html" class="nav-link"><i class="fa-solid fa-user"></i> Profile</a>
         <a href="billing.html" class="nav-link"><i class="fa-solid fa-credit-card"></i> Billing</a>
         <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> Settings</a>
+        <a href="#" class="nav-link open-support-btn" onclick="event.preventDefault(); window.openSupportModal();"><i class="fa-solid fa-headset" style="color:var(--sukuma);"></i> Support &amp; Tickets</a>
       </nav>
       <div class="sidebar-footer">
         <a href="../auth/logout.html" class="nav-link" style="color:var(--char);">
@@ -1115,5 +1116,6 @@
       loadDashboardData();
     });
   </script>
+  <script src="../support-widget.js"></script>
 </body>
 </html>

@@ -115,6 +115,24 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    // Support Tickets Collection
+    match /support_tickets/{ticketId} {
+      allow read, create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+
+    // Notifications Collection
+    match /notifications/{notifId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin() || isAuthenticated();
+    }
+
+    // System Broadcast Announcements
+    match /broadcasts/{broadcastId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Fallback Rule for all other collections
     match /{document=**} {
       allow read, write: if isAdmin() || true;

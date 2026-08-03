@@ -446,25 +446,170 @@ app.put('/api/settings', (req, res) => {
 
 // --- AI Chat & Meal Generator (Gemini Integration) ---
 app.post('/api/ai/chat', async (req, res) => {
-  const { message } = req.body || {};
+  const { message, userProfile, history = [] } = req.body || {};
   if (!message) return errorResponse(res, 'Message is required', 400);
+
+  const availableFoodsSummary = foodsList.slice(0, 10).map(f => `${f.name} (${f.category}, ${f.calories_100g}kcal, GI:${f.glycemic_index})`).join(', ');
+  const availableRecipesSummary = recipesList.slice(0, 8).map(r => `${r.name} (${r.calories}kcal)`).join(', ');
+
+  let profileContext = '';
+  if (userProfile && userProfile.name) {
+    profileContext = `User: ${userProfile.name}, Goal: ${userProfile.goal || 'Wellness'}, Target Cal: ${userProfile.calories || 2000} kcal.`;
+  }
+
+  const systemInstruction = `You are Smart Lishe AI, an expert Kenyan clinical nutritionist. ${profileContext}
+Kenyan Foods: ${availableFoodsSummary}.
+Kenyan Recipes: ${availableRecipesSummary}.
+Be concise and clear.
+Return ONLY a JSON object matching this schema:
+{
+  "reply": "Concise, friendly clinical guidance (2-3 sentences max).",
+  "card": {
+    "title": "Short title or null",
+    "totalCalories": 1600,
+    "meals": [
+      { "name": "Breakfast: Uji wa Mtama & 2 Boiled Eggs", "cal": 380 },
+      { "name": "Lunch: Githeri with Sukuma Wiki & Avocado", "cal": 600 },
+      { "name": "Dinner: Brown Ugali with Tilapia & Managu", "cal": 620 }
+    ],
+    "tips": "1 actionable clinical tip"
+  }
+}`;
 
   if (process.env.GEMINI_API_KEY) {
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const ai = new GoogleGenAI({
+        apiKey: process.env.GEMINI_API_KEY,
+        httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+      });
+
+      const contentsList = [];
+      if (Array.isArray(history) && history.length > 0) {
+        history.slice(-4).forEach(h => {
+          if (h.role && h.content) {
+            contentsList.push(`${h.role.toUpperCase()}: ${h.content}`);
+          }
+        });
+      }
+      contentsList.push(`USER: ${message}`);
+
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: `You are Smart Lishe AI, an expert Kenyan nutritionist. Answer cleanly and helpfully in English or Swahili as appropriate. User message: ${message}`
+        contents: contentsList.join('\n'),
+        config: {
+          systemInstruction,
+          responseMimeType: 'application/json',
+          maxOutputTokens: 600,
+          temperature: 0.7
+        }
       });
-      return successResponse(res, 'AI response generated', { reply: response.text });
+
+      let parsed = {};
+      try {
+        const text = response.text ? response.text.trim() : '';
+        const cleaned = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+        parsed = JSON.parse(cleaned);
+      } catch (e) {
+        parsed = { reply: response.text || 'Recommendation generated successfully.', card: null };
+      }
+
+      return successResponse(res, 'AI response generated', {
+        reply: parsed.reply || 'Here is your personalized Smart Lishe nutrition guidance:',
+        card: parsed.card || null
+      });
+
     } catch (err) {
-      console.warn('Gemini API call failed, using smart fallback:', err);
+      console.warn('Gemini API call failed, using dynamic local fallback:', err);
     }
   }
 
-  // Fallback AI Nutritionist response
-  let reply = `Smart Lishe Nutritionist: Thank you for your inquiry about "${message}". For optimum energy and health in Kenya, balance your meals with whole grains (Ugali wa sorghum/brown maize), indigenous dark leafy greens (Sukuma Wiki, Managu, Terere), and clean protein sources (Tilapia, Beans, Githeri). Drink at least 2.5L of clean water daily.`;
-  return successResponse(res, 'AI response generated', { reply });
+  // High quality dynamic local fallback grounded in food dataset
+  const lowerMsg = message.toLowerCase();
+  let replyText = `Smart Lishe AI: `;
+  let card = null;
+
+  if (lowerMsg.includes('weight loss') || lowerMsg.includes('lose weight') || lowerMsg.includes('fat loss')) {
+    replyText += `For sustainable weight loss, prioritize high-fiber indigenous greens (Sukuma Wiki, Managu), lean protein (Tilapia, Ndengu, Kienyeji Chicken), and complex low-GI carbs (Brown Ugali, Millet). Keep caloric intake at ~1,400–1,600 kcal daily.`;
+    card = {
+      title: 'Kenyan Weight Loss Plan',
+      totalCalories: 1480,
+      meals: [
+        { name: 'Breakfast: Uji wa Mtama (Unsweetened) & 2 Boiled Eggs', cal: 320 },
+        { name: 'Lunch: Steamed Tilapia with Sukuma Wiki & Small Brown Ugali', cal: 480 },
+        { name: 'Dinner: Ndengu Stew (Yellow Grams) with Sautéed Managu Greens', cal: 450 },
+        { name: 'Snack: Fresh Papaya Slices & Roasted Pumpkin Seeds', cal: 230 }
+      ],
+      tips: 'Drink 3L of water daily and limit cooking oil to 1 tsp per meal.'
+    };
+  } else if (lowerMsg.includes('weight gain') || lowerMsg.includes('gain weight') || lowerMsg.includes('muscle')) {
+    replyText += `For healthy weight and muscle gain, increase nutrient-dense calories using avocado, groundnuts, brown ugali, Mukimo, and high-protein Omena or Kienyeji Chicken stew. Target ~2,300–2,600 kcal daily.`;
+    card = {
+      title: 'Kenyan High-Energy Weight Gain Plan',
+      totalCalories: 2450,
+      meals: [
+        { name: 'Breakfast: Uji wa Mtama with Peanut Butter & 3 Boiled Eggs', cal: 520 },
+        { name: 'Lunch: Mukimo (Potatoes, Corn, Pumpkin Leaves) with Beef Stew & Avocado', cal: 780 },
+        { name: 'Dinner: Kienyeji Chicken Stew with Ugali & Terere Greens', cal: 750 },
+        { name: 'Snack: Handful of Roasted Groundnuts & Whole Milk', cal: 400 }
+      ],
+      tips: 'Eat every 3–4 hours and add healthy fats like avocado and nuts to main meals.'
+    };
+  } else if (lowerMsg.includes('diabet') || lowerMsg.includes('sugar') || lowerMsg.includes('glycemic')) {
+    replyText += `Managing blood sugar requires choosing low-Glycemic Index (GI) Kenyan foods. Replace refined white maize meal with unhulled Sorghum/Millet Ugali, and load half your plate with indigenous greens (Terere, Managu, Saget).`;
+    card = {
+      title: 'Diabetes-Friendly Kenyan Plan',
+      totalCalories: 1450,
+      meals: [
+        { name: 'Breakfast: Sorghum Porridge (No added sugar) & Boiled Egg', cal: 280 },
+        { name: 'Lunch: Githeri (Corn & Beans) with Sautéed Sukuma Wiki', cal: 490 },
+        { name: 'Dinner: Pan-Seared Tilapia with Terere Greens & Small Brown Ugali', cal: 460 },
+        { name: 'Snack: Green Apple Slices & Raw Almonds', cal: 220 }
+      ],
+      tips: 'Monitor blood glucose 2 hours post-meal. Indigenous vegetables significantly slow carbohydrate absorption.'
+    };
+  } else if (lowerMsg.includes('hypertension') || lowerMsg.includes('pressure') || lowerMsg.includes('salt')) {
+    replyText += `To regulate blood pressure, consume potassium-rich foods (Matoke, Bananas, Managu, Avocado) and minimize processed sodium. Season stews with garlic, ginger, and lemon instead of excessive salt.`;
+    card = {
+      title: 'DASH & Hypertension Kenyan Plan',
+      totalCalories: 1520,
+      meals: [
+        { name: 'Breakfast: Whole Oats with Sliced Banana & Flaxseed', cal: 350 },
+        { name: 'Lunch: Matoke (Green Banana Stew) with Beans & Spinach', cal: 510 },
+        { name: 'Dinner: Poached Tilapia with Kundes (Cowpea Leaves) & Sweet Potato', cal: 480 },
+        { name: 'Snack: Fresh Watermelon Slices', cal: 180 }
+      ],
+      tips: 'Aim for <2,000mg sodium daily. Potassium from Matoke and greens helps flush excess sodium.'
+    };
+  } else if (lowerMsg.includes('shopping') || lowerMsg.includes('grocery') || lowerMsg.includes('market')) {
+    replyText += `Here is a cost-effective weekly Kenyan healthy grocery list estimated at KES 3,500–4,500 at your local green market (soko).`;
+    card = {
+      title: 'Healthy Kenyan Weekly Shopping List',
+      totalCalories: 0,
+      meals: [
+        { name: '🥬 Greens: Sukuma Wiki (2 bunches), Managu (2 bunches), Terere', cal: 'KES 250' },
+        { name: '🫘 Legumes: Ndengu (1kg), Beans (1kg), Groundnuts (500g)', cal: 'KES 520' },
+        { name: '🐟 Proteins: Tilapia (2 whole), Dried Omena (500g), Eggs (1 tray)', cal: 'KES 1,200' },
+        { name: '🌽 Grains: Sorghum/Millet Flour (2kg), Unhulled Maize Flour (2kg)', cal: 'KES 480' },
+        { name: '🥑 Produce: Avocado (4), Bananas (1 bunch), Tomatoes/Onions', cal: 'KES 650' }
+      ],
+      tips: 'Buy leafy vegetables every 2-3 days for maximum vitamin freshness.'
+    };
+  } else {
+    replyText += `Thank you for asking about "${message}". Balanced Kenyan nutrition relies on authentic whole foods: Sorghum/Brown Ugali for clean energy, Sukuma Wiki/Managu for micronutrients, and Tilapia/Ndengu for lean protein.`;
+    card = {
+      title: 'Balanced Daily Kenyan Meal Plan',
+      totalCalories: 1750,
+      meals: [
+        { name: 'Breakfast: Uji wa Mtama & 2 Boiled Eggs', cal: 360 },
+        { name: 'Lunch: Githeri with Sukuma Wiki & Avocado', cal: 580 },
+        { name: 'Dinner: Brown Ugali with Tilapia & Sautéed Managu', cal: 620 },
+        { name: 'Snack: Handful of Roasted Groundnuts', cal: 190 }
+      ],
+      tips: 'Drink at least 2.5L clean water daily and maintain consistent meal timing.'
+    };
+  }
+
+  return successResponse(res, 'AI response generated', { reply: replyText, card });
 });
 
 app.get('/api/ai/conversations', authenticateToken, (req, res) => {
@@ -478,14 +623,23 @@ app.post('/api/meals/generate', async (req, res) => {
   
   if (process.env.GEMINI_API_KEY) {
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const ai = new GoogleGenAI({
+        apiKey: process.env.GEMINI_API_KEY,
+        httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+      });
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: `Generate a detailed 1-day Kenyan meal plan targeting ${calories} kcal (${diet_type}). Format JSON with keys: breakfast, lunch, dinner, snack. Include authentic Kenyan dishes like Ugali, Sukuma Wiki, Githeri, Tilapia, Mukimo, Uji.`
+        model: 'gemini-3.6-flash',
+        contents: `Generate a detailed 1-day Kenyan meal plan targeting ${calories} kcal (${diet_type}).`,
+        config: {
+          systemInstruction: 'You are Smart Lishe AI. Return a JSON object with keys: title, target_calories, breakfast (name, calories, protein), lunch (name, calories, protein), dinner (name, calories, protein), snack (name, calories, protein), tips. Include authentic Kenyan dishes like Ugali, Sukuma Wiki, Githeri, Tilapia, Mukimo, Uji, Managu.',
+          responseMimeType: 'application/json'
+        }
       });
       let json = {};
       try {
-        json = JSON.parse(response.text.replace(/```json|```/g, '').trim());
+        const text = response.text ? response.text.trim() : '';
+        const cleaned = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+        json = JSON.parse(cleaned);
       } catch (e) {
         json = { raw: response.text };
       }
@@ -495,7 +649,6 @@ app.post('/api/meals/generate', async (req, res) => {
     }
   }
 
-  // High quality fallback Kenyan Meal Plan
   const plan = {
     title: `Custom ${diet_type} Plan (${calories} kcal)`,
     target_calories: calories,
@@ -788,29 +941,176 @@ app.put('/api/professional/profile', authenticateToken, (req, res) => {
 });
 
 app.get('/api/professional/clients', authenticateToken, (req, res) => {
-  const clientsList = users.filter(u => u.role === 'client');
+  const proEmail = (req.user.email || '').toLowerCase();
+  const clientsList = users.filter(u => u.role === 'client' || u.assigned_professional_email === proEmail).map(u => {
+    return {
+      id: u.id,
+      email: u.email,
+      first_name: u.first_name || 'Client',
+      last_name: u.last_name || '',
+      name: (u.first_name || u.last_name) ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : (u.name || u.email),
+      status: u.status || 'pending',
+      medical_conditions: u.medical_conditions || [],
+      goal: u.goal || 'General Wellness',
+      program: u.program || 'Nutrition Plan',
+      duration: u.duration || '12 Weeks',
+      compliance: u.compliance || 85,
+      assigned_professional_email: u.assigned_professional_email || proEmail,
+      created_at: u.created_at || new Date().toISOString()
+    };
+  });
   return successResponse(res, 'Clients retrieved', clientsList);
 });
 
 app.post('/api/professional/clients', authenticateToken, (req, res) => {
-  const newClient = {
-    id: `client-${Date.now()}`,
-    email: (req.body.email || `client${Date.now()}@example.com`).trim().toLowerCase(),
-    passwordHash: bcrypt.hashSync('ClientPass123', 10),
-    first_name: req.body.first_name || 'New',
-    last_name: req.body.last_name || 'Client',
-    role: 'client',
-    status: 'active',
+  const cleanEmail = (req.body.email || '').trim().toLowerCase();
+  if (!cleanEmail) {
+    return errorResponse(res, 'Client email address is required', 400);
+  }
+
+  const proName = (req.user.first_name || req.user.last_name) 
+    ? `${req.user.first_name || ''} ${req.user.last_name || ''}`.trim() 
+    : (req.user.name || 'Nutrition Professional');
+  const proEmail = req.user.email.toLowerCase();
+
+  let targetUser = users.find(u => u.email && u.email.toLowerCase() === cleanEmail);
+
+  if (targetUser) {
+    targetUser.first_name = req.body.first_name || targetUser.first_name || 'Client';
+    targetUser.last_name = req.body.last_name || targetUser.last_name || '';
+    targetUser.name = `${targetUser.first_name} ${targetUser.last_name}`.trim();
+    targetUser.role = targetUser.role || 'client';
+    targetUser.status = 'pending'; // Pending invitation acceptance
+    targetUser.assigned_professional_email = proEmail;
+    if (req.body.medical_conditions) targetUser.medical_conditions = req.body.medical_conditions;
+    if (req.body.goal) targetUser.goal = req.body.goal;
+    if (req.body.program) targetUser.program = req.body.program;
+    if (req.body.duration) targetUser.duration = req.body.duration;
+  } else {
+    targetUser = {
+      id: `client-${Date.now()}`,
+      email: cleanEmail,
+      passwordHash: bcrypt.hashSync('ClientPass123', 10),
+      first_name: req.body.first_name || 'Client',
+      last_name: req.body.last_name || '',
+      name: `${req.body.first_name || 'Client'} ${req.body.last_name || ''}`.trim(),
+      role: 'client',
+      status: 'pending', // Pending invitation acceptance
+      assigned_professional_email: proEmail,
+      medical_conditions: req.body.medical_conditions || [],
+      goal: req.body.goal || 'General Wellness',
+      program: req.body.program || 'Standard Nutrition Plan',
+      duration: req.body.duration || '12 Weeks',
+      created_at: new Date().toISOString()
+    };
+    users.push(targetUser);
+  }
+
+  saveUsersToDisk();
+  syncFirestoreDoc('users', targetUser.id, targetUser);
+
+  // Send invitation notification to the user
+  const inviteId = `inv-${Date.now()}`;
+  const notifObj = {
+    id: `notif-${Date.now()}`,
+    user_email: cleanEmail,
+    title: `🤝 Professional Invitation from ${proName}`,
+    message: `${proName} has invited you to join their client management portal for personalized nutrition coaching (${req.body.program || 'Nutrition Program'}). Accept to share your health goals and receive tailored meal plans.`,
+    type: 'pro_invite',
+    invite_id: inviteId,
+    pro_email: proEmail,
+    pro_name: proName,
+    status: 'pending',
+    is_read: false,
     created_at: new Date().toISOString()
   };
-  users.push(newClient);
-  saveUsersToDisk();
-  return successResponse(res, 'Client added', newClient, 201);
+
+  notifications.unshift(notifObj);
+  saveNotificationsToDisk();
+  syncFirestoreDoc('notifications', notifObj.id, notifObj);
+
+  return successResponse(res, `Client invitation sent to ${cleanEmail}. They will see an invitation in their Notifications section to accept or decline.`, targetUser, 201);
+});
+
+app.post(['/api/user/invitations/:id/respond', '/api/client/invitations/:id/respond', '/api/notifications/:id/respond'], authenticateToken, (req, res) => {
+  const notifId = req.params.id;
+  const action = (req.body.action || '').toLowerCase();
+  if (!['accept', 'accepted', 'decline', 'declined'].includes(action)) {
+    return errorResponse(res, 'Action must be "accept" or "decline"', 400);
+  }
+
+  const isAccept = action === 'accept' || action === 'accepted';
+  const newStatus = isAccept ? 'accepted' : 'declined';
+
+  const userEmail = (req.user.email || '').toLowerCase();
+  const notif = notifications.find(n => (n.id === notifId || n.invite_id === notifId) && (n.user_email.toLowerCase() === userEmail || n.user_email === 'all'));
+
+  if (!notif) {
+    return errorResponse(res, 'Invitation notification not found', 404);
+  }
+
+  notif.status = newStatus;
+  notif.is_read = true;
+  saveNotificationsToDisk();
+  syncFirestoreDoc('notifications', notif.id, notif);
+
+  // Update target user account status
+  const currentUser = users.find(u => u.email && u.email.toLowerCase() === userEmail);
+  if (currentUser) {
+    if (isAccept) {
+      currentUser.status = 'active';
+      currentUser.assigned_professional_email = notif.pro_email;
+      currentUser.professional_name = notif.pro_name;
+    } else {
+      currentUser.status = 'declined';
+    }
+    saveUsersToDisk();
+    syncFirestoreDoc('users', currentUser.id, currentUser);
+  }
+
+  // Notify professional
+  const clientName = (req.user.first_name || req.user.last_name) 
+    ? `${req.user.first_name || ''} ${req.user.last_name || ''}`.trim() 
+    : (req.user.name || userEmail);
+
+  const proNotif = {
+    id: `notif-resp-${Date.now()}`,
+    user_email: notif.pro_email,
+    title: isAccept ? `✅ Client Invitation Accepted: ${clientName}` : `❌ Client Invitation Declined: ${clientName}`,
+    message: isAccept 
+      ? `${clientName} accepted your client invitation! They are now active on your Smart Lishe professional portal.`
+      : `${clientName} declined your client invitation.`,
+    type: isAccept ? 'invite_accepted' : 'invite_declined',
+    is_read: false,
+    created_at: new Date().toISOString()
+  };
+
+  notifications.unshift(proNotif);
+  saveNotificationsToDisk();
+  syncFirestoreDoc('notifications', proNotif.id, proNotif);
+
+  return successResponse(res, isAccept ? 'Invitation accepted! You are now connected with your professional.' : 'Invitation declined.', { status: newStatus });
 });
 
 app.get('/api/professional/clients/:id', authenticateToken, (req, res) => {
-  const client = users.find(u => u.id === req.params.id) || users[2];
+  const client = users.find(u => u.id === req.params.id || u.email === req.params.id) || users.find(u => u.role === 'client') || users[2];
   return successResponse(res, 'Client details', client);
+});
+
+app.put('/api/professional/clients/:id', authenticateToken, (req, res) => {
+  let client = users.find(u => u.id === req.params.id || u.email === req.params.id);
+  if (!client) {
+    return errorResponse(res, 'Client not found', 404);
+  }
+  Object.assign(client, req.body);
+  if (req.body.name) {
+    const parts = req.body.name.split(' ');
+    client.first_name = parts[0] || client.first_name;
+    client.last_name = parts.slice(1).join(' ') || client.last_name;
+  }
+  saveUsersToDisk();
+  syncFirestoreDoc('users', client.id, client);
+  return successResponse(res, 'Client updated successfully', client);
 });
 
 app.get('/api/professional/clients/:id/mealplans', authenticateToken, (req, res) => {
@@ -818,7 +1118,71 @@ app.get('/api/professional/clients/:id/mealplans', authenticateToken, (req, res)
 });
 
 app.post('/api/professional/clients/:id/send-message', authenticateToken, (req, res) => {
-  return successResponse(res, 'Message sent to client successfully');
+  const clientId = req.params.id;
+  const client = users.find(u => u.id === clientId || u.email === clientId) || users.find(u => u.role === 'client');
+  if (!client) {
+    return errorResponse(res, 'Client not found', 404);
+  }
+  const { subject, message } = req.body;
+  if (!message) {
+    return errorResponse(res, 'Message content is required', 400);
+  }
+  const proName = (req.user.first_name || req.user.last_name) 
+    ? `${req.user.first_name || ''} ${req.user.last_name || ''}`.trim() 
+    : (req.user.name || 'Nutrition Professional');
+  const proEmail = (req.user.email || '').toLowerCase();
+
+  const notifObj = {
+    id: `notif-${Date.now()}`,
+    user_email: client.email.toLowerCase(),
+    title: `💬 Message from ${proName}: ${subject || 'Direct Message'}`,
+    message: message,
+    type: 'pro_message',
+    pro_name: proName,
+    pro_email: proEmail,
+    is_read: false,
+    created_at: new Date().toISOString()
+  };
+
+  notifications.unshift(notifObj);
+  saveNotificationsToDisk();
+  syncFirestoreDoc('notifications', notifObj.id, notifObj);
+
+  return successResponse(res, `Message sent to ${client.name || client.email}. They will receive a notification in their portal.`, notifObj);
+});
+
+app.post(['/api/professional/clients/:id/assign-plan', '/api/professional/meal-plans/assign'], authenticateToken, (req, res) => {
+  const clientId = req.params.id || req.body.client_id;
+  const client = users.find(u => u.id === clientId || u.email === clientId) || users.find(u => u.role === 'client');
+  if (!client) {
+    return errorResponse(res, 'Client not found', 404);
+  }
+  const planName = req.body.program || req.body.plan_title || req.body.plan_name || 'Personalised Nutrition Plan';
+  client.program = planName;
+  client.assigned_plan_details = req.body;
+  saveUsersToDisk();
+  syncFirestoreDoc('users', client.id, client);
+
+  const proName = (req.user.first_name || req.user.last_name) 
+    ? `${req.user.first_name || ''} ${req.user.last_name || ''}`.trim() 
+    : (req.user.name || 'Nutrition Professional');
+
+  const notifObj = {
+    id: `notif-plan-${Date.now()}`,
+    user_email: client.email.toLowerCase(),
+    title: `🥗 New Meal Plan Assigned by ${proName}`,
+    message: `${proName} has assigned you the "${planName}" plan (${req.body.duration || '12 Weeks'}). Check your dashboard and meal planner to view your tailored schedule!`,
+    type: 'pro_plan',
+    pro_name: proName,
+    is_read: false,
+    created_at: new Date().toISOString()
+  };
+
+  notifications.unshift(notifObj);
+  saveNotificationsToDisk();
+  syncFirestoreDoc('notifications', notifObj.id, notifObj);
+
+  return successResponse(res, `Plan "${planName}" assigned to ${client.name || client.email} successfully.`);
 });
 
 app.get('/api/professional/meal-plans', authenticateToken, (req, res) => {
@@ -830,9 +1194,112 @@ app.get('/api/professional/appointments', authenticateToken, (req, res) => {
 });
 
 app.post('/api/professional/appointments', authenticateToken, (req, res) => {
-  const appt = { id: `app-${Date.now()}`, ...req.body, status: 'Scheduled' };
+  const proName = (req.user.first_name || req.user.last_name) 
+    ? `${req.user.first_name || ''} ${req.user.last_name || ''}`.trim() 
+    : (req.user.name || 'Nutrition Professional');
+  const proEmail = (req.user.email || '').toLowerCase();
+
+  const appt = { 
+    id: `app-${Date.now()}`, 
+    ...req.body, 
+    pro_name: proName, 
+    pro_email: proEmail, 
+    status: 'Scheduled',
+    created_at: new Date().toISOString() 
+  };
   appointments.push(appt);
+
+  // Notify client
+  let clientEmail = req.body.client_email || req.body.email;
+  if (!clientEmail && req.body.client_id) {
+    const cl = users.find(u => u.id === req.body.client_id);
+    if (cl) clientEmail = cl.email;
+  }
+  if (clientEmail) {
+    const notifObj = {
+      id: `notif-app-${Date.now()}`,
+      user_email: clientEmail.toLowerCase(),
+      title: `📅 New Appointment Scheduled with ${proName}`,
+      message: `A consultation (${req.body.type || 'Virtual Consultation'}) has been scheduled for ${req.body.date || 'upcoming date'} at ${req.body.time || 'scheduled time'}. Notes: ${req.body.notes || 'No additional notes.'}`,
+      type: 'pro_appointment',
+      pro_name: proName,
+      is_read: false,
+      created_at: new Date().toISOString()
+    };
+    notifications.unshift(notifObj);
+    saveNotificationsToDisk();
+    syncFirestoreDoc('notifications', notifObj.id, notifObj);
+  }
+
   return successResponse(res, 'Appointment created', appt, 201);
+});
+
+app.get('/api/user/my-professional', authenticateToken, (req, res) => {
+  const userEmail = (req.user.email || '').toLowerCase();
+  const currentUser = users.find(u => u.email && u.email.toLowerCase() === userEmail);
+  if (!currentUser || !currentUser.assigned_professional_email) {
+    return successResponse(res, 'No assigned professional', { connected: false });
+  }
+
+  const proEmail = currentUser.assigned_professional_email.toLowerCase();
+  const proUser = users.find(u => u.email && u.email.toLowerCase() === proEmail);
+
+  const proAppts = appointments.filter(a => 
+    (a.client_email && a.client_email.toLowerCase() === userEmail) || 
+    (a.client_id && a.client_id === currentUser.id) ||
+    (a.email && a.email.toLowerCase() === userEmail)
+  );
+
+  return successResponse(res, 'My professional details', {
+    connected: true,
+    professional: {
+      name: proUser ? (`${proUser.first_name || ''} ${proUser.last_name || ''}`.trim() || proUser.name) : (currentUser.professional_name || 'Nutrition Professional'),
+      email: proEmail,
+      title: proUser?.title || 'Clinical Dietitian & Nutritionist',
+      phone: proUser?.phone || '+254 700 000 000',
+    },
+    program: currentUser.program || 'Standard Nutrition Plan',
+    duration: currentUser.duration || '12 Weeks',
+    status: currentUser.status || 'active',
+    assigned_plan_details: currentUser.assigned_plan_details || null,
+    appointments: proAppts
+  });
+});
+
+app.post('/api/user/message-professional', authenticateToken, (req, res) => {
+  const userEmail = (req.user.email || '').toLowerCase();
+  const currentUser = users.find(u => u.email && u.email.toLowerCase() === userEmail);
+  if (!currentUser || !currentUser.assigned_professional_email) {
+    return errorResponse(res, 'You do not have an assigned professional to message.', 400);
+  }
+
+  const { subject, message } = req.body;
+  if (!message || !message.trim()) {
+    return errorResponse(res, 'Message content is required', 400);
+  }
+
+  const clientName = (req.user.first_name || req.user.last_name) 
+    ? `${req.user.first_name || ''} ${req.user.last_name || ''}`.trim() 
+    : (req.user.name || userEmail);
+  const proEmail = currentUser.assigned_professional_email.toLowerCase();
+
+  const notifObj = {
+    id: `notif-${Date.now()}`,
+    user_email: proEmail,
+    title: `💬 Message from Client ${clientName}: ${subject || 'Direct Inquiry'}`,
+    message: message.trim(),
+    type: 'client_message',
+    client_name: clientName,
+    client_email: userEmail,
+    is_read: false,
+    created_at: new Date().toISOString()
+  };
+
+  notifications.unshift(notifObj);
+  saveNotificationsToDisk();
+  syncFirestoreDoc('notifications', notifObj.id, notifObj);
+
+  return successResponse(res, `Message sent successfully to your assigned professional.`, notifObj);
 });
 
 app.get('/api/professional/reports', authenticateToken, (req, res) => {
@@ -845,14 +1312,16 @@ app.post('/api/professional/reports', authenticateToken, (req, res) => {
   return successResponse(res, 'Report created', rep, 201);
 });
 
-// --- Support Tickets Store ---
-const supportTickets = [
+// --- Support Tickets Data Store ---
+const SUPPORT_TICKETS_FILE = path.join(__dirname, 'support_tickets_db.json');
+const seedSupportTickets = [
   {
     id: 'ticket-101',
     user_name: 'Amina Ochieng',
     user_email: 'client@example.com',
     user_role: 'client',
     subject: 'Question regarding custom M-Pesa billing',
+    category: 'Billing & Payments',
     message: 'Hello admin, I wanted to confirm if M-Pesa Express STK push works automatically for my monthly subscription.',
     status: 'open',
     priority: 'high',
@@ -865,6 +1334,7 @@ const supportTickets = [
     user_email: 'pro@smartlishe.com',
     user_role: 'professional',
     subject: 'Request to verify KNDI practitioner license',
+    category: 'Account Verification',
     message: 'Dear Admin, I have uploaded my clinical license documentation KNDI-8842. Please review and activate my nutritionist portal.',
     status: 'pending',
     priority: 'urgent',
@@ -877,6 +1347,7 @@ const supportTickets = [
     user_email: 'user@example.com',
     user_role: 'user',
     subject: 'NutriScan AI vision scanning speed',
+    category: 'Technical / AI',
     message: 'The food scanner worked great for my Ugali and Sukuma Wiki photo. Thank you for this awesome Kenyan app!',
     status: 'resolved',
     priority: 'normal',
@@ -887,7 +1358,98 @@ const supportTickets = [
   }
 ];
 
-let systemBroadcast = null;
+function loadSupportTicketsFromDisk() {
+  try {
+    if (fs.existsSync(SUPPORT_TICKETS_FILE)) {
+      const parsed = JSON.parse(fs.readFileSync(SUPPORT_TICKETS_FILE, 'utf8'));
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  try { fs.writeFileSync(SUPPORT_TICKETS_FILE, JSON.stringify(seedSupportTickets, null, 2)); } catch (e) {}
+  return [...seedSupportTickets];
+}
+const supportTickets = loadSupportTicketsFromDisk();
+function saveSupportTicketsToDisk() {
+  try { fs.writeFileSync(SUPPORT_TICKETS_FILE, JSON.stringify(supportTickets, null, 2)); } catch (e) {}
+}
+
+// --- User Notifications Data Store ---
+const NOTIFICATIONS_FILE = path.join(__dirname, 'notifications_db.json');
+const seedNotifications = [
+  {
+    id: 'notif-101',
+    user_email: 'all',
+    title: '📢 System Update: Smart Lishe 2.0 Released',
+    message: 'New features live! Try out automated weekly meal planner, NutriScan AI vision scanner, and instant professional consultation booking.',
+    type: 'broadcast',
+    is_read: false,
+    created_at: new Date(Date.now() - 3600000 * 48).toISOString()
+  },
+  {
+    id: 'notif-102',
+    user_email: 'user@example.com',
+    title: 'Support Ticket Resolved',
+    message: 'Admin replied to your ticket "NutriScan AI vision scanning speed": Thank you Joram! We appreciate your feedback.',
+    type: 'support_reply',
+    is_read: false,
+    ticket_id: 'ticket-103',
+    created_at: new Date(Date.now() - 3600000 * 24).toISOString()
+  },
+  {
+    id: 'notif-103',
+    user_email: 'client@example.com',
+    title: 'New Professional Consultation Scheduled',
+    message: 'Your appointment with Dr. Wanjiru Njuguna has been confirmed.',
+    type: 'system',
+    is_read: false,
+    created_at: new Date(Date.now() - 3600000 * 2).toISOString()
+  }
+];
+
+function loadNotificationsFromDisk() {
+  try {
+    if (fs.existsSync(NOTIFICATIONS_FILE)) {
+      const parsed = JSON.parse(fs.readFileSync(NOTIFICATIONS_FILE, 'utf8'));
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  try { fs.writeFileSync(NOTIFICATIONS_FILE, JSON.stringify(seedNotifications, null, 2)); } catch (e) {}
+  return [...seedNotifications];
+}
+const notifications = loadNotificationsFromDisk();
+function saveNotificationsToDisk() {
+  try { fs.writeFileSync(NOTIFICATIONS_FILE, JSON.stringify(notifications, null, 2)); } catch (e) {}
+}
+
+// --- System Broadcast Announcements Data Store ---
+const BROADCASTS_FILE = path.join(__dirname, 'broadcasts_db.json');
+const seedBroadcasts = [
+  {
+    id: 'bc-101',
+    title: 'System Maintenance & Feature Upgrade',
+    message: 'Smart Lishe server optimization completed. Enjoy faster AI meal generation and instant nutritionist response.',
+    type: 'info',
+    created_by: 'adminlishe@gmail.com',
+    created_at: new Date(Date.now() - 3600000 * 6).toISOString()
+  }
+];
+
+function loadBroadcastsFromDisk() {
+  try {
+    if (fs.existsSync(BROADCASTS_FILE)) {
+      const parsed = JSON.parse(fs.readFileSync(BROADCASTS_FILE, 'utf8'));
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  try { fs.writeFileSync(BROADCASTS_FILE, JSON.stringify(seedBroadcasts, null, 2)); } catch (e) {}
+  return [...seedBroadcasts];
+}
+const broadcasts = loadBroadcastsFromDisk();
+function saveBroadcastsToDisk() {
+  try { fs.writeFileSync(BROADCASTS_FILE, JSON.stringify(broadcasts, null, 2)); } catch (e) {}
+}
+
+let systemBroadcast = broadcasts.length > 0 ? broadcasts[0] : null;
 
 // --- Admin Portal API ---
 app.get('/api/admin/stats', authenticateToken, (req, res) => {
@@ -906,7 +1468,7 @@ app.get('/api/admin/stats', authenticateToken, (req, res) => {
     total_clients: activeClients.length,
     premium_users: premiumCount,
     total_meal_plans: mealPlans.length,
-    total_recipes: seedRecipes.length,
+    total_recipes: recipesList.length,
     total_foods: foodsList.length,
     open_tickets: openTickets,
     ai_requests_today: 142,
@@ -1297,7 +1859,7 @@ app.delete('/api/admin/users/:id', authenticateToken, (req, res) => {
 
 // --- Admin Recipes Management ---
 app.get('/api/admin/recipes', authenticateToken, (req, res) => {
-  return successResponse(res, 'Recipes list retrieved', seedRecipes);
+  return successResponse(res, 'Recipes list retrieved', recipesList);
 });
 
 app.post('/api/admin/recipes', authenticateToken, (req, res) => {
@@ -1313,29 +1875,37 @@ app.post('/api/admin/recipes', authenticateToken, (req, res) => {
     carbs: req.body.carbs || '45g',
     fats: req.body.fats || '10g',
     category: req.body.category || 'Kenyan Specialties',
+    cost: req.body.cost || 'Medium',
+    desc: req.body.desc || '',
+    img: req.body.img || '',
     ingredients: Array.isArray(req.body.ingredients) ? req.body.ingredients : (req.body.ingredients || '').split('\n').filter(Boolean),
     instructions: Array.isArray(req.body.instructions) ? req.body.instructions : (req.body.instructions || '').split('\n').filter(Boolean),
     created_at: new Date().toISOString()
   };
 
-  seedRecipes.unshift(newRec);
+  recipesList.unshift(newRec);
+  saveRecipesToDisk();
   syncFirestoreDoc('recipes', newRec.id, newRec);
   return successResponse(res, 'Recipe created successfully', newRec, 201);
 });
 
 app.put('/api/admin/recipes/:id', authenticateToken, (req, res) => {
-  const rec = seedRecipes.find(r => r.id === req.params.id);
+  const rec = recipesList.find(r => r.id === req.params.id);
   if (!rec) return errorResponse(res, 'Recipe not found', 404);
 
   Object.assign(rec, req.body);
+  saveRecipesToDisk();
   syncFirestoreDoc('recipes', rec.id, rec);
   return successResponse(res, 'Recipe updated successfully', rec);
 });
 
 app.delete('/api/admin/recipes/:id', authenticateToken, (req, res) => {
-  const idx = seedRecipes.findIndex(r => r.id === req.params.id);
+  const idx = recipesList.findIndex(r => r.id === req.params.id);
   if (idx !== -1) {
-    seedRecipes.splice(idx, 1);
+    const deletedId = recipesList[idx].id;
+    recipesList.splice(idx, 1);
+    saveRecipesToDisk();
+    syncFirestoreDoc('recipes', deletedId, { _deleted: true, deleted_at: new Date().toISOString() });
   }
   return successResponse(res, 'Recipe deleted');
 });
@@ -1343,7 +1913,7 @@ app.delete('/api/admin/recipes/:id', authenticateToken, (req, res) => {
 app.post('/api/admin/recipes/sync-firestore', authenticateToken, async (req, res) => {
   try {
     let syncedCount = 0;
-    for (const r of seedRecipes) {
+    for (const r of recipesList) {
       await syncFirestoreDoc('recipes', r.id, r);
       syncedCount++;
     }
@@ -1371,6 +1941,7 @@ app.post('/api/admin/datasets', authenticateToken, (req, res) => {
     glycemic_index: req.body.glycemic_index || 'Low'
   };
   foodsList.unshift(food);
+  saveFoodsToDisk();
   syncFirestoreDoc('foods', food.id, food);
   return successResponse(res, 'Food item added to dataset', food, 201);
 });
@@ -1379,14 +1950,33 @@ app.put('/api/admin/datasets/:id', authenticateToken, (req, res) => {
   const food = foodsList.find(f => f.id === req.params.id);
   if (!food) return errorResponse(res, 'Food item not found', 404);
   Object.assign(food, req.body);
+  saveFoodsToDisk();
   syncFirestoreDoc('foods', food.id, food);
   return successResponse(res, 'Food item updated', food);
 });
 
 app.delete('/api/admin/datasets/:id', authenticateToken, (req, res) => {
   const idx = foodsList.findIndex(f => f.id === req.params.id);
-  if (idx !== -1) foodsList.splice(idx, 1);
+  if (idx !== -1) {
+    const deletedId = foodsList[idx].id;
+    foodsList.splice(idx, 1);
+    saveFoodsToDisk();
+    syncFirestoreDoc('foods', deletedId, { _deleted: true, deleted_at: new Date().toISOString() });
+  }
   return successResponse(res, 'Food item deleted');
+});
+
+app.post('/api/admin/datasets/sync-firestore', authenticateToken, async (req, res) => {
+  try {
+    let syncedCount = 0;
+    for (const f of foodsList) {
+      await syncFirestoreDoc('foods', f.id, f);
+      syncedCount++;
+    }
+    return successResponse(res, `Successfully batch synced ${syncedCount} food dataset items to Firestore database!`);
+  } catch (err) {
+    return errorResponse(res, `Batch sync failed: ${err.message}`, 500);
+  }
 });
 
 // --- Admin Billing & Transactions ---
@@ -1404,7 +1994,61 @@ app.get('/api/admin/billing', authenticateToken, (req, res) => {
   });
 });
 
-// --- Admin Support & Ticketing ---
+// ════════════════════ SUPPORT & NOTIFICATION & BROADCAST API ════════════════════
+
+// --- Support Tickets API (User & Admin) ---
+app.get(['/api/support', '/api/user/support'], authenticateToken, (req, res) => {
+  const userEmail = req.user.email;
+  // If admin, return all tickets; otherwise return tickets for this user
+  if (req.user.role === 'admin' || userEmail === 'adminlishe@gmail.com') {
+    return successResponse(res, 'All support tickets retrieved', supportTickets);
+  }
+  const userTickets = supportTickets.filter(t => t.user_email === userEmail);
+  return successResponse(res, 'User support tickets retrieved', userTickets);
+});
+
+app.post(['/api/support', '/api/user/support'], authenticateToken, (req, res) => {
+  const { subject, category, message, priority } = req.body || {};
+  if (!subject || !message) {
+    return errorResponse(res, 'Subject and message are required', 400);
+  }
+
+  const newTicket = {
+    id: `ticket-${Date.now()}`,
+    user_name: `${req.user.first_name || ''} ${req.user.last_name || ''}`.trim() || (req.user.email ? req.user.email.split('@')[0] : 'User'),
+    user_email: req.user.email || 'user@example.com',
+    user_role: req.user.role || 'user',
+    subject: subject.trim(),
+    category: category || 'General Support',
+    message: message.trim(),
+    status: 'open',
+    priority: priority || 'normal',
+    created_at: new Date().toISOString(),
+    replies: []
+  };
+
+  supportTickets.unshift(newTicket);
+  saveSupportTicketsToDisk();
+  syncFirestoreDoc('support_tickets', newTicket.id, newTicket);
+
+  // Create confirmation notification for user
+  const notif = {
+    id: `notif-${Date.now()}`,
+    user_email: newTicket.user_email,
+    title: 'Support Ticket Submitted',
+    message: `Your ticket "${newTicket.subject}" has been received. Our team will respond shortly.`,
+    type: 'info',
+    is_read: false,
+    ticket_id: newTicket.id,
+    created_at: new Date().toISOString()
+  };
+  notifications.unshift(notif);
+  saveNotificationsToDisk();
+  syncFirestoreDoc('notifications', notif.id, notif);
+
+  return successResponse(res, 'Support ticket created successfully', newTicket, 201);
+});
+
 app.get('/api/admin/support', authenticateToken, (req, res) => {
   return successResponse(res, 'Support tickets retrieved', supportTickets);
 });
@@ -1414,12 +2058,32 @@ app.post('/api/admin/support/:id/reply', authenticateToken, (req, res) => {
   if (!ticket) return errorResponse(res, 'Ticket not found', 404);
 
   const replyText = req.body.reply || 'Your inquiry has been addressed by Smart Lishe Admin.';
-  ticket.replies.push({
+  const replyObj = {
     sender: 'Admin',
     message: replyText,
     time: new Date().toISOString()
-  });
+  };
+
+  ticket.replies.push(replyObj);
   ticket.status = req.body.status || 'resolved';
+  saveSupportTicketsToDisk();
+  syncFirestoreDoc('support_tickets', ticket.id, ticket);
+
+  // Automatically trigger a notification for the ticket author!
+  const notifObj = {
+    id: `notif-${Date.now()}`,
+    user_email: ticket.user_email,
+    title: `Support Reply: ${ticket.subject}`,
+    message: `Admin replied: "${replyText.length > 90 ? replyText.substring(0, 90) + '...' : replyText}"`,
+    type: 'support_reply',
+    is_read: false,
+    ticket_id: ticket.id,
+    created_at: new Date().toISOString()
+  };
+  notifications.unshift(notifObj);
+  saveNotificationsToDisk();
+  syncFirestoreDoc('notifications', notifObj.id, notifObj);
+
   return successResponse(res, 'Reply sent to user and ticket updated', ticket);
 });
 
@@ -1427,19 +2091,93 @@ app.put('/api/admin/support/:id/status', authenticateToken, (req, res) => {
   const ticket = supportTickets.find(t => t.id === req.params.id);
   if (!ticket) return errorResponse(res, 'Ticket not found', 404);
   ticket.status = req.body.status || 'resolved';
+  saveSupportTicketsToDisk();
+  syncFirestoreDoc('support_tickets', ticket.id, ticket);
   return successResponse(res, 'Ticket status updated', ticket);
 });
 
 // --- System Operations & Broadcast ---
+app.get(['/api/broadcast', '/api/user/broadcast'], (req, res) => {
+  return successResponse(res, 'System broadcasts retrieved', {
+    current: systemBroadcast,
+    all: broadcasts
+  });
+});
+
 app.post('/api/admin/broadcast', authenticateToken, (req, res) => {
   const { title, message, type } = req.body || {};
-  systemBroadcast = {
-    title: title || 'System Announcement',
-    message: message || 'Smart Lishe system update scheduled.',
+  if (!title || !message) {
+    return errorResponse(res, 'Title and message are required for broadcast notice', 400);
+  }
+
+  const broadcastItem = {
+    id: `bc-${Date.now()}`,
+    title: title.trim(),
+    message: message.trim(),
     type: type || 'info',
+    created_by: req.user ? req.user.email : 'adminlishe@gmail.com',
     created_at: new Date().toISOString()
   };
-  return successResponse(res, 'Broadcast announcement published to all active user dashboards!', systemBroadcast);
+
+  broadcasts.unshift(broadcastItem);
+  systemBroadcast = broadcastItem;
+  saveBroadcastsToDisk();
+  syncFirestoreDoc('broadcasts', broadcastItem.id, broadcastItem);
+
+  // Automatically publish as global notification for all user dashboards!
+  const globalNotif = {
+    id: `notif-bc-${Date.now()}`,
+    user_email: 'all',
+    title: `📢 ${broadcastItem.title}`,
+    message: broadcastItem.message,
+    type: 'broadcast',
+    is_read: false,
+    created_at: new Date().toISOString()
+  };
+  notifications.unshift(globalNotif);
+  saveNotificationsToDisk();
+  syncFirestoreDoc('notifications', globalNotif.id, globalNotif);
+
+  return successResponse(res, 'Broadcast announcement published to all active user dashboards!', broadcastItem);
+});
+
+// --- User Notifications API ---
+app.get(['/api/notifications', '/api/user/notifications'], authenticateToken, (req, res) => {
+  const userEmail = req.user.email;
+  // Return notifications for this specific user or global 'all' notifications
+  const userNotifs = notifications.filter(n => n.user_email === userEmail || n.user_email === 'all');
+  return successResponse(res, 'Notifications retrieved', userNotifs);
+});
+
+app.put(['/api/notifications/:id/read', '/api/notifications/read'], authenticateToken, (req, res) => {
+  const notifId = req.params.id;
+  if (notifId) {
+    const notif = notifications.find(n => n.id === notifId);
+    if (notif) {
+      notif.is_read = true;
+      saveNotificationsToDisk();
+    }
+  } else {
+    // Mark all as read for user
+    const userEmail = req.user.email;
+    notifications.forEach(n => {
+      if (n.user_email === userEmail || n.user_email === 'all') {
+        n.is_read = true;
+      }
+    });
+    saveNotificationsToDisk();
+  }
+  return successResponse(res, 'Notification(s) updated');
+});
+
+app.post(['/api/notifications/clear', '/api/notifications/clear-all'], authenticateToken, (req, res) => {
+  const userEmail = req.user.email;
+  // Mark all user notifications as read and filter out user-specific ones
+  const filtered = notifications.filter(n => n.user_email !== userEmail && n.user_email !== 'all');
+  notifications.length = 0;
+  notifications.push(...filtered);
+  saveNotificationsToDisk();
+  return successResponse(res, 'Notifications cleared');
 });
 
 app.post('/api/admin/system/purge-cache', authenticateToken, (req, res) => {
@@ -1455,18 +2193,38 @@ app.get('/api/admin/audit-logs', authenticateToken, (req, res) => {
 });
 
 // --- Foods & Recipes Database ---
-const foodsList = [
-  { id: 'food-1', name: 'Sukuma Wiki (Collard Greens)', category: 'Traditional Vegetables', calories_100g: 32, carbs_g: 4.3, protein_g: 3.0, fats_g: 0.6, iron_mg: 2.1, vitamin_c_mg: 35, glycemic_index: 'Low' },
-  { id: 'food-2', name: 'Ugali (Unhulled Maize)', category: 'Grains & Staples', calories_100g: 130, carbs_g: 28.0, protein_g: 2.7, fats_g: 0.5, fiber_g: 3.5, glycemic_index: 'Medium' },
-  { id: 'food-3', name: 'Githeri (Beans & Corn)', category: 'Legumes & Grains', calories_100g: 145, carbs_g: 24.5, protein_g: 7.2, fats_g: 1.2, fiber_g: 6.0, glycemic_index: 'Low' },
-  { id: 'food-4', name: 'Tilapia Fish (Lake Victoria)', category: 'Seafood & Protein', calories_100g: 128, carbs_g: 0, protein_g: 26.0, fats_g: 2.7, omega3: 'High', glycemic_index: 'Low' },
-  { id: 'food-5', name: 'Managu (African Nightshade)', category: 'Traditional Vegetables', calories_100g: 28, carbs_g: 3.8, protein_g: 3.2, fats_g: 0.4, calcium_mg: 210, iron_mg: 4.2, glycemic_index: 'Low' },
-  { id: 'food-6', name: 'Terere (Amaranth Greens)', category: 'Traditional Vegetables', calories_100g: 23, carbs_g: 4.0, protein_g: 3.5, fats_g: 0.3, iron_mg: 5.3, glycemic_index: 'Low' },
-  { id: 'food-7', name: 'Mukimo (Potatoes, Maize, Pumpkin Leaves)', category: 'Kenyan Specialties', calories_100g: 155, carbs_g: 30.2, protein_g: 4.1, fats_g: 2.0, fiber_g: 4.2, glycemic_index: 'Medium' },
-  { id: 'food-8', name: 'Uji wa Mtama (Millet Porridge)', category: 'Breakfast & Beverages', calories_100g: 78, carbs_g: 16.5, protein_g: 2.1, fats_g: 0.8, iron_mg: 1.8, glycemic_index: 'Low-Medium' },
-  { id: 'food-9', name: 'Kienyeji Chicken (Indigenous Stew)', category: 'Poultry', calories_100g: 165, carbs_g: 1.0, protein_g: 24.5, fats_g: 6.8, glycemic_index: 'Low' },
-  { id: 'food-10', name: 'Ndengu (Yellow/Green Grams)', category: 'Legumes', calories_100g: 120, carbs_g: 20.0, protein_g: 8.5, fats_g: 0.6, fiber_g: 5.5, glycemic_index: 'Low' }
+const seedFoods = [
+  { id: 'food-1', name: 'Sukuma Wiki (Collard Greens)', category: 'Traditional Vegetables', calories_100g: 32, carbs_g: 4.3, protein_g: 3.0, fats_g: 0.6, fiber_g: 3.2, iron_mg: 2.1, vitamin_c_mg: 35, glycemic_index: 'Low' },
+  { id: 'food-2', name: 'Ugali (Unhulled Maize)', category: 'Grains & Staples', calories_100g: 130, carbs_g: 28.0, protein_g: 2.7, fats_g: 0.5, fiber_g: 3.5, iron_mg: 1.2, vitamin_c_mg: 0, glycemic_index: 'Medium' },
+  { id: 'food-3', name: 'Githeri (Beans & Corn)', category: 'Legumes & Grains', calories_100g: 145, carbs_g: 24.5, protein_g: 7.2, fats_g: 1.2, fiber_g: 6.0, iron_mg: 2.8, vitamin_c_mg: 4, glycemic_index: 'Low' },
+  { id: 'food-4', name: 'Tilapia Fish (Lake Victoria)', category: 'Seafood & Protein', calories_100g: 128, carbs_g: 0, protein_g: 26.0, fats_g: 2.7, fiber_g: 0, iron_mg: 0.6, vitamin_c_mg: 0, glycemic_index: 'Low' },
+  { id: 'food-5', name: 'Managu (African Nightshade)', category: 'Traditional Vegetables', calories_100g: 28, carbs_g: 3.8, protein_g: 3.2, fats_g: 0.4, fiber_g: 2.9, iron_mg: 4.2, vitamin_c_mg: 42, glycemic_index: 'Low' },
+  { id: 'food-6', name: 'Terere (Amaranth Greens)', category: 'Traditional Vegetables', calories_100g: 23, carbs_g: 4.0, protein_g: 3.5, fats_g: 0.3, fiber_g: 2.5, iron_mg: 5.3, vitamin_c_mg: 40, glycemic_index: 'Low' },
+  { id: 'food-7', name: 'Mukimo (Potatoes, Maize, Pumpkin Leaves)', category: 'Kenyan Specialties', calories_100g: 155, carbs_g: 30.2, protein_g: 4.1, fats_g: 2.0, fiber_g: 4.2, iron_mg: 1.9, vitamin_c_mg: 12, glycemic_index: 'Medium' },
+  { id: 'food-8', name: 'Uji wa Mtama (Millet Porridge)', category: 'Breakfast & Beverages', calories_100g: 78, carbs_g: 16.5, protein_g: 2.1, fats_g: 0.8, fiber_g: 1.8, iron_mg: 1.8, vitamin_c_mg: 0, glycemic_index: 'Low-Medium' },
+  { id: 'food-9', name: 'Kienyeji Chicken (Indigenous Stew)', category: 'Poultry & Meats', calories_100g: 165, carbs_g: 1.0, protein_g: 24.5, fats_g: 6.8, fiber_g: 0, iron_mg: 1.5, vitamin_c_mg: 0, glycemic_index: 'Low' },
+  { id: 'food-10', name: 'Ndengu (Yellow/Green Grams)', category: 'Legumes & Pulses', calories_100g: 120, carbs_g: 20.0, protein_g: 8.5, fats_g: 0.6, fiber_g: 5.5, iron_mg: 3.1, vitamin_c_mg: 2, glycemic_index: 'Low' },
+  { id: 'food-11', name: 'Omena (Dried Silver Cyprinid)', category: 'Seafood & Protein', calories_100g: 290, carbs_g: 0, protein_g: 58.0, fats_g: 6.5, fiber_g: 0, iron_mg: 12.5, vitamin_c_mg: 0, glycemic_index: 'Low' },
+  { id: 'food-12', name: 'Matoke (Green Cooking Bananas)', category: 'Staples & Tubers', calories_100g: 122, carbs_g: 31.8, protein_g: 1.3, fats_g: 0.3, fiber_g: 2.3, iron_mg: 0.6, vitamin_c_mg: 18, glycemic_index: 'Medium' },
+  { id: 'food-13', name: 'Kundes (Cowpea Leaves)', category: 'Traditional Vegetables', calories_100g: 34, carbs_g: 5.2, protein_g: 4.1, fats_g: 0.4, fiber_g: 3.8, iron_mg: 4.8, vitamin_c_mg: 38, glycemic_index: 'Low' },
+  { id: 'food-14', name: 'Sagaa / Saget (Spiderwisp)', category: 'Traditional Vegetables', calories_100g: 30, carbs_g: 4.5, protein_g: 4.8, fats_g: 0.5, fiber_g: 3.1, iron_mg: 6.1, vitamin_c_mg: 52, glycemic_index: 'Low' }
 ];
+
+const FOODS_FILE = path.join(__dirname, 'foods_db.json');
+function loadFoodsFromDisk() {
+  try {
+    if (fs.existsSync(FOODS_FILE)) {
+      const parsed = JSON.parse(fs.readFileSync(FOODS_FILE, 'utf8'));
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  try { fs.writeFileSync(FOODS_FILE, JSON.stringify(seedFoods, null, 2)); } catch (e) {}
+  return [...seedFoods];
+}
+const foodsList = loadFoodsFromDisk();
+function saveFoodsToDisk() {
+  try { fs.writeFileSync(FOODS_FILE, JSON.stringify(foodsList, null, 2)); } catch (e) {}
+}
 
 const seedRecipes = [
   {
@@ -1716,7 +2474,7 @@ app.post('/api/nutriscan', async (req, res) => {
       else if (image.startsWith('data:image/webp')) mimeType = 'image/webp';
 
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.6-flash',
         contents: [
           {
             inlineData: { mimeType: mimeType, data: base64Data }
@@ -2145,6 +2903,18 @@ async function syncInitialDataToFirestore() {
     }
     for (const rec of recipesList) {
       await syncFirestoreDoc('recipes', rec.id, rec);
+    }
+    for (const f of foodsList) {
+      await syncFirestoreDoc('foods', f.id, f);
+    }
+    for (const st of supportTickets) {
+      await syncFirestoreDoc('support_tickets', st.id, st);
+    }
+    for (const n of notifications) {
+      await syncFirestoreDoc('notifications', n.id, n);
+    }
+    for (const b of broadcasts) {
+      await syncFirestoreDoc('broadcasts', b.id, b);
     }
     console.log('[Firestore Init] Initial seed data successfully synced to Firestore database.');
   } catch (err) {

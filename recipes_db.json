@@ -1,0 +1,259 @@
+[
+  {
+    "id": "rec-1785716603316",
+    "name": "Omena Curry Stew",
+    "cook_time": "40 min",
+    "prep_time": "15 mins",
+    "servings": 4,
+    "difficulty": "Medium",
+    "calories": 303,
+    "protein": "22g",
+    "carbs": "60g",
+    "fats": "10g",
+    "category": "Protein & Seafood",
+    "cost": "Medium (KES 350-600)",
+    "desc": "Authentic Lake Victoria Omena stew gently simmered with tomatoes, onions, garlic, and coconut milk for optimal nutrition and rich flavor.",
+    "img": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600&auto=format&fit=crop",
+    "ingredients": [
+      "2 cups dried Omena (silver cyprinid)",
+      "1 large red onion, finely chopped",
+      "3 ripe tomatoes, pureed",
+      "2 cloves garlic, minced",
+      "1 tsp ginger paste",
+      "1/2 cup light coconut milk",
+      "1 tbsp vegetable oil",
+      "1 lemon (for washing)"
+    ],
+    "instructions": [
+      "Wash Omena thoroughly in hot lemon water twice to remove sand and bitterness, then drain.",
+      "Heat oil in a pan and deep fry Omena lightly until crispy, then set aside.",
+      "Sauté onions, garlic, and ginger until fragrant.",
+      "Add tomato puree and simmer until thick sauce forms.",
+      "Stir fried Omena and coconut milk into the sauce, simmer for 10 minutes on low heat.",
+      "Serve warm with brown ugali and traditional greens."
+    ],
+    "created_at": "2026-08-03T00:23:23.316Z"
+  },
+  {
+    "id": "rec-1",
+    "name": "Authentic Kenyan Githeri Special",
+    "cook_time": "45 mins",
+    "prep_time": "15 mins",
+    "servings": 4,
+    "difficulty": "Easy",
+    "calories": 420,
+    "protein": "18g",
+    "carbs": "62g",
+    "fats": "8g",
+    "category": "Traditional Staples",
+    "cost": "Budget (KES 150-300)",
+    "desc": "Nutritious traditional Kenyan corn and bean stew sautéed with fresh tomatoes, onions, and coriander.",
+    "img": "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?q=80&w=600&auto=format&fit=crop",
+    "ingredients": [
+      "2 cups boiled soft maize",
+      "2 cups boiled red beans or rosecoco",
+      "1 large onion, chopped",
+      "2 ripe tomatoes, diced",
+      "1 tablespoon vegetable oil",
+      "1 bunch fresh coriander (dania)",
+      "1 avocado, sliced for serving"
+    ],
+    "instructions": [
+      "Heat oil in a heavy pot over medium heat and sauté onions until golden brown.",
+      "Add diced tomatoes and salt; cook until soft and saucy.",
+      "Stir in the pre-boiled maize and beans thoroughly.",
+      "Simmer on low heat for 15-20 minutes to absorb all flavors.",
+      "Garnish with coriander and serve hot with sliced fresh avocado."
+    ],
+    "created_at": "2026-08-01T10:00:00.000Z"
+  },
+  {
+    "id": "rec-2",
+    "name": "Tilapia Stew with Coconut Milk & Managu",
+    "cook_time": "30 mins",
+    "prep_time": "10 mins",
+    "servings": 2,
+    "difficulty": "Medium",
+    "calories": 510,
+    "protein": "38g",
+    "carbs": "18g",
+    "fats": "22g",
+    "category": "Coastal & Lake Cuisine",
+    "cost": "Premium (KES 600-1000)",
+    "desc": "Pan-seared fresh whole tilapia fish simmered in rich coconut stew, accompanied by steamed nightshade greens.",
+    "img": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=600&auto=format&fit=crop",
+    "ingredients": [
+      "2 fresh whole tilapia fish, cleaned",
+      "1 cup light coconut milk",
+      "2 bunches fresh managu (nightshade greens)",
+      "1 onion, 2 tomatoes, garlic & ginger paste",
+      "1 tablespoon lemon juice"
+    ],
+    "instructions": [
+      "Pan-fry or grill tilapia lightly until golden skin forms.",
+      "Prepare a tomato-onion garlic sauce with coconut milk base.",
+      "Steam managu greens separately with a pinch of sea salt.",
+      "Simmer tilapia in coconut stew for 10 minutes.",
+      "Serve hot alongside warm brown ugali and steamed managu."
+    ],
+    "created_at": "2026-08-01T11:00:00.000Z"
+  },
+  {
+    "id": "rec-3",
+    "name": "Fermented Sorghum Uji with Honey & Ginger",
+    "cook_time": "15 mins",
+    "prep_time": "5 mins",
+    "servings": 2,
+    "difficulty": "Easy",
+    "calories": 210,
+    "protein": "6g",
+    "carbs": "42g",
+    "fats": "1.5g",
+    "category": "Healthy Breakfast",
+    "cost": "Budget (KES 50-150)",
+    "desc": "Probiotic-rich fermented millet and sorghum porridge sweetened naturally with raw honey and fresh ginger.",
+    "img": "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?q=80&w=600&auto=format&fit=crop",
+    "ingredients": [
+      "1/2 cup fermented sorghum flour (wimbi)",
+      "3 cups clean water",
+      "1 tsp freshly grated ginger root",
+      "1 tbsp raw natural honey",
+      "Squeeze of fresh lemon"
+    ],
+    "instructions": [
+      "Mix sorghum flour with 1/2 cup cold water to form a smooth paste.",
+      "Bring 2.5 cups of water with grated ginger to a boil.",
+      "Whisk in the sorghum paste continuously to prevent lumps.",
+      "Simmer gently for 10-12 minutes until thick and glossy.",
+      "Stir in honey and lemon before serving warm."
+    ],
+    "created_at": "2026-08-01T12:00:00.000Z"
+  },
+  {
+    "id": "rec-4",
+    "name": "Traditional Mukimo with Sweet Corn & Kahurura",
+    "cook_time": "40 mins",
+    "prep_time": "20 mins",
+    "servings": 5,
+    "difficulty": "Medium",
+    "calories": 380,
+    "protein": "12g",
+    "carbs": "68g",
+    "fats": "7g",
+    "category": "Traditional Staples",
+    "cost": "Medium (KES 300-500)",
+    "desc": "Classic Central Kenya mashed dish made of soft potatoes, green peas, maize, and pumpkin leaves (kahurura).",
+    "img": "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?q=80&w=600&auto=format&fit=crop",
+    "ingredients": [
+      "6 large soft potatoes, peeled",
+      "1 cup fresh soft green peas",
+      "1 cup boiled sweet corn",
+      "1 bunch pumpkin leaves (kahurura), finely chopped",
+      "1 large onion, diced",
+      "2 tbsp cooking oil"
+    ],
+    "instructions": [
+      "Boil potatoes, green peas, sweet corn, and pumpkin leaves together with salt until soft.",
+      "Drain excess water, keeping 1/2 cup for mashing consistency.",
+      "Mash thoroughly until uniform and vibrant green.",
+      "Sauté onions separately until golden brown, then fold into the mashed mukimo.",
+      "Serve warm with beef stew or vegetable gravy."
+    ],
+    "created_at": "2026-08-02T08:00:00.000Z"
+  },
+  {
+    "id": "rec-5",
+    "name": "Kienyeji Chicken Stew (Indigenous Free-Range)",
+    "cook_time": "60 mins",
+    "prep_time": "20 mins",
+    "servings": 6,
+    "difficulty": "Medium",
+    "calories": 480,
+    "protein": "42g",
+    "carbs": "12g",
+    "fats": "28g",
+    "category": "Poultry & Meats",
+    "cost": "Premium (KES 800-1400)",
+    "desc": "Slow-cooked indigenous organic chicken stew infused with garlic, ginger, tomatoes, and natural spices.",
+    "img": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?q=80&w=600&auto=format&fit=crop",
+    "ingredients": [
+      "1 full Kienyeji chicken, cut into pieces",
+      "2 onions, finely chopped",
+      "3 ripe tomatoes, pureed",
+      "1 tbsp ginger-garlic paste",
+      "1 tsp cumin and coriander powder",
+      "Fresh dania for garnish"
+    ],
+    "instructions": [
+      "Boil chicken pieces with salt, garlic, and ginger for 35 minutes until tender.",
+      "In a separate pot, sauté onions in oil until caramelized.",
+      "Add tomato puree and spices, cooking down to a rich gravy.",
+      "Add boiled chicken along with its stock to the gravy.",
+      "Simmer for 20 minutes on medium-low heat until flavors integrate.",
+      "Garnish with fresh dania and serve with brown ugali."
+    ],
+    "created_at": "2026-08-02T09:00:00.000Z"
+  },
+  {
+    "id": "rec-6",
+    "name": "Coconut Ndengu Stew (Green Grams Curry)",
+    "cook_time": "35 mins",
+    "prep_time": "15 mins",
+    "servings": 4,
+    "difficulty": "Easy",
+    "calories": 340,
+    "protein": "16g",
+    "carbs": "52g",
+    "fats": "8g",
+    "category": "Vegetarian & Vegan",
+    "cost": "Budget (KES 150-300)",
+    "desc": "High-protein green grams simmered in aromatic coconut cream with turmeric, garlic, and sweet bell peppers.",
+    "img": "https://images.unsplash.com/photo-1546833999-b9f581a1996d?q=80&w=600&auto=format&fit=crop",
+    "ingredients": [
+      "2 cups pre-boiled green grams (ndengu)",
+      "1 cup coconut milk",
+      "1 red bell pepper, diced",
+      "1 onion & 2 tomatoes, chopped",
+      "1 tsp mild curry powder & turmeric"
+    ],
+    "instructions": [
+      "Sauté onions and bell pepper in oil until softened.",
+      "Add tomatoes, curry powder, and turmeric; cook into a paste.",
+      "Add pre-boiled green grams and stir well.",
+      "Pour in coconut milk and 1/2 cup water, simmer for 15 minutes.",
+      "Serve hot with chapati or rice."
+    ],
+    "created_at": "2026-08-02T10:00:00.000Z"
+  },
+  {
+    "id": "rec-7",
+    "name": "Matoke & Beef Stew (Plantain Stew)",
+    "cook_time": "40 mins",
+    "prep_time": "15 mins",
+    "servings": 4,
+    "difficulty": "Medium",
+    "calories": 450,
+    "protein": "26g",
+    "carbs": "58g",
+    "fats": "14g",
+    "category": "Traditional Staples",
+    "cost": "Medium (KES 400-700)",
+    "desc": "Savory green banana (matoke) stew cooked with tender beef chunks, carrots, and sweet bell peppers.",
+    "img": "https://images.unsplash.com/photo-1574484284002-952d92456975?q=80&w=600&auto=format&fit=crop",
+    "ingredients": [
+      "8 green cooking bananas (matoke), peeled",
+      "300g lean beef, cubed",
+      "2 carrots, sliced",
+      "1 onion & 2 tomatoes, chopped",
+      "1 cup beef stock"
+    ],
+    "instructions": [
+      "Boil beef cubes with salt until tender.",
+      "In a deep pot, sauté onions, add tomatoes and carrots.",
+      "Add peeled green bananas and tender beef cubes.",
+      "Pour beef stock, cover tightly, and simmer on low heat for 25 minutes until matoke is soft.",
+      "Serve warm as a complete single-pot meal."
+    ],
+    "created_at": "2026-08-02T11:00:00.000Z"
+  }
+]
