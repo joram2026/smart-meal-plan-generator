@@ -16,6 +16,7 @@
     "express": "^4.19.2",
     "firebase": "^12.17.0",
     "firebase-admin": "^14.2.0",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "serverless-http": "^4.0.0"
   }
 }

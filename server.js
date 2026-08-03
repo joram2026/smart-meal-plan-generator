@@ -14,6 +14,14 @@ const JWT_SECRET = process.env.JWT_SECRET || 'smartlishe_secret_key_2026';
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Netlify path normalization
+app.use((req, res, next) => {
+  if (req.url.startsWith('/.netlify/functions/api')) {
+    req.url = req.url.replace('/.netlify/functions/api', '/api');
+  }
+  next();
+});
+
 // Helper Response Formatters
 const successResponse = (res, message, data = null, statusCode = 200) => {
   return res.status(statusCode).json({
@@ -2922,7 +2930,11 @@ async function syncInitialDataToFirestore() {
   }
 }
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Smart Lishe server running on http://0.0.0.0:${PORT}`);
-  syncInitialDataToFirestore();
-});
+if (require.main === module) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Smart Lishe server running on http://0.0.0.0:${PORT}`);
+    syncInitialDataToFirestore();
+  });
+}
+
+module.exports = app;
