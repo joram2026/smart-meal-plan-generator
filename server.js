@@ -23,11 +23,16 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Netlify & Serverless Path Normalization Middleware
 app.use((req, res, next) => {
-  if (req.url.startsWith('/.netlify/functions/api')) {
-    req.url = req.url.replace('/.netlify/functions/api', '/api');
-  } else if (req.url.startsWith('/.netlify/functions/')) {
-    req.url = req.url.replace('/.netlify/functions/', '/api/');
+  let url = req.url;
+  if (url.startsWith('/.netlify/functions/api')) {
+    url = url.replace('/.netlify/functions/api', '/api');
+  } else if (url.startsWith('/.netlify/functions/')) {
+    url = url.replace('/.netlify/functions/', '/api/');
   }
+  if (!url.startsWith('/api') && !url.includes('.') && !url.startsWith('/user') && !url.startsWith('/professional') && !url.startsWith('/auth') && !url.startsWith('/membership') && !url.startsWith('/css') && !url.startsWith('/js') && !url.startsWith('/images')) {
+    url = '/api' + (url.startsWith('/') ? url : '/' + url);
+  }
+  req.url = url;
   next();
 });
 
@@ -694,7 +699,7 @@ app.put('/api/settings', (req, res) => {
 });
 
 // --- AI Chat & Meal Generator (Gemini Integration) ---
-app.post('/api/ai/chat', async (req, res) => {
+app.post(['/api/ai/chat', '/ai/chat'], async (req, res) => {
   const { message, userProfile, history = [], image } = req.body || {};
   if (!message && !image) return errorResponse(res, 'Message or image is required', 400);
 
@@ -746,10 +751,12 @@ Return ONLY a valid JSON object matching this strict schema without any addition
   ]
 }`;
 
-  if (process.env.GEMINI_API_KEY) {
+  const activeApiKey = process.env.GEMINI_API_KEY || req.headers['x-gemini-api-key'] || req.body?.apiKey;
+
+  if (activeApiKey) {
     try {
       const ai = new GoogleGenAI({
-        apiKey: process.env.GEMINI_API_KEY,
+        apiKey: activeApiKey,
         httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
       });
 
@@ -977,13 +984,14 @@ app.get('/api/ai/conversations', authenticateToken, (req, res) => {
   ]);
 });
 
-app.post('/api/meals/generate', async (req, res) => {
+app.post(['/api/meals/generate', '/meals/generate'], async (req, res) => {
   const { calories = 2000, preferences = [], diet_type = 'Balanced Kenyan' } = req.body || {};
+  const activeApiKey = process.env.GEMINI_API_KEY || req.headers['x-gemini-api-key'] || req.body?.apiKey;
   
-  if (process.env.GEMINI_API_KEY) {
+  if (activeApiKey) {
     try {
       const ai = new GoogleGenAI({
-        apiKey: process.env.GEMINI_API_KEY,
+        apiKey: activeApiKey,
         httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
       });
       const response = await ai.models.generateContent({
@@ -2832,13 +2840,14 @@ app.delete('/api/recipes/:id', authenticateToken, (req, res) => {
 });
 
 // --- NutriScan & Health Conditions ---
-app.post('/api/nutriscan', async (req, res) => {
+app.post(['/api/nutriscan', '/nutriscan'], async (req, res) => {
   const { image, food_name } = req.body || {};
+  const activeApiKey = process.env.GEMINI_API_KEY || req.headers['x-gemini-api-key'] || req.body?.apiKey;
 
-  if (process.env.GEMINI_API_KEY && image) {
+  if (activeApiKey && image) {
     try {
       const ai = new GoogleGenAI({
-        apiKey: process.env.GEMINI_API_KEY,
+        apiKey: activeApiKey,
         httpOptions: {
           headers: {
             'User-Agent': 'aistudio-build'

@@ -734,125 +734,131 @@
       // This object can be replaced with API responses later.
       const sampleResponses = {
         'weight gain': {
-          title: 'Weight Gain Meal Plan',
+          reply: 'To build healthy lean muscle and body mass in East Africa, prioritize high-energy, nutrient-dense local whole foods. Combine complex carbohydrates like Mukimo and Matoke with high-quality protein (Kienyeji Chicken, Tilapia, Beef, Eggs) and healthy fats like Haas avocados and peanut butter.',
+          title: 'Kenyan High-Energy Muscle & Weight Gain Plan',
+          prepTime: '30-40 mins',
+          estimatedCostKES: 'KES 550',
+          macros: { protein: '120g', carbs: '280g', fats: '70g', fiber: '30g' },
           meals: [
-            { name: 'Breakfast: Body Builder Porridge', cal: 520 },
-            { name: 'Lunch: Rice with Beef Stew', cal: 780 },
-            { name: 'Dinner: Ugali with Fried Fish', cal: 650 },
-            { name: 'Snack: Nuts & Greek Yogurt', cal: 350 }
+            { name: 'Breakfast: Uji wa Mtama with 2 tbsp Peanut Butter & 3 Boiled Eggs', cal: 520 },
+            { name: 'Lunch: Mukimo with Tender Beef Stew & 1/2 Avocado', cal: 780 },
+            { name: 'Dinner: Kienyeji Chicken Stew with Ugali & Sautéed Terere Greens', cal: 750 },
+            { name: 'Snack: Roasted Groundnuts & Whole Milk', cal: 400 }
           ],
-          totalCalories: 2300,
-          tips: 'Add an extra banana and a glass of milk to increase calories further.'
+          totalCalories: 2450,
+          tips: 'Eat every 3-4 hours and consume a high-protein snack before sleep.',
+          followUps: ['How much protein is in Mukimo?', 'What is a cheap weight gain meal?', 'Show step-by-step recipe']
         },
         'weight loss': {
-          title: 'Weight Loss Meal Plan',
+          reply: 'For sustainable weight loss in East Africa, we prioritize high-fiber, low-glycemic index traditional foods. Swap processed white flour with unhulled Sorghum or Brown Ugali, fill half your plate with indigenous greens (Sukuma Wiki, Managu, Terere), and pair with lean protein.',
+          title: 'Kenyan Sustainable Fat Loss Plan',
+          prepTime: '25-35 mins',
+          estimatedCostKES: 'KES 380',
+          macros: { protein: '88g', carbs: '165g', fats: '42g', fiber: '29g' },
           meals: [
-            { name: 'Breakfast: Oatmeal with Berries', cal: 320 },
-            { name: 'Lunch: Grilled Chicken Salad', cal: 420 },
-            { name: 'Dinner: Steamed Fish with Vegetables', cal: 480 },
-            { name: 'Snack: Apple slices', cal: 80 }
+            { name: 'Breakfast: Unsweetened Uji wa Mtama & 2 Boiled Eggs', cal: 320 },
+            { name: 'Lunch: Steamed Lake Tilapia with Sukuma Wiki & Brown Ugali', cal: 480 },
+            { name: 'Dinner: Yellow Ndengu Stew with Managu Greens & Cucumber', cal: 450 },
+            { name: 'Snack: Sliced Papaya & Pumpkin Seeds', cal: 230 }
           ],
-          totalCalories: 1300,
-          tips: 'Focus on portion control and increase water intake to 2.5L/day.'
+          totalCalories: 1480,
+          tips: 'Drink 3 Liters of water daily. Limit cooking oil to 1 tsp per dish.',
+          followUps: ['How do I prep Ndengu without bloating?', 'What is a good evening snack?', 'Can I swap Tilapia for Omena?']
         },
         'breakfast': {
-          title: 'Healthy Breakfast Ideas',
+          reply: 'A nutrient-dense Kenyan breakfast sets your metabolic tone for the day. High-fiber whole grains paired with eggs or peanut butter ensure sustained energy and prevent mid-morning blood sugar drops.',
+          title: 'High-Protein Kenyan Breakfast Guide',
+          prepTime: '15-20 mins',
+          estimatedCostKES: 'KES 180',
+          macros: { protein: '28g', carbs: '65g', fats: '18g', fiber: '9g' },
           meals: [
-            { name: 'Oatmeal with Honey & Berries', cal: 350 },
-            { name: 'Scrambled Eggs with Avocado Toast', cal: 420 },
-            { name: 'Smoothie Bowl with Granola', cal: 380 },
-            { name: 'Ugali with Sukuma Wiki (small portion)', cal: 300 }
+            { name: 'Fermented Sorghum Porridge (Uji wa Mtama) with Honey & Ginger', cal: 240 },
+            { name: '2 Pan-Boiled Eggs with Fresh Tomato-Dania Kachumbari', cal: 170 },
+            { name: '1/2 Haas Avocado with Lemon & Sea Salt', cal: 130 }
           ],
-          totalCalories: 1450,
-          tips: 'Start your day with protein and fibre for sustained energy.'
+          totalCalories: 540,
+          tips: 'Avoid adding refined white sugar to porridge. Use ginger, lemon, or raw honey.',
+          followUps: ['How do I ferment sorghum flour at home?', 'Give me a quick 5-min breakfast idea', 'What are low-carb breakfast options?']
         },
         'diabetes': {
-          title: 'Diabetes-Friendly Meal Guide',
+          reply: 'Controlling blood sugar requires choosing Low-Glycemic Index (GI) staples. Replace white ugali with Sorghum or Millet, consume indigenous vegetables generously, and eat proteins/greens before carbohydrates to blunt glucose spikes.',
+          title: 'Diabetes-Friendly Low-GI Kenyan Plan',
+          prepTime: '30 mins',
+          estimatedCostKES: 'KES 350',
+          macros: { protein: '82g', carbs: '160g', fats: '40g', fiber: '31g' },
           meals: [
-            { name: 'Breakfast: Millet Porridge', cal: 280 },
-            { name: 'Lunch: Brown Rice with Lentils', cal: 420 },
-            { name: 'Dinner: Fish with Steamed Vegetables', cal: 390 },
-            { name: 'Snack: Apple with Peanut Butter', cal: 160 }
+            { name: 'Breakfast: Pure Sorghum Porridge & 1 Boiled Egg', cal: 280 },
+            { name: 'Lunch: Githeri (Corn & Beans 1:2 ratio) with Sautéed Sukuma Wiki', cal: 490 },
+            { name: 'Dinner: Pan-Seared Tilapia with Terere Greens & 150g Brown Ugali', cal: 460 },
+            { name: 'Snack: Green Apple Slices & Handful of Raw Peanuts', cal: 220 }
           ],
-          totalCalories: 1250,
-          tips: 'Choose low-GI foods, moderate portions, and eat at regular intervals.'
+          totalCalories: 1450,
+          tips: 'Eating greens and protein before starch can reduce glucose spikes by up to 30%.',
+          followUps: ['Is Chapati allowed for diabetics?', 'Which fruits have the lowest sugar in Kenya?', 'How do I cook Githeri for diabetes?']
         },
         'hypertension': {
-          title: 'Hypertension-Friendly Nutrition',
+          reply: 'Following the DASH nutrition model helps regulate blood pressure naturally. Focus on potassium-rich foods like green bananas (Matoke), avocados, and leafy greens while eliminating commercial high-sodium seasoning cubes.',
+          title: 'Hypertension (DASH Protocol) Kenyan Plan',
+          prepTime: '25-35 mins',
+          estimatedCostKES: 'KES 390',
+          macros: { protein: '80g', carbs: '185g', fats: '38g', fiber: '28g' },
           meals: [
-            { name: 'Breakfast: Oatmeal with Banana', cal: 300 },
-            { name: 'Lunch: Beans with Brown Rice', cal: 450 },
-            { name: 'Dinner: Baked Fish with Sweet Potato', cal: 480 }
+            { name: 'Breakfast: Oatmeal with Banana & Cinnamon', cal: 350 },
+            { name: 'Lunch: Matoke Stew with Beans & Steamed Spinach', cal: 510 },
+            { name: 'Dinner: Poached Tilapia with Kundes (Cowpea Leaves) & Sweet Potato', cal: 480 },
+            { name: 'Snack: Fresh Watermelon Slices', cal: 180 }
           ],
-          totalCalories: 1230,
-          tips: 'Reduce salt, increase potassium-rich foods like bananas and sweet potatoes.'
+          totalCalories: 1520,
+          tips: 'Keep total daily salt under 1 level teaspoon. Season with fresh coriander, ginger, and garlic.',
+          followUps: ['What herbs replace salt for cooking?', 'Is sweet potato good for high blood pressure?', 'How does avocado help heart health?']
         },
         'shopping list': {
-          title: 'Weekly Shopping List',
+          reply: 'Here is an optimized weekly grocery list for a balanced, budget-friendly East African kitchen. Stocking these essentials allows you to prepare quick, clinical-grade meals all week.',
+          title: 'Weekly Smart Lishe Grocery List',
+          prepTime: 'Market Visit',
+          estimatedCostKES: 'KES 2,800 - 3,500',
+          macros: { protein: 'High', carbs: 'Complex', fats: 'Healthy', fiber: 'Rich' },
           meals: [
-            { name: '🛒 Vegetables: Spinach, Bell Peppers, Onions', cal: '' },
-            { name: '🛒 Proteins: Chicken, Fish, Eggs', cal: '' },
-            { name: '🛒 Grains: Brown Rice, Oats, Whole Wheat Bread', cal: '' },
-            { name: '🛒 Fruits: Bananas, Apples, Berries', cal: '' },
-            { name: '🛒 Dairy: Milk, Yogurt', cal: '' }
+            { name: '🛒 Grains & Tubers: Sorghum/Wimbi Flour, Unhulled Maize, Sweet Potatoes', cal: '' },
+            { name: '🛒 Vegetables: Sukuma Wiki, Managu, Terere, Tomatoes, Onions, Coriander', cal: '' },
+            { name: '🛒 Proteins: Fresh Tilapia, Ndengu (Mung Beans), Rosecoco Beans, Eggs, Kienyeji Chicken', cal: '' },
+            { name: '🛒 Healthy Fats: Haas Avocados, Roasted Groundnuts', cal: '' }
           ],
           totalCalories: '',
-          tips: 'Estimated Budget: KES 4,200. Check your local market for best prices.'
+          tips: 'Buy leafy greens every 3 days from local mama mboga for maximum nutrient preservation.',
+          followUps: ['How do I keep managu fresh longer?', 'Show meal plan using this grocery list', 'Can I get a KES 2000 budget list?']
         },
         'snack': {
-          title: 'Healthy Snack Ideas',
+          reply: 'Healthy snacking prevents mid-day energy slumps and keeps blood sugar stable. Pair complex carbohydrates or fiber with healthy protein or healthy fats.',
+          title: 'Nutritious Kenyan Snack Options',
+          prepTime: '5 mins',
+          estimatedCostKES: 'KES 120',
+          macros: { protein: '18g', carbs: '35g', fats: '12g', fiber: '8g' },
           meals: [
-            { name: 'Apple slices with peanut butter', cal: 160 },
-            { name: 'Greek yogurt with honey', cal: 150 },
-            { name: 'Handful of mixed nuts', cal: 180 },
-            { name: 'Carrot sticks with hummus', cal: 120 }
+            { name: 'Handful of Roasted Groundnuts & 1 Medium Banana', cal: 240 },
+            { name: 'Sliced Fresh Papaya with Pumpkin Seeds', cal: 160 },
+            { name: '2 Hard-Boiled Eggs with Salt & Pepper', cal: 140 },
+            { name: 'Natural Yoghurt with Honey & Chia Seeds', cal: 180 }
           ],
-          totalCalories: 610,
-          tips: 'Choose snacks that combine protein and fibre for satiety.'
-        },
-        'calories': {
-          title: 'Your Daily Calorie Estimate',
-          meals: [
-            { name: 'Basal Metabolic Rate (BMR)', cal: '—' },
-            { name: 'Daily Calorie Need (Moderate Activity)', cal: '—' },
-            { name: 'Calories for Weight Gain', cal: '—' },
-            { name: 'Calories for Weight Loss', cal: '—' }
-          ],
-          totalCalories: '',
-          tips: 'Your daily calorie needs depend on your activity level. Adjust accordingly.'
-        },
-        'meal plan': {
-          title: 'Today\'s Meal Plan',
-          meals: [
-            { name: 'Breakfast: Oatmeal with Berries', cal: 350 },
-            { name: 'Lunch: Grilled Chicken with Quinoa', cal: 520 },
-            { name: 'Dinner: Salmon with Roasted Vegetables', cal: 480 },
-            { name: 'Snack: Mixed Nuts', cal: 180 }
-          ],
-          totalCalories: 1530,
-          tips: 'Drink 2.5L of water today. Add a side of greens to lunch.'
-        },
-        'protein': {
-          title: 'High Protein Meal Plan',
-          meals: [
-            { name: 'Breakfast: Scrambled Eggs (4) with Avocado', cal: 480 },
-            { name: 'Lunch: Grilled Chicken Breast (200g) with Rice', cal: 620 },
-            { name: 'Dinner: Beef Steak with Sweet Potato', cal: 590 },
-            { name: 'Snack: Greek Yogurt (200g)', cal: 150 }
-          ],
-          totalCalories: 1840,
-          tips: 'Protein: 140g. Aim for 1.6–2g protein per kg bodyweight.'
+          totalCalories: 720,
+          tips: 'Avoid deep-fried mandazi and processed biscuits for tea time snacks.',
+          followUps: ['What are low-cost snacks for school or office?', 'Is roasted maize a healthy snack?', 'Show protein-rich evening snacks']
         },
         'default': {
-          title: 'AI Recommendation',
+          reply: 'Hello! I am **Smart Lishe AI**, your clinical nutritionist registered with KNDI. Based on your health goals, here is a balanced daily nutrition guide crafted with accessible local ingredients.',
+          title: 'Balanced Smart Lishe Clinical Meal Plan',
+          prepTime: '30 mins',
+          estimatedCostKES: 'KES 420',
+          macros: { protein: '85g', carbs: '200g', fats: '45g', fiber: '27g' },
           meals: [
-            { name: '🍎 Focus on balanced meals', cal: '' },
-            { name: '💧 Stay hydrated (2.5L/day)', cal: '' },
-            { name: '🥗 Include vegetables in every meal', cal: '' },
-            { name: '🏃 Stay active daily', cal: '' }
+            { name: 'Breakfast: Uji wa Mtama & 2 Boiled Eggs', cal: 360 },
+            { name: 'Lunch: Githeri with Sautéed Sukuma Wiki & 1/2 Avocado', cal: 580 },
+            { name: 'Dinner: Brown Ugali with Tilapia & Managu Greens', cal: 620 },
+            { name: 'Snack: Handful of Roasted Groundnuts', cal: 160 }
           ],
-          totalCalories: '',
-          tips: 'I can help with meal plans, weight goals, health conditions, or recipes. Try a suggested prompt!'
+          totalCalories: 1720,
+          tips: 'Drink 2.5–3 Liters of water daily and include dark leafy greens with lunch and dinner.',
+          followUps: ['How do I adjust this for weight loss?', 'Show diabetes-friendly swaps', 'Give me a shopping list for this plan']
         }
       };
 
