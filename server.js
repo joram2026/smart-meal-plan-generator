@@ -693,6 +693,31 @@ app.put('/api/settings', (req, res) => {
   return successResponse(res, 'Settings updated', settings);
 });
 
+// Helper for Gemini API call with exponential retry for transient errors (e.g. 503 high demand)
+async function generateContentWithRetry(ai, requestParams, maxRetries = 2) {
+  let lastError;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await ai.models.generateContent(requestParams);
+    } catch (err) {
+      lastError = err;
+      const errStr = String(err?.message || err || '');
+      const isTransient = err?.status === 503 || err?.code === 503 ||
+        errStr.includes('503') || errStr.includes('high demand') ||
+        errStr.includes('UNAVAILABLE') || errStr.includes('429') ||
+        errStr.includes('RESOURCE_EXHAUSTED');
+      
+      if (isTransient && attempt < maxRetries) {
+        console.warn(`Gemini API transient error (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${(attempt + 1) * 750}ms...`);
+        await new Promise(res => setTimeout(res, (attempt + 1) * 750));
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw lastError;
+}
+
 // --- AI Chat & Meal Generator (Gemini Integration) ---
 app.post(['/api/ai/chat', '/ai/chat'], async (req, res) => {
   const { message, userProfile, history = [], image } = req.body || {};
@@ -767,7 +792,7 @@ Return ONLY a valid JSON object matching this strict schema without any addition
       let userPart = `USER: ${message || 'Please analyze this meal image and provide nutritional guidance.'}`;
       
       const requestPayload = {
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.6-flash',
         contents: image ? [
           { inlineData: { mimeType: image.startsWith('data:image/png') ? 'image/png' : 'image/jpeg', data: image.includes(',') ? image.split(',')[1] : image } },
           `${contentsList.join('\n')}\n${userPart}`
@@ -780,14 +805,7 @@ Return ONLY a valid JSON object matching this strict schema without any addition
         }
       };
 
-      let response;
-      try {
-        response = await ai.models.generateContent(requestPayload);
-      } catch (firstErr) {
-        console.warn('gemini-2.5-flash failed, trying gemini-1.5-flash:', firstErr.message);
-        requestPayload.model = 'gemini-1.5-flash';
-        response = await ai.models.generateContent(requestPayload);
-      }
+      const response = await generateContentWithRetry(ai, requestPayload);
 
       function parseGeminiResponse(rawText) {
         if (!rawText) return { reply: 'Here is your personalized Smart Lishe clinical nutrition guidance:', card: null, followUps: [] };
@@ -996,8 +1014,8 @@ app.post(['/api/meals/generate', '/meals/generate'], async (req, res) => {
         apiKey: activeApiKey,
         httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
       });
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+      const response = await generateContentWithRetry(ai, {
+        model: 'gemini-3.6-flash',
         contents: `Generate a detailed 1-day Kenyan meal plan targeting ${calories} kcal (${diet_type}).`,
         config: {
           systemInstruction: 'You are Smart Lishe AI. Return a JSON object with keys: title, target_calories, breakfast (name, calories, protein), lunch (name, calories, protein), dinner (name, calories, protein), snack (name, calories, protein), tips. Include authentic Kenyan dishes like Ugali, Sukuma Wiki, Githeri, Tilapia, Mukimo, Uji, Managu.',
@@ -2861,8 +2879,8 @@ app.post(['/api/nutriscan', '/nutriscan'], async (req, res) => {
       if (image.startsWith('data:image/png')) mimeType = 'image/png';
       else if (image.startsWith('data:image/webp')) mimeType = 'image/webp';
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+      const response = await generateContentWithRetry(ai, {
+        model: 'gemini-3.6-flash',
         contents: [
           {
             inlineData: { mimeType: mimeType, data: base64Data }
