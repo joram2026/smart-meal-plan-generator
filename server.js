@@ -693,26 +693,36 @@ app.put('/api/settings', (req, res) => {
   return successResponse(res, 'Settings updated', settings);
 });
 
-// Helper for Gemini API call with exponential retry for transient errors (e.g. 503 high demand)
-async function generateContentWithRetry(ai, requestParams, maxRetries = 2) {
+// Helper for Gemini API call with exponential retry and model fallback for transient/quota errors (e.g. 503 high demand, 429 rate limits)
+async function generateContentWithRetry(ai, requestParams, maxRetries = 1) {
+  const modelsToTry = [
+    requestParams.model || 'gemini-2.5-flash',
+    'gemini-2.5-flash',
+    'gemini-1.5-flash'
+  ].filter((m, idx, self) => self.indexOf(m) === idx);
+
   let lastError;
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      return await ai.models.generateContent(requestParams);
-    } catch (err) {
-      lastError = err;
-      const errStr = String(err?.message || err || '');
-      const isTransient = err?.status === 503 || err?.code === 503 ||
-        errStr.includes('503') || errStr.includes('high demand') ||
-        errStr.includes('UNAVAILABLE') || errStr.includes('429') ||
-        errStr.includes('RESOURCE_EXHAUSTED');
-      
-      if (isTransient && attempt < maxRetries) {
-        console.warn(`Gemini API transient error (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${(attempt + 1) * 750}ms...`);
-        await new Promise(res => setTimeout(res, (attempt + 1) * 750));
-        continue;
+  for (const modelName of modelsToTry) {
+    const currentParams = { ...requestParams, model: modelName };
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await ai.models.generateContent(currentParams);
+      } catch (err) {
+        lastError = err;
+        const errStr = String(err?.message || err || '');
+        const isTransient = err?.status === 503 || err?.code === 503 ||
+          errStr.includes('503') || errStr.includes('high demand') ||
+          errStr.includes('UNAVAILABLE') || errStr.includes('429') ||
+          errStr.includes('RESOURCE_EXHAUSTED') || errStr.includes('Quota exceeded');
+        
+        if (isTransient && attempt < maxRetries) {
+          console.warn(`Gemini API transient error on ${modelName} (attempt ${attempt + 1}/${maxRetries + 1}), retrying...`);
+          await new Promise(res => setTimeout(res, (attempt + 1) * 500));
+          continue;
+        }
+        console.warn(`Model ${modelName} encountered error, trying next fallback model if available...`);
+        break;
       }
-      throw err;
     }
   }
   throw lastError;
@@ -2886,7 +2896,25 @@ app.post(['/api/nutriscan', '/nutriscan'], async (req, res) => {
             inlineData: { mimeType: mimeType, data: base64Data }
           },
           `You are an expert AI clinical nutritionist specializing in East African, Kenyan, and global cuisine.
-Analyze the meal in this photograph thoroughly. Pay special attention to traditional Kenyan dishes (such as Ugali, Sukuma Wiki, Tilapia, Githeri, Mukimo, Managu, Terere, Ndengu, Nyama Choma, Chapati, Kienyeji Chicken, Uji, Kachumbari, Pilau, Matoke, Omena, etc.).
+
+CRITICAL INSTRUCTION FOR IMAGE VERIFICATION:
+First, inspect the uploaded photograph carefully to verify if it contains any food, dish, meal, beverage, food ingredient, or edible item.
+If the uploaded image DOES NOT contain any food or meal items (e.g., it is a document, text/quiz screenshot, object, person, animal, vehicle, landscape, device, UI screenshot, etc.), you MUST set:
+{
+  "food_identified": "No food identified",
+  "confidence_score": 94,
+  "description": "The uploaded image is a screenshot or photo of non-food content [state briefly what is visible, e.g. document text, question screenshot, object] and does not contain any food or meal items.",
+  "estimated_calories": 0,
+  "portion_size": "N/A",
+  "macronutrients": { "carbs": "0g", "protein": "0g", "fats": "0g", "fiber": "0g" },
+  "glycemic_index": "N/A",
+  "key_vitamins": [],
+  "nutritional_grade": "N/A",
+  "health_recommendation": "Please upload a clear photograph of a meal, dish, or food item to analyze its nutritional composition.",
+  "dish_breakdown": []
+}
+
+If the image DOES contain food, analyze the meal thoroughly. Pay special attention to traditional Kenyan dishes (such as Ugali, Sukuma Wiki, Tilapia, Githeri, Mukimo, Managu, Terere, Ndengu, Nyama Choma, Chapati, Kienyeji Chicken, Uji, Kachumbari, Pilau, Matoke, Omena, etc.).
 
 Return ONLY a valid JSON object strictly adhering to this JSON structure without any markdown formatting or extra text outside JSON:
 {
@@ -2932,23 +2960,39 @@ Return ONLY a valid JSON object strictly adhering to this JSON structure without
     }
   }
 
-  // Enhanced fallback analysis for Kenyan cuisine
+  // Fallback handling when AI Vision cannot run or API key is missing
+  if (image && !food_name) {
+    return successResponse(res, 'AI Vision unavailable or API key unconfigured', {
+      food_identified: 'AI Vision Unavailable',
+      confidence_score: 0,
+      description: 'Unable to process image via AI Vision. Please ensure your GEMINI_API_KEY environment variable is configured in Netlify or select a meal name.',
+      estimated_calories: 0,
+      portion_size: 'N/A',
+      macronutrients: { carbs: '0g', protein: '0g', fats: '0g', fiber: '0g' },
+      glycemic_index: 'N/A',
+      key_vitamins: [],
+      nutritional_grade: 'N/A',
+      health_recommendation: 'Please upload a meal photo or select a dish from the sample list to run NutriScan analysis.',
+      dish_breakdown: []
+    });
+  }
+
+  // Fallback analysis when a food_name is provided
   const name = food_name || 'Traditional Kenyan Meal (Ugali, Sukuma Wiki & Tilapia)';
   return successResponse(res, 'Scan analyzed successfully', {
     food_identified: name,
     confidence_score: 92,
-    description: 'A classic Kenyan plate featuring energy-giving unhulled staple with nutrient-dense green leafy vegetables and high-protein fish.',
+    description: `Nutritional profile for ${name}. Energetic staple paired with nutrient-dense sides.`,
     estimated_calories: 560,
-    portion_size: 'Standard Kenyan Plate (~450g)',
+    portion_size: 'Standard Plate (~450g)',
     macronutrients: { carbs: '64g', protein: '32g', fats: '12g', fiber: '8.5g' },
     glycemic_index: 'Medium',
     key_vitamins: ['Vitamin A', 'Vitamin C', 'Iron', 'Magnesium', 'Omega-3 Fatty Acids'],
     nutritional_grade: 'A+ (High Fiber & Lean Protein)',
     health_recommendation: 'Excellent meal for sustained energy and muscle recovery. Pair with fresh water or lemon tea for optimal hydration.',
     dish_breakdown: [
-      { item: 'Unhulled Ugali', approx_grams: 200, calories: 250 },
-      { item: 'Sukuma Wiki (Collards)', approx_grams: 120, calories: 70 },
-      { item: 'Grilled Tilapia', approx_grams: 150, calories: 240 }
+      { item: name, approx_grams: 300, calories: 420 },
+      { item: 'Side Vegetables', approx_grams: 120, calories: 140 }
     ]
   });
 });
