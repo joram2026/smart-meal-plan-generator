@@ -23,40 +23,11 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Netlify & Serverless Path Normalization Middleware
 app.use((req, res, next) => {
-  let url = req.url;
-  if (url.startsWith('/.netlify/functions/api')) {
-    url = url.replace('/.netlify/functions/api', '/api');
-  } else if (url.startsWith('/.netlify/functions')) {
-    url = url.replace('/.netlify/functions', '/api');
+  if (req.url.startsWith('/.netlify/functions/api')) {
+    req.url = req.url.replace('/.netlify/functions/api', '/api');
+  } else if (req.url.startsWith('/.netlify/functions/')) {
+    req.url = req.url.replace('/.netlify/functions/', '/api/');
   }
-
-  if (!url.startsWith('/api') && (
-    url.startsWith('/auth') || 
-    url.startsWith('/user') || 
-    url.startsWith('/admin') || 
-    url.startsWith('/professional') || 
-    url.startsWith('/profile') || 
-    url.startsWith('/meal-plans') || 
-    url.startsWith('/shopping-lists') || 
-    url.startsWith('/support') || 
-    url.startsWith('/notifications') || 
-    url.startsWith('/broadcasts') || 
-    url.startsWith('/client') || 
-    url.startsWith('/reports') || 
-    url.startsWith('/audit-logs') || 
-    url.startsWith('/settings') || 
-    url.startsWith('/ai') ||
-    url.startsWith('/payments') ||
-    url.startsWith('/contact') ||
-    url.startsWith('/goals') ||
-    url.startsWith('/water-logs') ||
-    url.startsWith('/recipes') ||
-    url.startsWith('/foods') ||
-    url.startsWith('/nutriscan')
-  )) {
-    url = '/api' + (url.startsWith('/') ? url : '/' + url);
-  }
-  req.url = url;
   next();
 });
 
@@ -147,6 +118,9 @@ async function ensureFirestoreSynced() {
     if (!db) return;
     for (const u of seedUsers) {
       await syncFirestoreDoc('users', u.id, u);
+    }
+    if (typeof syncUsersWithFirestore === 'function') {
+      await syncUsersWithFirestore();
     }
   } catch (e) {
     console.warn('[Ensure Firestore Synced Warning]:', e.message);
@@ -280,6 +254,50 @@ const users = loadUsersFromDisk();
 
 function saveUsersToDisk() {
   safeWriteFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+}
+
+async function syncUsersWithFirestore() {
+  try {
+    const db = getFirestoreDb();
+    if (!db) return;
+    const querySnapshot = await getDocs(collection(db, 'users'));
+    querySnapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      if (data && data.id) {
+        const idx = users.findIndex(u => u.id === data.id || (u.email && data.email && u.email.toLowerCase() === data.email.toLowerCase()));
+        if (idx >= 0) {
+          users[idx] = { ...users[idx], ...data };
+        } else {
+          users.push(data);
+        }
+      }
+    });
+    saveUsersToDisk();
+  } catch (err) {
+    console.warn('[syncUsersWithFirestore Warning]:', err.message);
+  }
+}
+
+async function syncSupportTicketsWithFirestore() {
+  try {
+    const db = getFirestoreDb();
+    if (!db) return;
+    const querySnapshot = await getDocs(collection(db, 'support_tickets'));
+    querySnapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      if (data && data.id) {
+        const idx = supportTickets.findIndex(t => t.id === data.id);
+        if (idx >= 0) {
+          supportTickets[idx] = { ...supportTickets[idx], ...data };
+        } else {
+          supportTickets.push(data);
+        }
+      }
+    });
+    saveSupportTicketsToDisk();
+  } catch (err) {
+    console.warn('[syncSupportTicketsWithFirestore Warning]:', err.message);
+  }
 }
 
 async function findUserByEmail(email) {
@@ -1606,7 +1624,9 @@ function saveBroadcastsToDisk() {
 let systemBroadcast = broadcasts.length > 0 ? broadcasts[0] : null;
 
 // --- Admin Portal API ---
-app.get('/api/admin/stats', authenticateToken, (req, res) => {
+app.get('/api/admin/stats', authenticateToken, async (req, res) => {
+  await syncUsersWithFirestore();
+  await syncSupportTicketsWithFirestore();
   const pendingPros = users.filter(u => u.role === 'professional' && (u.status === 'pending' || u.approval_status === 'pending'));
   const activePros = users.filter(u => u.role === 'professional' && (u.status === 'active' || u.approval_status === 'approved') && u.status !== 'pending' && u.approval_status !== 'pending');
   const activeClients = users.filter(u => u.role === 'client');
@@ -1632,7 +1652,8 @@ app.get('/api/admin/stats', authenticateToken, (req, res) => {
   });
 });
 
-app.get('/api/admin/users', authenticateToken, (req, res) => {
+app.get('/api/admin/users', authenticateToken, async (req, res) => {
+  await syncUsersWithFirestore();
   return successResponse(res, 'Users list', users);
 });
 
@@ -1737,7 +1758,8 @@ app.put('/api/admin/users/:id/upgrade', authenticateToken, (req, res) => {
   return successResponse(res, 'User upgraded to Premium successfully', target);
 });
 
-app.get('/api/admin/professionals', authenticateToken, (req, res) => {
+app.get('/api/admin/professionals', authenticateToken, async (req, res) => {
+  await syncUsersWithFirestore();
   const pros = users.filter(u => u.role === 'professional');
   return successResponse(res, 'Professionals list', pros);
 });
@@ -1806,7 +1828,8 @@ app.put('/api/admin/professionals/:id', authenticateToken, (req, res) => {
   return successResponse(res, 'Professional updated successfully', target);
 });
 
-app.get('/api/admin/pending-professionals', authenticateToken, (req, res) => {
+app.get('/api/admin/pending-professionals', authenticateToken, async (req, res) => {
+  await syncUsersWithFirestore();
   const pending = users.filter(u => u.role === 'professional' && (u.status === 'pending' || u.approval_status === 'pending'));
   return successResponse(res, 'Pending professionals list', pending);
 });
@@ -1899,7 +1922,8 @@ app.delete('/api/admin/professionals/:id', authenticateToken, (req, res) => {
   return successResponse(res, 'Professional deleted');
 });
 
-app.get('/api/admin/clients', authenticateToken, (req, res) => {
+app.get('/api/admin/clients', authenticateToken, async (req, res) => {
+  await syncUsersWithFirestore();
   return successResponse(res, 'Clients list', users.filter(u => u.role === 'client'));
 });
 
