@@ -23,16 +23,11 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Netlify & Serverless Path Normalization Middleware
 app.use((req, res, next) => {
-  let url = req.url;
-  if (url.startsWith('/.netlify/functions/api')) {
-    url = url.replace('/.netlify/functions/api', '/api');
-  } else if (url.startsWith('/.netlify/functions/')) {
-    url = url.replace('/.netlify/functions/', '/api/');
+  if (req.url.startsWith('/.netlify/functions/api')) {
+    req.url = req.url.replace('/.netlify/functions/api', '/api');
+  } else if (req.url.startsWith('/.netlify/functions/')) {
+    req.url = req.url.replace('/.netlify/functions/', '/api/');
   }
-  if (!url.startsWith('/api') && !url.includes('.') && !url.startsWith('/user') && !url.startsWith('/professional') && !url.startsWith('/auth') && !url.startsWith('/membership') && !url.startsWith('/css') && !url.startsWith('/js') && !url.startsWith('/images')) {
-    url = '/api' + (url.startsWith('/') ? url : '/' + url);
-  }
-  req.url = url;
   next();
 });
 
@@ -772,7 +767,7 @@ Return ONLY a valid JSON object matching this strict schema without any addition
       let userPart = `USER: ${message || 'Please analyze this meal image and provide nutritional guidance.'}`;
       
       const requestPayload = {
-        model: 'gemini-3.6-flash',
+        model: 'gemini-2.5-flash',
         contents: image ? [
           { inlineData: { mimeType: image.startsWith('data:image/png') ? 'image/png' : 'image/jpeg', data: image.includes(',') ? image.split(',')[1] : image } },
           `${contentsList.join('\n')}\n${userPart}`
@@ -785,7 +780,14 @@ Return ONLY a valid JSON object matching this strict schema without any addition
         }
       };
 
-      const response = await ai.models.generateContent(requestPayload);
+      let response;
+      try {
+        response = await ai.models.generateContent(requestPayload);
+      } catch (firstErr) {
+        console.warn('gemini-2.5-flash failed, trying gemini-1.5-flash:', firstErr.message);
+        requestPayload.model = 'gemini-1.5-flash';
+        response = await ai.models.generateContent(requestPayload);
+      }
 
       function parseGeminiResponse(rawText) {
         if (!rawText) return { reply: 'Here is your personalized Smart Lishe clinical nutrition guidance:', card: null, followUps: [] };
@@ -995,7 +997,7 @@ app.post(['/api/meals/generate', '/meals/generate'], async (req, res) => {
         httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
       });
       const response = await ai.models.generateContent({
-        model: 'gemini-3.6-flash',
+        model: 'gemini-2.5-flash',
         contents: `Generate a detailed 1-day Kenyan meal plan targeting ${calories} kcal (${diet_type}).`,
         config: {
           systemInstruction: 'You are Smart Lishe AI. Return a JSON object with keys: title, target_calories, breakfast (name, calories, protein), lunch (name, calories, protein), dinner (name, calories, protein), snack (name, calories, protein), tips. Include authentic Kenyan dishes like Ugali, Sukuma Wiki, Githeri, Tilapia, Mukimo, Uji, Managu.',
@@ -2860,7 +2862,7 @@ app.post(['/api/nutriscan', '/nutriscan'], async (req, res) => {
       else if (image.startsWith('data:image/webp')) mimeType = 'image/webp';
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3.6-flash',
+        model: 'gemini-2.5-flash',
         contents: [
           {
             inlineData: { mimeType: mimeType, data: base64Data }
