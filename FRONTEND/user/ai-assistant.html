@@ -73,6 +73,68 @@
     }
     .chat-welcome .feature-tags span i { font-size: 0.65rem; }
 
+    .btn-input-action {
+      background: var(--bg-elevated);
+      border: 1px solid var(--basket-line);
+      color: var(--text-secondary);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+    .btn-input-action:hover {
+      background: var(--sukuma);
+      color: #fff;
+      border-color: var(--sukuma);
+    }
+    .btn-input-action.listening {
+      background: #dc2626;
+      color: #fff;
+      border-color: #dc2626;
+      animation: pulseMic 1s infinite alternate;
+    }
+    @keyframes pulseMic {
+      from { transform: scale(1); box-shadow: 0 0 0 0 rgba(220,38,38,0.4); }
+      to { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(220,38,38,0); }
+    }
+
+    .macro-badge-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin: 10px 0;
+      padding: 8px;
+      background: var(--bg-elevated);
+      border-radius: 8px;
+      border: 1px solid var(--basket-line);
+    }
+    @media (max-width: 480px) {
+      .macro-badge-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    .macro-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 0.72rem;
+    }
+    .macro-item .m-val {
+      font-weight: 700;
+      color: var(--sukuma);
+    }
+    .macro-item .m-lbl {
+      color: var(--text-muted);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+    }
+
     .suggested-prompts {
       padding: 12px 20px;
       border-bottom: 1px solid var(--basket-line);
@@ -522,33 +584,45 @@
 
             <div class="chat-welcome">
               <h2>Hello, <span id="userGreeting">User</span> 👋</h2>
-              <p>I'm Smart Lishe AI. I can help you with meal planning, nutrition advice, recipes, and more.</p>
-              <div class="feature-tags">
-                <span><i class="fa-regular fa-check"></i> Meal Plans</span>
-                <span><i class="fa-regular fa-check"></i> Nutrition</span>
-                <span><i class="fa-regular fa-check"></i> Recipes</span>
-                <span><i class="fa-regular fa-check"></i> Goal Tracking</span>
-                <span><i class="fa-regular fa-check"></i> Alternatives</span>
+              <p>I'm Smart Lishe AI, your dedicated clinical nutritionist. I tailor meal plans to your live health metrics, budget, and local market ingredients.</p>
+              
+              <div class="active-persona-bar" id="activePersonaBar" style="margin-top:10px; padding:8px 12px; background:rgba(26,122,100,0.08); border-radius:8px; border:1px solid rgba(26,122,100,0.2); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; font-size:0.78rem;">
+                <div style="display:flex; align-items:center; gap:6px; font-weight:600; color:var(--sukuma);">
+                  <i class="fa-solid fa-user-doctor"></i> <span>Active Health Persona:</span>
+                </div>
+                <div style="color:var(--text-secondary);" id="personaBadgeText">
+                  Goal: <strong id="personaGoal" style="color:var(--sukuma);">Weight Loss</strong> • Cal Target: <strong id="personaCal">2,000 kcal</strong> • BMI: <strong id="personaBmi">23.0</strong>
+                </div>
+              </div>
+
+              <div class="feature-tags" style="margin-top:10px;">
+                <span><i class="fa-regular fa-check"></i> KNDI Clinical Standards</span>
+                <span><i class="fa-regular fa-check"></i> Soko Market Budgets</span>
+                <span><i class="fa-regular fa-check"></i> Diabetes & Hypertension</span>
+                <span><i class="fa-regular fa-check"></i> Macro Breakdowns</span>
+                <span><i class="fa-regular fa-check"></i> Voice & Photo Vision</span>
               </div>
             </div>
 
             <div class="suggested-prompts" id="suggestedPrompts">
-              <span class="prompt-chip" data-prompt="Generate today's meal plan"><i class="fa-regular fa-utensils"></i> Today's Meal Plan</span>
-              <span class="prompt-chip" data-prompt="Weight gain meal plan"><i class="fa-regular fa-weight"></i> Weight Gain</span>
-              <span class="prompt-chip" data-prompt="Weight loss meal plan"><i class="fa-regular fa-fire"></i> Weight Loss</span>
-              <span class="prompt-chip" data-prompt="Healthy breakfast ideas"><i class="fa-regular fa-mug-hot"></i> Breakfast</span>
-              <span class="prompt-chip" data-prompt="High-protein foods"><i class="fa-regular fa-dumbbell"></i> High Protein</span>
-              <span class="prompt-chip" data-prompt="Foods for diabetes"><i class="fa-regular fa-droplet"></i> Diabetes</span>
-              <span class="prompt-chip" data-prompt="Foods for hypertension"><i class="fa-regular fa-heart"></i> Hypertension</span>
-              <span class="prompt-chip" data-prompt="Weekly shopping list"><i class="fa-regular fa-basket-shopping"></i> Shopping List</span>
-              <span class="prompt-chip" data-prompt="Healthy snacks"><i class="fa-regular fa-apple-alt"></i> Snacks</span>
-              <span class="prompt-chip" data-prompt="Calculate my daily calories"><i class="fa-regular fa-calculator"></i> Calories</span>
+              <span class="prompt-chip" data-prompt="Generate today's personalized meal plan"><i class="fa-regular fa-utensils"></i> Today's Meal Plan</span>
+              <span class="prompt-chip" data-prompt="KES 300 Healthy Market Meal Plan"><i class="fa-solid fa-coins"></i> KES 300 Market Budget</span>
+              <span class="prompt-chip" data-prompt="Diabetes Low-GI Ugali & Greens Swap"><i class="fa-solid fa-droplet"></i> Diabetes Low-GI</span>
+              <span class="prompt-chip" data-prompt="High-protein Omena & Tilapia Plan for Muscle Gain"><i class="fa-solid fa-dumbbell"></i> Muscle Gain</span>
+              <span class="prompt-chip" data-prompt="Hypertension Low-Sodium DASH Meals"><i class="fa-solid fa-heart-pulse"></i> Hypertension DASH</span>
+              <span class="prompt-chip" data-prompt="Iron-Rich Greens & Ndengu for Anemia"><i class="fa-solid fa-leaf"></i> Anemia & Iron</span>
+              <span class="prompt-chip" data-prompt="Lactation & Milk-Boosting Nutrition Plan"><i class="fa-solid fa-baby"></i> Lactation Support</span>
+              <span class="prompt-chip" data-prompt="Weekly Soko Grocery Shopping List"><i class="fa-regular fa-basket-shopping"></i> Weekly Shopping List</span>
             </div>
 
             <div class="chat-messages" id="chatMessages">
               <div class="message ai">
                 <div class="bubble">
-                  👋 Hello! I'm your Smart Lishe AI assistant. Ask me about meal plans, nutrition, recipes, or health goals. Try one of the suggested prompts above to get started!
+                  👋 <strong>Jambo! I'm Smart Lishe AI</strong>, your personal clinical nutritionist.
+                  <br><br>
+                  I analyze your specific health metrics (Goal, BMI, Daily Calorie Target) to generate realistic, affordable, and delicious meal recommendations using locally available East African foods.
+                  <br><br>
+                  <em>Tip: You can type, tap a quick topic, click the microphone to speak, or snap a food photo to analyze!</em>
                 </div>
                 <span class="msg-time">Just now</span>
               </div>
@@ -558,9 +632,25 @@
               <span></span><span></span><span></span>
             </div>
 
+            <!-- Image attachment preview bar -->
+            <div id="imagePreviewContainer" style="display:none; padding:8px 20px; background:var(--bg-card); border-top:1px solid var(--basket-line); align-items:center; gap:12px;">
+              <div style="position:relative;">
+                <img id="imagePreview" src="" alt="Attached dish" style="width:48px; height:48px; object-fit:cover; border-radius:8px; border:1px solid var(--basket-line);" />
+                <button id="removeImageBtn" style="position:absolute; top:-6px; right:-6px; background:#dc2626; color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:0.6rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">×</button>
+              </div>
+              <span style="font-size:0.78rem; color:var(--text-secondary);" id="imagePreviewText">Photo attached for NutriScan AI vision analysis</span>
+            </div>
+
             <div class="chat-input-area">
-              <textarea id="chatInput" rows="1" placeholder="Ask Smart Lishe AI..." aria-label="Message"></textarea>
-              <button class="btn-send" id="sendBtn"><i class="fa-regular fa-paper-plane"></i></button>
+              <input type="file" id="imageInput" accept="image/*" style="display:none;" />
+              <button class="btn-input-action" id="attachBtn" title="Attach meal photo for AI vision analysis">
+                <i class="fa-solid fa-camera"></i>
+              </button>
+              <button class="btn-input-action" id="voiceBtn" title="Speak to AI Assistant (Voice input)">
+                <i class="fa-solid fa-microphone"></i>
+              </button>
+              <textarea id="chatInput" rows="1" placeholder="Ask Smart Lishe AI or speak your question..." aria-label="Message"></textarea>
+              <button class="btn-send" id="sendBtn" title="Send message"><i class="fa-regular fa-paper-plane"></i></button>
             </div>
 
           </div>
@@ -875,6 +965,11 @@
         if (document.getElementById('userWater')) document.getElementById('userWater').textContent = data.waterGoal;
         if (document.getElementById('userCalories')) document.getElementById('userCalories').textContent = data.calories;
 
+        // Active Persona Header Bar elements
+        if (document.getElementById('personaGoal')) document.getElementById('personaGoal').textContent = data.goal;
+        if (document.getElementById('personaCal')) document.getElementById('personaCal').textContent = data.calories;
+        if (document.getElementById('personaBmi')) document.getElementById('personaBmi').textContent = data.bmi;
+
         const membershipEl = document.getElementById('userMembership');
         const badge = document.getElementById('membershipBadge');
         if (membershipEl) {
@@ -906,30 +1001,79 @@
       // ---- Escape HTML helper ----
       function escapeHtml(str) {
         if (!str) return '';
-        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
+
+      // ---- Markdown & Linebreak formatting helper ----
+      function formatMarkdown(text) {
+        if (!text) return '';
+        let formatted = escapeHtml(text);
+        // Bold formatting
+        formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // Italics
+        formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        // Bullet points formatting
+        formatted = formatted.replace(/(?:^|\n)• (.*?)(?=\n|$)/g, '<br>• $1');
+        // Paragraph breaks
+        formatted = formatted.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>');
+        return formatted;
       }
 
       // ---- Conversation History ----
       let conversationHistory = [];
 
       // ---- Add message to chat ----
-      function addMessage(text, sender) {
+      function addMessage(text, sender, imageUrl) {
         const div = document.createElement('div');
         div.className = 'message ' + sender;
         const time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-        div.innerHTML = '<div class="bubble">' + escapeHtml(text) + '</div><span class="msg-time">' + time + '</span>';
+        
+        let imgHtml = '';
+        if (imageUrl) {
+          imgHtml = '<div style="margin-bottom:8px;"><img src="' + imageUrl + '" style="max-width:200px; max-height:160px; border-radius:10px; border:1px solid rgba(255,255,255,0.3);" /></div>';
+        }
+
+        div.innerHTML = '<div class="bubble">' + imgHtml + (text ? formatMarkdown(text) : '') + '</div><span class="msg-time">' + time + '</span>';
         messagesContainer.appendChild(div);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
       }
 
       // ---- Render AI response ----
-      function renderAiResponse(replyText, cardData) {
+      function renderAiResponse(replyText, cardData, followUps) {
+        if (typeof replyText === 'string' && replyText.trim().startsWith('{')) {
+          try {
+            const parsedObj = JSON.parse(replyText.trim());
+            if (parsedObj.reply) {
+              replyText = parsedObj.reply;
+              if (parsedObj.card && !cardData) cardData = parsedObj.card;
+              if (parsedObj.followUps && (!followUps || !followUps.length)) followUps = parsedObj.followUps;
+            }
+          } catch(e) {
+            replyText = replyText
+              .replace(/^\s*\{\s*"reply"\s*:\s*"/i, '')
+              .replace(/"\s*,\s*"card"[\s\S]*$/i, '')
+              .replace(/"\s*\}\s*$/i, '')
+              .replace(/\\n/g, '\n')
+              .replace(/\\"/g, '"');
+          }
+        }
+
         let contentHtml = '';
         if (replyText) {
-          contentHtml += '<div style="margin-bottom:' + (cardData && cardData.meals ? '12px' : '0') + '; line-height:1.5; font-size:0.95rem;">' + escapeHtml(replyText) + '</div>';
+          contentHtml += '<div style="margin-bottom:' + (cardData && cardData.meals ? '12px' : '0') + '; line-height:1.6; font-size:0.92rem;">' + formatMarkdown(replyText) + '</div>';
         }
         if (cardData && (cardData.meals || cardData.title)) {
           contentHtml += renderResponseCard(cardData);
+        }
+
+        if (Array.isArray(followUps) && followUps.length > 0) {
+          contentHtml += '<div style="margin-top:12px; padding-top:10px; border-top:1px dashed var(--basket-line);">';
+          contentHtml += '<div style="font-size:0.72rem; font-weight:700; color:var(--text-muted); margin-bottom:6px;">💡 Suggested Follow-ups:</div>';
+          contentHtml += '<div class="followup-container" style="display:flex; flex-wrap:wrap; gap:6px;">';
+          followUps.forEach(function(f) {
+            contentHtml += '<span class="prompt-chip followup-chip" data-prompt="' + escapeHtml(f) + '" style="font-size:0.72rem; padding:4px 10px; background:rgba(26,122,100,0.08); color:var(--sukuma); border:1px solid rgba(26,122,100,0.2);"><i class="fa-solid fa-arrow-right" style="font-size:0.6rem; margin-right:4px;"></i>' + escapeHtml(f) + '</span>';
+          });
+          contentHtml += '</div></div>';
         }
 
         const div = document.createElement('div');
@@ -945,7 +1089,24 @@
       function renderResponseCard(data) {
         let html = '<div class="ai-response-card" data-card=\'' + JSON.stringify(data).replace(/'/g, "&apos;") + '\'>';
         if (data.title) {
-          html += '<div class="rc-header"><i class="fa-regular fa-utensils"></i> ' + escapeHtml(data.title) + '</div>';
+          html += '<div class="rc-header" style="display:flex; justify-content:space-between; align-items:center;">' +
+            '<span><i class="fa-regular fa-utensils"></i> ' + escapeHtml(data.title) + '</span>' +
+            (data.estimatedCostKES ? '<span style="font-size:0.75rem; font-weight:700; color:var(--sukuma); background:rgba(26,122,100,0.1); padding:2px 8px; border-radius:12px;">' + escapeHtml(data.estimatedCostKES) + '</span>' : '') +
+            '</div>';
+        }
+
+        if (data.prepTime) {
+          html += '<div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:8px;"><i class="fa-regular fa-clock"></i> Est. Prep Time: <strong>' + escapeHtml(data.prepTime) + '</strong></div>';
+        }
+
+        // Macros breakdown
+        if (data.macros) {
+          html += '<div class="macro-badge-grid">' +
+            '<div class="macro-item"><span class="m-val">' + escapeHtml(data.macros.protein || '—') + '</span><span class="m-lbl">Protein</span></div>' +
+            '<div class="macro-item"><span class="m-val">' + escapeHtml(data.macros.carbs || '—') + '</span><span class="m-lbl">Carbs</span></div>' +
+            '<div class="macro-item"><span class="m-val">' + escapeHtml(data.macros.fats || '—') + '</span><span class="m-lbl">Fats</span></div>' +
+            '<div class="macro-item"><span class="m-val">' + escapeHtml(data.macros.fiber || '—') + '</span><span class="m-lbl">Fiber</span></div>' +
+            '</div>';
         }
 
         if (data.meals && Array.isArray(data.meals)) {
@@ -978,7 +1139,7 @@
         return html;
       }
 
-      // ---- Action button handler ----
+      // ---- Action button & Followup handler ----
       async function handleAction(e) {
         const action = this.dataset.action;
         const cardNode = this.parentElement ? this.parentElement.previousElementSibling : null;
@@ -1034,6 +1195,107 @@
           btn.removeEventListener('click', handleAction);
           btn.addEventListener('click', handleAction);
         });
+
+        document.querySelectorAll('.followup-chip').forEach(function(chip) {
+          chip.onclick = function() {
+            const text = this.dataset.prompt;
+            chatInput.value = text;
+            chatInput.focus();
+            sendMessage();
+          };
+        });
+      }
+
+      // ---- Photo Attachment Handlers ----
+      let attachedImageData = null;
+      const attachBtn = document.getElementById('attachBtn');
+      const imageInput = document.getElementById('imageInput');
+      const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+      const imagePreview = document.getElementById('imagePreview');
+      const removeImageBtn = document.getElementById('removeImageBtn');
+
+      if (attachBtn && imageInput) {
+        attachBtn.addEventListener('click', function() {
+          imageInput.click();
+        });
+
+        imageInput.addEventListener('change', function() {
+          const file = this.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              attachedImageData = e.target.result;
+              imagePreview.src = attachedImageData;
+              imagePreviewContainer.style.display = 'flex';
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+
+        removeImageBtn.addEventListener('click', function() {
+          attachedImageData = null;
+          imageInput.value = '';
+          imagePreviewContainer.style.display = 'none';
+        });
+      }
+
+      // ---- Speech-to-Text Microphone Handler ----
+      const voiceBtn = document.getElementById('voiceBtn');
+      let isListening = false;
+      let recognition = null;
+
+      if (voiceBtn) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+          recognition = new SpeechRecognition();
+          recognition.continuous = false;
+          recognition.interimResults = false;
+          recognition.lang = 'en-KE'; // Kenyan English / Swahili friendly
+
+          recognition.onstart = function() {
+            isListening = true;
+            voiceBtn.classList.add('listening');
+            chatInput.placeholder = 'Listening... Speak now...';
+          };
+
+          recognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript;
+            chatInput.value = transcript;
+            chatInput.dispatchEvent(new Event('input'));
+            showToast('🎙️ Voice recorded: "' + transcript + '"');
+          };
+
+          recognition.onerror = function() {
+            showToast('Voice recognition error. Please try typing.', 'error');
+            stopListening();
+          };
+
+          recognition.onend = function() {
+            stopListening();
+          };
+
+          voiceBtn.addEventListener('click', function() {
+            if (isListening) {
+              recognition.stop();
+            } else {
+              try {
+                recognition.start();
+              } catch(e) {
+                showToast('Unable to start microphone.', 'error');
+              }
+            }
+          });
+        } else {
+          voiceBtn.addEventListener('click', function() {
+            showToast('Voice speech recognition is not supported in this browser.', 'error');
+          });
+        }
+      }
+
+      function stopListening() {
+        isListening = false;
+        if (voiceBtn) voiceBtn.classList.remove('listening');
+        if (chatInput) chatInput.placeholder = 'Ask Smart Lishe AI or speak your question...';
       }
 
       // ---- Send message ----
@@ -1041,11 +1303,11 @@
 
       function sendMessage() {
         const text = chatInput.value.trim();
-        if (!text || isProcessing) return;
-        sendMessageWithText(text);
+        if ((!text && !attachedImageData) || isProcessing) return;
+        sendMessageWithText(text, attachedImageData);
       }
 
-      async function sendMessageWithText(text) {
+      async function sendMessageWithText(text, imageData) {
         let usage = parseInt(sessionStorage.getItem('aiUsage') || '0');
         const userProfile = getUserProfile();
 
@@ -1054,11 +1316,18 @@
           return;
         }
 
-        addMessage(text, 'user');
-        conversationHistory.push({ role: 'user', content: text });
+        const currentImage = imageData || attachedImageData;
 
+        addMessage(text || 'Analyzed photo for nutritional details', 'user', currentImage);
+        conversationHistory.push({ role: 'user', content: text || 'Analyzed photo for nutritional details' });
+
+        // Reset inputs
         chatInput.value = '';
         chatInput.style.height = 'auto';
+        if (imageInput) imageInput.value = '';
+        attachedImageData = null;
+        if (imagePreviewContainer) imagePreviewContainer.style.display = 'none';
+
         isProcessing = true;
         sendBtn.disabled = true;
 
@@ -1077,40 +1346,41 @@
             },
             body: JSON.stringify({
               message: text,
+              image: currentImage,
               userProfile: userProfile,
               history: conversationHistory
             })
           });
 
-          // Ensure minimum 1.4s natural thinking delay so typing indicator feels human
-          const delayPromise = new Promise(resolve => setTimeout(resolve, 1400));
+          // Ensure minimum 1.2s natural thinking delay so typing indicator feels human
+          const delayPromise = new Promise(resolve => setTimeout(resolve, 1200));
           const [response] = await Promise.all([responsePromise, delayPromise]);
 
           const data = await response.json();
           typingIndicator.classList.remove('show');
 
           if (data && data.success && data.data) {
-            const { reply, card } = data.data;
+            const { reply, card, followUps } = data.data;
             if (reply) {
               conversationHistory.push({ role: 'model', content: reply });
             }
-            renderAiResponse(reply, card);
+            renderAiResponse(reply, card, followUps);
             usage++;
             sessionStorage.setItem('aiUsage', String(usage));
             updateProfileUI();
           } else {
             const fallback = getAIResponse(text);
-            renderAiResponse(fallback.reply || 'Here is your nutrition advice:', fallback);
+            renderAiResponse(fallback.reply || 'Here is your clinical nutrition advice:', fallback, fallback.followUps);
           }
         } catch (err) {
           console.warn('AI API Fetch error, using intelligent fallback:', err);
           const elapsed = Date.now() - startTime;
-          if (elapsed < 1400) {
-            await new Promise(r => setTimeout(r, 1400 - elapsed));
+          if (elapsed < 1200) {
+            await new Promise(r => setTimeout(r, 1200 - elapsed));
           }
           typingIndicator.classList.remove('show');
           const fallback = getAIResponse(text);
-          renderAiResponse(fallback.reply || 'Here is your nutrition advice:', fallback);
+          renderAiResponse(fallback.reply || 'Here is your clinical nutrition advice:', fallback, fallback.followUps);
         } finally {
           isProcessing = false;
           sendBtn.disabled = false;

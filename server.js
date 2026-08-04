@@ -119,8 +119,16 @@ async function ensureFirestoreSynced() {
     for (const u of seedUsers) {
       await syncFirestoreDoc('users', u.id, u);
     }
+    if (typeof seedRecipes !== 'undefined' && Array.isArray(seedRecipes)) {
+      for (const r of seedRecipes) {
+        await syncFirestoreDoc('recipes', r.id, r);
+      }
+    }
     if (typeof syncUsersWithFirestore === 'function') {
       await syncUsersWithFirestore();
+    }
+    if (typeof syncRecipesWithFirestore === 'function') {
+      await syncRecipesWithFirestore();
     }
   } catch (e) {
     console.warn('[Ensure Firestore Synced Warning]:', e.message);
@@ -300,6 +308,33 @@ async function syncSupportTicketsWithFirestore() {
   }
 }
 
+async function syncRecipesWithFirestore() {
+  try {
+    const db = getFirestoreDb();
+    if (!db) return;
+    const querySnapshot = await getDocs(collection(db, 'recipes'));
+    querySnapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      if (data && data.id && !data._deleted) {
+        const idx = recipesList.findIndex(r => r.id === data.id);
+        if (idx >= 0) {
+          recipesList[idx] = { ...recipesList[idx], ...data };
+        } else {
+          recipesList.push(data);
+        }
+      } else if (data && data.id && data._deleted) {
+        const idx = recipesList.findIndex(r => r.id === data.id);
+        if (idx >= 0) {
+          recipesList.splice(idx, 1);
+        }
+      }
+    });
+    saveRecipesToDisk();
+  } catch (err) {
+    console.warn('[syncRecipesWithFirestore Warning]:', err.message);
+  }
+}
+
 async function findUserByEmail(email) {
   if (!email) return null;
   const cleanEmail = email.trim().toLowerCase();
@@ -434,6 +469,51 @@ function loadShoppingListsFromDisk() {
 const shoppingLists = loadShoppingListsFromDisk();
 function saveShoppingListsToDisk() {
   safeWriteFileSync(SHOPPING_LISTS_FILE, JSON.stringify(shoppingLists, null, 2));
+}
+
+// --- Goals & Water Logs Data Store ---
+const GOALS_FILE = path.join(__dirname, 'goals_db.json');
+const WATER_LOGS_FILE = path.join(__dirname, 'water_logs_db.json');
+
+const seedGoals = [
+  { id: 'goal-1', user_id: 'user-001', title: 'Target Weight Loss', current: 72, target: 65, unit: 'kg', status: 'In Progress' },
+  { id: 'goal-2', user_id: 'user-001', title: 'Daily Water Intake', current: 2000, target: 2500, unit: 'ml', status: 'In Progress' }
+];
+
+const seedWaterLogs = [
+  { id: 'w-1', user_id: 'user-001', amount_ml: 500, timestamp: new Date().toISOString() }
+];
+
+function loadGoalsFromDisk() {
+  try {
+    const data = safeReadFileSync(GOALS_FILE);
+    if (data) {
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  safeWriteFileSync(GOALS_FILE, JSON.stringify(seedGoals, null, 2));
+  return [...seedGoals];
+}
+const goals = loadGoalsFromDisk();
+function saveGoalsToDisk() {
+  safeWriteFileSync(GOALS_FILE, JSON.stringify(goals, null, 2));
+}
+
+function loadWaterLogsFromDisk() {
+  try {
+    const data = safeReadFileSync(WATER_LOGS_FILE);
+    if (data) {
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  safeWriteFileSync(WATER_LOGS_FILE, JSON.stringify(seedWaterLogs, null, 2));
+  return [...seedWaterLogs];
+}
+const waterLogs = loadWaterLogsFromDisk();
+function saveWaterLogsToDisk() {
+  safeWriteFileSync(WATER_LOGS_FILE, JSON.stringify(waterLogs, null, 2));
 }
 
 const appointments = [
@@ -615,34 +695,55 @@ app.put('/api/settings', (req, res) => {
 
 // --- AI Chat & Meal Generator (Gemini Integration) ---
 app.post('/api/ai/chat', async (req, res) => {
-  const { message, userProfile, history = [] } = req.body || {};
-  if (!message) return errorResponse(res, 'Message is required', 400);
+  const { message, userProfile, history = [], image } = req.body || {};
+  if (!message && !image) return errorResponse(res, 'Message or image is required', 400);
 
-  const availableFoodsSummary = foodsList.slice(0, 10).map(f => `${f.name} (${f.category}, ${f.calories_100g}kcal, GI:${f.glycemic_index})`).join(', ');
-  const availableRecipesSummary = recipesList.slice(0, 8).map(r => `${r.name} (${r.calories}kcal)`).join(', ');
+  const availableFoodsSummary = foodsList.slice(0, 15).map(f => `${f.name} (${f.category}, ${f.calories_100g}kcal, GI:${f.glycemic_index})`).join(', ');
+  const availableRecipesSummary = recipesList.slice(0, 10).map(r => `${r.name} (${r.calories}kcal)`).join(', ');
 
   let profileContext = '';
-  if (userProfile && userProfile.name) {
-    profileContext = `User: ${userProfile.name}, Goal: ${userProfile.goal || 'Wellness'}, Target Cal: ${userProfile.calories || 2000} kcal.`;
+  if (userProfile && (userProfile.name || userProfile.goal)) {
+    profileContext = `User Health Profile: Name=${userProfile.name || 'User'}, Goal=${userProfile.goal || 'Wellness'}, Weight=${userProfile.weight || '68kg'}, Height=${userProfile.height || '172cm'}, BMI=${userProfile.bmi || '23'}, Target Calories=${userProfile.calories || '2000 kcal'}, Water Goal=${userProfile.waterGoal || '2.5L'}, Membership=${userProfile.membership || 'free'}.`;
   }
 
-  const systemInstruction = `You are Smart Lishe AI, an expert Kenyan clinical nutritionist. ${profileContext}
-Kenyan Foods: ${availableFoodsSummary}.
-Kenyan Recipes: ${availableRecipesSummary}.
-Be concise and clear.
-Return ONLY a JSON object matching this schema:
+  const systemInstruction = `You are Smart Lishe AI, an empathetic, top-tier clinical nutritionist and dietitian registered with the Kenya Nutritionists and Dietitians Institute (KNDI).
+${profileContext}
+Kenyan Foods Dataset: ${availableFoodsSummary}.
+Kenyan Recipes Dataset: ${availableRecipesSummary}.
+
+Guidelines:
+1. Provide realistic, practical, and culturally authentic advice tailored for East Africa / Kenya & global health standards.
+2. Address medical conditions gently if mentioned (e.g. Diabetes low GI swaps, Hypertension low sodium, Anemia iron-rich greens with Vitamin C, Ulcers non-acidic meals, Fat Loss, Muscle Gain, Lactation).
+3. Offer actionable advice using accessible local ingredients (Ugali wa Sorghum/Millet/Unhulled Maize, Sukuma Wiki, Managu, Terere, Ndengu, Githeri, Tilapia, Kienyeji Chicken, Mukimo, Matoke, Omena, Uji wa Mtama, Avocado, Groundnuts).
+4. Provide estimated meal cost in Kenyan Shillings (KES) and prep time in minutes where appropriate.
+5. Format the textual reply cleanly using markdown bolding (**text**) or bullet points.
+
+Return ONLY a valid JSON object matching this strict schema without any additional markdown wrapper outside the JSON object:
 {
-  "reply": "Concise, friendly clinical guidance (2-3 sentences max).",
+  "reply": "Warm, practical, realistic clinical advice (2-4 clear paragraphs/bullets).",
   "card": {
-    "title": "Short title or null",
-    "totalCalories": 1600,
+    "title": "Title of Recommended Plan or Meal",
+    "totalCalories": 1650,
+    "prepTime": "30 mins",
+    "estimatedCostKES": "KES 400",
+    "macros": {
+      "protein": "85g",
+      "carbs": "190g",
+      "fats": "45g",
+      "fiber": "26g"
+    },
     "meals": [
-      { "name": "Breakfast: Uji wa Mtama & 2 Boiled Eggs", "cal": 380 },
-      { "name": "Lunch: Githeri with Sukuma Wiki & Avocado", "cal": 600 },
-      { "name": "Dinner: Brown Ugali with Tilapia & Managu", "cal": 620 }
+      { "name": "Breakfast: Uji wa Mtama with Peanut Butter & 2 Boiled Eggs", "cal": 380 },
+      { "name": "Lunch: Githeri with Sautéed Sukuma Wiki & Avocado", "cal": 600 },
+      { "name": "Dinner: Unhulled Ugali with Tilapia & Managu Greens", "cal": 670 }
     ],
-    "tips": "1 actionable clinical tip"
-  }
+    "tips": "Practical clinical tip (e.g. Cooking oil limit, water intake, iron absorption boost)."
+  },
+  "followUps": [
+    "Can you give me a vegetarian swap?",
+    "How do I prep this under KES 300?",
+    "Show step-by-step recipe"
+  ]
 }`;
 
   if (process.env.GEMINI_API_KEY) {
@@ -654,37 +755,98 @@ Return ONLY a JSON object matching this schema:
 
       const contentsList = [];
       if (Array.isArray(history) && history.length > 0) {
-        history.slice(-4).forEach(h => {
+        history.slice(-6).forEach(h => {
           if (h.role && h.content) {
             contentsList.push(`${h.role.toUpperCase()}: ${h.content}`);
           }
         });
       }
-      contentsList.push(`USER: ${message}`);
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: contentsList.join('\n'),
+      let userPart = `USER: ${message || 'Please analyze this meal image and provide nutritional guidance.'}`;
+      
+      const requestPayload = {
+        model: 'gemini-3.6-flash',
+        contents: image ? [
+          { inlineData: { mimeType: image.startsWith('data:image/png') ? 'image/png' : 'image/jpeg', data: image.includes(',') ? image.split(',')[1] : image } },
+          `${contentsList.join('\n')}\n${userPart}`
+        ] : `${contentsList.join('\n')}\n${userPart}`,
         config: {
           systemInstruction,
           responseMimeType: 'application/json',
-          maxOutputTokens: 600,
+          maxOutputTokens: 1000,
           temperature: 0.7
         }
-      });
+      };
 
-      let parsed = {};
-      try {
-        const text = response.text ? response.text.trim() : '';
-        const cleaned = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
-        parsed = JSON.parse(cleaned);
-      } catch (e) {
-        parsed = { reply: response.text || 'Recommendation generated successfully.', card: null };
+      const response = await ai.models.generateContent(requestPayload);
+
+      function parseGeminiResponse(rawText) {
+        if (!rawText) return { reply: 'Here is your personalized Smart Lishe clinical nutrition guidance:', card: null, followUps: [] };
+        
+        let cleaned = rawText.trim()
+          .replace(/^```json\s*/i, '')
+          .replace(/^```\s*/i, '')
+          .replace(/```\s*$/i, '')
+          .trim();
+
+        try {
+          const parsed = JSON.parse(cleaned);
+          let reply = parsed.reply;
+          if (typeof reply === 'object') {
+            reply = JSON.stringify(reply);
+          }
+          if (typeof reply === 'string' && reply.trim().startsWith('{') && reply.includes('"reply"')) {
+            try {
+              const nested = JSON.parse(reply);
+              if (nested.reply) reply = nested.reply;
+            } catch (e) {}
+          }
+          return {
+            reply: reply || 'Here is your personalized Smart Lishe clinical nutrition guidance:',
+            card: parsed.card || null,
+            followUps: parsed.followUps || ['Can you adjust the calories?', 'Show grocery shopping list', 'How do I cook this?']
+          };
+        } catch (e) {
+          let extractedReply = '';
+          const matchReply = cleaned.match(/"reply"\s*:\s*"([\s\S]*?)"\s*,\s*"(?:card|followUps)"/i) || 
+                             cleaned.match(/"reply"\s*:\s*"([\s\S]*?)"\s*}/i);
+          if (matchReply && matchReply[1]) {
+            extractedReply = matchReply[1]
+              .replace(/\\n/g, '\n')
+              .replace(/\\"/g, '"')
+              .replace(/\\\\/g, '\\');
+          }
+
+          let extractedCard = null;
+          const matchCard = cleaned.match(/"card"\s*:\s*(\{[\s\S]*?\})\s*,\s*"followUps"/i) ||
+                            cleaned.match(/"card"\s*:\s*(\{[\s\S]*?\})\s*}/i);
+          if (matchCard && matchCard[1]) {
+            try { extractedCard = JSON.parse(matchCard[1]); } catch(err) {}
+          }
+
+          if (!extractedReply) {
+            extractedReply = cleaned
+              .replace(/^\s*\{\s*"reply"\s*:\s*"/i, '')
+              .replace(/"\s*,\s*"card"[\s\S]*$/i, '')
+              .replace(/"\s*\}\s*$/i, '')
+              .replace(/\\n/g, '\n')
+              .replace(/\\"/g, '"');
+          }
+
+          return {
+            reply: extractedReply || 'Here is your personalized Smart Lishe clinical nutrition guidance:',
+            card: extractedCard || null,
+            followUps: ['Can you adjust the calories?', 'Show grocery shopping list', 'How do I cook this?']
+          };
+        }
       }
 
+      const parsedResult = parseGeminiResponse(response.text);
+
       return successResponse(res, 'AI response generated', {
-        reply: parsed.reply || 'Here is your personalized Smart Lishe nutrition guidance:',
-        card: parsed.card || null
+        reply: parsedResult.reply,
+        card: parsedResult.card,
+        followUps: parsedResult.followUps
       });
 
     } catch (err) {
@@ -692,93 +854,121 @@ Return ONLY a JSON object matching this schema:
     }
   }
 
-  // High quality dynamic local fallback grounded in food dataset
-  const lowerMsg = message.toLowerCase();
-  let replyText = `Smart Lishe AI: `;
+  // High quality dynamic local fallback grounded in food dataset & clinical standards
+  const lowerMsg = (message || '').toLowerCase();
+  let replyText = `**Smart Lishe Clinical Nutritionist:**\n\n`;
   let card = null;
+  let followUps = [];
 
   if (lowerMsg.includes('weight loss') || lowerMsg.includes('lose weight') || lowerMsg.includes('fat loss')) {
-    replyText += `For sustainable weight loss, prioritize high-fiber indigenous greens (Sukuma Wiki, Managu), lean protein (Tilapia, Ndengu, Kienyeji Chicken), and complex low-GI carbs (Brown Ugali, Millet). Keep caloric intake at ~1,400–1,600 kcal daily.`;
+    replyText += `For realistic and sustainable weight loss in East Africa, we prioritize **high-satiety, low-glycemic index traditional foods**. \n\n` +
+      `• **Carbohydrate Swaps:** Replace white processed ugali with unhulled Sorghum, Millet, or Brown Ugali in measured 180g-200g portions.\n` +
+      `• **Indigenous Greens:** Fill half your plate with Sukuma Wiki, Managu, Terere, or Saget. The rich dietary fiber slows stomach emptying and stabilizes insulin.\n` +
+      `• **Lean Proteins:** Tilapia, Yellow Ndengu (mung beans), Kienyeji chicken, or Omena offer high thermic effect without excessive saturated fat.`;
+
     card = {
-      title: 'Kenyan Weight Loss Plan',
+      title: 'Kenyan Sustainable Fat Loss Plan',
       totalCalories: 1480,
+      prepTime: '25-35 mins',
+      estimatedCostKES: 'KES 380',
+      macros: { protein: '88g', carbs: '165g', fats: '42g', fiber: '29g' },
       meals: [
-        { name: 'Breakfast: Uji wa Mtama (Unsweetened) & 2 Boiled Eggs', cal: 320 },
-        { name: 'Lunch: Steamed Tilapia with Sukuma Wiki & Small Brown Ugali', cal: 480 },
-        { name: 'Dinner: Ndengu Stew (Yellow Grams) with Sautéed Managu Greens', cal: 450 },
-        { name: 'Snack: Fresh Papaya Slices & Roasted Pumpkin Seeds', cal: 230 }
+        { name: 'Breakfast: Unsweetened Uji wa Mtama & 2 Boiled Eggs', cal: 320 },
+        { name: 'Lunch: Steamed Lake Tilapia with Sautéed Sukuma Wiki & Small Brown Ugali', cal: 480 },
+        { name: 'Dinner: Yellow Ndengu Stew with Managu Greens & Cucumber Slices', cal: 450 },
+        { name: 'Snack: Sliced Papaya & Handful of Pumpkin Seeds', cal: 230 }
       ],
-      tips: 'Drink 3L of water daily and limit cooking oil to 1 tsp per meal.'
+      tips: 'Drink 3 Liters of water daily. Limit cooking oil to 1 teaspoon per dish.'
     };
+    followUps = ['How do I prep Ndengu without bloating?', 'What is a good evening snack?', 'Can I swap Tilapia for Omena?'];
   } else if (lowerMsg.includes('weight gain') || lowerMsg.includes('gain weight') || lowerMsg.includes('muscle')) {
-    replyText += `For healthy weight and muscle gain, increase nutrient-dense calories using avocado, groundnuts, brown ugali, Mukimo, and high-protein Omena or Kienyeji Chicken stew. Target ~2,300–2,600 kcal daily.`;
+    replyText += `To gain healthy lean weight and muscle mass, focus on **nutrient-dense, calorie-rich whole foods** rather than empty sugars.\n\n` +
+      `• **Healthy Energy Density:** Incorporate Haas avocados, roasted groundnut paste in porridge, and whole cow milk.\n` +
+      `• **Protein Synthesis:** Aim for 1.6g–2.0g protein per kg bodyweight using Kienyeji Chicken, Beef stew, Tilapia, and Eggs.\n` +
+      `• **Complex Carbohydrates:** Mukimo (mashed potatoes, corn, pumpkin leaves), Matoke, and Brown Ugali.`;
+
     card = {
-      title: 'Kenyan High-Energy Weight Gain Plan',
+      title: 'Kenyan High-Energy Muscle & Weight Gain Plan',
       totalCalories: 2450,
+      prepTime: '30-45 mins',
+      estimatedCostKES: 'KES 580',
+      macros: { protein: '125g', carbs: '290g', fats: '72g', fiber: '32g' },
       meals: [
-        { name: 'Breakfast: Uji wa Mtama with Peanut Butter & 3 Boiled Eggs', cal: 520 },
-        { name: 'Lunch: Mukimo (Potatoes, Corn, Pumpkin Leaves) with Beef Stew & Avocado', cal: 780 },
-        { name: 'Dinner: Kienyeji Chicken Stew with Ugali & Terere Greens', cal: 750 },
-        { name: 'Snack: Handful of Roasted Groundnuts & Whole Milk', cal: 400 }
+        { name: 'Breakfast: Uji wa Mtama with 2 tbsp Peanut Butter & 3 Boiled Eggs', cal: 520 },
+        { name: 'Lunch: Mukimo (Potatoes, Corn, Kahurura) with Tender Beef Stew & 1/2 Avocado', cal: 780 },
+        { name: 'Dinner: Kienyeji Chicken Stew with Ugali & Sautéed Terere Greens', cal: 750 },
+        { name: 'Snack: Roasted Groundnuts & Whole Glass Milk', cal: 400 }
       ],
-      tips: 'Eat every 3–4 hours and add healthy fats like avocado and nuts to main meals.'
+      tips: 'Eat meals every 3–4 hours and consume a protein snack before sleep.'
     };
+    followUps = ['How much protein is in Mukimo?', 'What is an easy budget weight gain snack?', 'Give me a post-workout smoothie idea'];
   } else if (lowerMsg.includes('diabet') || lowerMsg.includes('sugar') || lowerMsg.includes('glycemic')) {
-    replyText += `Managing blood sugar requires choosing low-Glycemic Index (GI) Kenyan foods. Replace refined white maize meal with unhulled Sorghum/Millet Ugali, and load half your plate with indigenous greens (Terere, Managu, Saget).`;
+    replyText += `**Clinical Diabetes & Blood Sugar Guidance:**\n\n` +
+      `Controlling blood glucose requires choosing **Low-GI (Glycemic Index)** local Kenyan staple foods:\n` +
+      `• **Swap White Ugali:** Use Sorghum / Wimbi / Finger Millet or Unhulled Maize. They digest slowly, preventing glucose spikes.\n` +
+      `• **Vegetable Dominance:** Indigenous vegetables (Terere, Managu, Saget) contain polyphenol antioxidants that improve insulin sensitivity.\n` +
+      `• **Smart Beans/Legumes:** Yellow Ndengu and Rosecoco beans contain resistant starch that feeds gut flora and lowers post-meal blood sugar.`;
+
     card = {
-      title: 'Diabetes-Friendly Kenyan Plan',
+      title: 'Diabetes-Friendly Low-GI Kenyan Plan',
       totalCalories: 1450,
+      prepTime: '30 mins',
+      estimatedCostKES: 'KES 350',
+      macros: { protein: '82g', carbs: '160g', fats: '40g', fiber: '31g' },
       meals: [
-        { name: 'Breakfast: Sorghum Porridge (No added sugar) & Boiled Egg', cal: 280 },
-        { name: 'Lunch: Githeri (Corn & Beans) with Sautéed Sukuma Wiki', cal: 490 },
-        { name: 'Dinner: Pan-Seared Tilapia with Terere Greens & Small Brown Ugali', cal: 460 },
-        { name: 'Snack: Green Apple Slices & Raw Almonds', cal: 220 }
+        { name: 'Breakfast: Pure Sorghum Porridge (No Sugar) & 1 Boiled Egg', cal: 280 },
+        { name: 'Lunch: Githeri (Corn & Beans 1:2 ratio) with Sautéed Sukuma Wiki', cal: 490 },
+        { name: 'Dinner: Pan-Seared Tilapia with Terere Greens & 150g Brown Ugali', cal: 460 },
+        { name: 'Snack: Crisp Green Apple Slices & Raw Almonds/Peanuts', cal: 220 }
       ],
-      tips: 'Monitor blood glucose 2 hours post-meal. Indigenous vegetables significantly slow carbohydrate absorption.'
+      tips: 'Always eat your greens and protein BEFORE consuming staple carbohydrates to reduce glucose spikes by up to 30%.'
     };
+    followUps = ['Is Chapati allowed for diabetics?', 'What fruits have the lowest sugar in Kenya?', 'How do I cook Githeri for diabetes?'];
   } else if (lowerMsg.includes('hypertension') || lowerMsg.includes('pressure') || lowerMsg.includes('salt')) {
-    replyText += `To regulate blood pressure, consume potassium-rich foods (Matoke, Bananas, Managu, Avocado) and minimize processed sodium. Season stews with garlic, ginger, and lemon instead of excessive salt.`;
+    replyText += `**High Blood Pressure (DASH Protocol) Guidance:**\n\n` +
+      `• **Potassium Boost:** Green bananas (Matoke), Avocados, Bananas, and Dark greens contain potassium which naturally balances sodium levels.\n` +
+      `• **Reduce Hidden Sodium:** Eliminate commercial seasoning cubes/salty stock pastes. Use fresh Dania (coriander), Garlic, Ginger, and Lemon juice for rich natural flavor.\n` +
+      `• **Magnesium & Calcium:** Terere greens and Tilapia support arterial elasticity.`;
+
     card = {
-      title: 'DASH & Hypertension Kenyan Plan',
+      title: 'Hypertension (DASH) Healthy Kenyan Plan',
       totalCalories: 1520,
+      prepTime: '25 mins',
+      estimatedCostKES: 'KES 390',
+      macros: { protein: '80g', carbs: '185g', fats: '38g', fiber: '28g' },
       meals: [
-        { name: 'Breakfast: Whole Oats with Sliced Banana & Flaxseed', cal: 350 },
-        { name: 'Lunch: Matoke (Green Banana Stew) with Beans & Spinach', cal: 510 },
+        { name: 'Breakfast: Whole Rolled Oats with Bananas & Flaxseed', cal: 350 },
+        { name: 'Lunch: Matoke (Green Banana Stew) with Beans & Steamed Spinach', cal: 510 },
         { name: 'Dinner: Poached Tilapia with Kundes (Cowpea Leaves) & Sweet Potato', cal: 480 },
         { name: 'Snack: Fresh Watermelon Slices', cal: 180 }
       ],
-      tips: 'Aim for <2,000mg sodium daily. Potassium from Matoke and greens helps flush excess sodium.'
+      tips: 'Keep total daily sodium under 1,800mg (less than 1 level teaspoon of salt across all meals).'
     };
-  } else if (lowerMsg.includes('shopping') || lowerMsg.includes('grocery') || lowerMsg.includes('market')) {
-    replyText += `Here is a cost-effective weekly Kenyan healthy grocery list estimated at KES 3,500–4,500 at your local green market (soko).`;
-    card = {
-      title: 'Healthy Kenyan Weekly Shopping List',
-      totalCalories: 0,
-      meals: [
-        { name: '🥬 Greens: Sukuma Wiki (2 bunches), Managu (2 bunches), Terere', cal: 'KES 250' },
-        { name: '🫘 Legumes: Ndengu (1kg), Beans (1kg), Groundnuts (500g)', cal: 'KES 520' },
-        { name: '🐟 Proteins: Tilapia (2 whole), Dried Omena (500g), Eggs (1 tray)', cal: 'KES 1,200' },
-        { name: '🌽 Grains: Sorghum/Millet Flour (2kg), Unhulled Maize Flour (2kg)', cal: 'KES 480' },
-        { name: '🥑 Produce: Avocado (4), Bananas (1 bunch), Tomatoes/Onions', cal: 'KES 650' }
-      ],
-      tips: 'Buy leafy vegetables every 2-3 days for maximum vitamin freshness.'
-    };
+    followUps = ['What herbs add taste without salt?', 'Are sweet potatoes good for high blood pressure?', 'How does avocado help heart health?'];
   } else {
-    replyText += `Thank you for asking about "${message}". Balanced Kenyan nutrition relies on authentic whole foods: Sorghum/Brown Ugali for clean energy, Sukuma Wiki/Managu for micronutrients, and Tilapia/Ndengu for lean protein.`;
+    replyText += `Hello! Based on your active profile, a balanced Kenyan daily meal plan emphasizes **unprocessed staple grains, nutrient-dense leafy greens, and lean proteins**.\n\n` +
+      `• **Morning Hydration:** Start with 500ml water and fermented Mtama/Wimbi porridge.\n` +
+      `• **Midday Satiety:** Githeri or Brown Ugali with indigenous vegetables.\n` +
+      `• **Evening Recovery:** Grilled or boiled Tilapia, Kienyeji Chicken, or Ndengu.`;
+
     card = {
-      title: 'Balanced Daily Kenyan Meal Plan',
-      totalCalories: 1750,
+      title: 'Balanced Smart Lishe Daily Meal Plan',
+      totalCalories: 1720,
+      prepTime: '30 mins',
+      estimatedCostKES: 'KES 420',
+      macros: { protein: '85g', carbs: '200g', fats: '45g', fiber: '27g' },
       meals: [
         { name: 'Breakfast: Uji wa Mtama & 2 Boiled Eggs', cal: 360 },
-        { name: 'Lunch: Githeri with Sukuma Wiki & Avocado', cal: 580 },
-        { name: 'Dinner: Brown Ugali with Tilapia & Sautéed Managu', cal: 620 },
-        { name: 'Snack: Handful of Roasted Groundnuts', cal: 190 }
+        { name: 'Lunch: Githeri with Sautéed Sukuma Wiki & 1/2 Avocado', cal: 580 },
+        { name: 'Dinner: Brown Ugali with Tilapia & Managu Greens', cal: 620 },
+        { name: 'Snack: Handful of Roasted Groundnuts', cal: 160 }
       ],
-      tips: 'Drink at least 2.5L clean water daily and maintain consistent meal timing.'
+      tips: 'Aim for a colorful plate every day to ensure a broad spectrum of vitamins and antioxidants.'
     };
+    followUps = ['Can you modify this for a KES 300 budget?', 'Give me a 7-day meal schedule', 'How do I add more protein?'];
   }
 
-  return successResponse(res, 'AI response generated', { reply: replyText, card });
+  return successResponse(res, 'AI response generated', { reply: replyText, card, followUps });
 });
 
 app.get('/api/ai/conversations', authenticateToken, (req, res) => {
@@ -875,6 +1065,7 @@ app.get('/api/client/goals', authenticateToken, (req, res) => {
 app.post('/api/client/goals', authenticateToken, (req, res) => {
   const newGoal = { id: `goal-${Date.now()}`, user_id: req.user.id, ...req.body, status: 'In Progress' };
   goals.push(newGoal);
+  saveGoalsToDisk();
   syncFirestoreDoc('goals', newGoal.id, newGoal);
   return successResponse(res, 'Goal added', newGoal);
 });
@@ -883,6 +1074,7 @@ app.post('/api/client/goals/:id/progress', authenticateToken, (req, res) => {
   const goal = goals.find(g => g.id === req.params.id);
   if (goal && req.body.progress !== undefined) {
     goal.current = req.body.progress;
+    saveGoalsToDisk();
     syncFirestoreDoc('goals', goal.id, goal);
   }
   return successResponse(res, 'Progress updated', goal);
@@ -897,6 +1089,7 @@ app.post('/api/client/water', authenticateToken, (req, res) => {
   const amount = parseInt(req.body.amount_ml || 250) || 250;
   const log = { id: `w-${Date.now()}`, user_id: req.user.id, amount_ml: amount, timestamp: new Date().toISOString() };
   waterLogs.push(log);
+  saveWaterLogsToDisk();
   syncFirestoreDoc('water_logs', log.id, log);
   return successResponse(res, 'Water logged successfully', log);
 });
@@ -1627,6 +1820,7 @@ let systemBroadcast = broadcasts.length > 0 ? broadcasts[0] : null;
 app.get('/api/admin/stats', authenticateToken, async (req, res) => {
   await syncUsersWithFirestore();
   await syncSupportTicketsWithFirestore();
+  await syncRecipesWithFirestore();
   const pendingPros = users.filter(u => u.role === 'professional' && (u.status === 'pending' || u.approval_status === 'pending'));
   const activePros = users.filter(u => u.role === 'professional' && (u.status === 'active' || u.approval_status === 'approved') && u.status !== 'pending' && u.approval_status !== 'pending');
   const activeClients = users.filter(u => u.role === 'client');
@@ -2036,7 +2230,8 @@ app.delete('/api/admin/users/:id', authenticateToken, (req, res) => {
 });
 
 // --- Admin Recipes Management ---
-app.get('/api/admin/recipes', authenticateToken, (req, res) => {
+app.get('/api/admin/recipes', authenticateToken, async (req, res) => {
+  await syncRecipesWithFirestore();
   return successResponse(res, 'Recipes list retrieved', recipesList);
 });
 
@@ -2494,17 +2689,18 @@ const seedRecipes = [
 const RECIPES_FILE = path.join(__dirname, 'recipes_db.json');
 function loadRecipesFromDisk() {
   try {
-    if (fs.existsSync(RECIPES_FILE)) {
-      const parsed = JSON.parse(fs.readFileSync(RECIPES_FILE, 'utf8'));
+    const data = safeReadFileSync(RECIPES_FILE);
+    if (data) {
+      const parsed = JSON.parse(data);
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     }
   } catch (e) {}
-  try { fs.writeFileSync(RECIPES_FILE, JSON.stringify(seedRecipes, null, 2)); } catch (e) {}
+  safeWriteFileSync(RECIPES_FILE, JSON.stringify(seedRecipes, null, 2));
   return [...seedRecipes];
 }
 const recipesList = loadRecipesFromDisk();
 function saveRecipesToDisk() {
-  try { fs.writeFileSync(RECIPES_FILE, JSON.stringify(recipesList, null, 2)); } catch (e) {}
+  safeWriteFileSync(RECIPES_FILE, JSON.stringify(recipesList, null, 2));
 }
 
 app.get('/api/foods/search', (req, res) => {
@@ -2518,7 +2714,8 @@ app.get('/api/foods/:id', (req, res) => {
   return successResponse(res, 'Food detail', food);
 });
 
-app.get('/api/recipes', (req, res) => {
+app.get('/api/recipes', async (req, res) => {
+  await syncRecipesWithFirestore();
   const q = (req.query.q || '').toLowerCase();
   const cat = (req.query.category || '').toLowerCase();
   let filtered = recipesList;
@@ -2531,13 +2728,15 @@ app.get('/api/recipes', (req, res) => {
   return successResponse(res, 'Recipes list', filtered);
 });
 
-app.get('/api/recipes/search', (req, res) => {
+app.get('/api/recipes/search', async (req, res) => {
+  await syncRecipesWithFirestore();
   const q = (req.query.q || '').toLowerCase();
   const filtered = recipesList.filter(r => r.name.toLowerCase().includes(q) || r.category.toLowerCase().includes(q) || (r.ingredients && r.ingredients.some(i => i.toLowerCase().includes(q))));
   return successResponse(res, 'Recipes list', filtered.length ? filtered : recipesList);
 });
 
-app.get('/api/recipes/:id', (req, res) => {
+app.get('/api/recipes/:id', async (req, res) => {
+  await syncRecipesWithFirestore();
   const recipe = recipesList.find(r => r.id === req.params.id) || recipesList[0];
   return successResponse(res, 'Recipe detail', recipe);
 });
