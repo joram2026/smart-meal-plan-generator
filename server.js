@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { GoogleGenAI } = require('@google/genai');
 const { initializeApp } = require('firebase/app');
-const { getFirestore, doc, setDoc } = require('firebase/firestore');
+const { getFirestore, doc, setDoc, getDoc, getDocs, collection, query, where } = require('firebase/firestore');
 
 const app = express();
 const PORT = 3000;
@@ -21,6 +21,35 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+// Safe Disk Persistence Helpers (for read-only filesystems on Netlify Serverless Functions / AWS Lambda)
+function safeWriteFileSync(filePath, content) {
+  try {
+    fs.writeFileSync(filePath, content);
+  } catch (err) {
+    try {
+      const tmpPath = path.join('/tmp', path.basename(filePath));
+      fs.writeFileSync(tmpPath, content);
+    } catch (e) {
+      console.warn(`[Disk Persistence Warning] Unable to write to ${filePath} or /tmp:`, e.message);
+    }
+  }
+}
+
+function safeReadFileSync(filePath) {
+  try {
+    if (fs.existsSync(filePath)) {
+      return fs.readFileSync(filePath, 'utf8');
+    }
+  } catch (e) {}
+  try {
+    const tmpPath = path.join('/tmp', path.basename(filePath));
+    if (fs.existsSync(tmpPath)) {
+      return fs.readFileSync(tmpPath, 'utf8');
+    }
+  } catch (e) {}
+  return null;
+}
 
 // Helper Response Formatters
 const successResponse = (res, message, data = null, statusCode = 200) => {
@@ -64,7 +93,7 @@ async function syncFirestoreDoc(collectionName, docId, data) {
     const db = getFirestoreDb();
     if (db) {
       const cleanData = JSON.parse(JSON.stringify(data));
-      delete cleanData.passwordHash;
+      // Retain passwordHash for users collection so login syncs across serverless instances and devices
       await setDoc(doc(db, collectionName, String(docId)), cleanData, { merge: true });
       console.log(`[Firestore Sync Success] ${collectionName}/${docId}`);
     }
@@ -158,8 +187,8 @@ const seedUsers = [
 function loadUsersFromDisk() {
   let loaded = [];
   try {
-    if (fs.existsSync(USERS_FILE)) {
-      const data = fs.readFileSync(USERS_FILE, 'utf8');
+    const data = safeReadFileSync(USERS_FILE);
+    if (data) {
       const parsed = JSON.parse(data);
       if (Array.isArray(parsed) && parsed.length > 0) {
         loaded = parsed;
@@ -177,21 +206,80 @@ function loadUsersFromDisk() {
     }
   });
 
-  try {
-    fs.writeFileSync(USERS_FILE, JSON.stringify(loaded, null, 2));
-  } catch (err) {}
-
+  safeWriteFileSync(USERS_FILE, JSON.stringify(loaded, null, 2));
   return loaded;
 }
 
 const users = loadUsersFromDisk();
 
 function saveUsersToDisk() {
+  safeWriteFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+}
+
+async function findUserByEmail(email) {
+  if (!email) return null;
+  const cleanEmail = email.trim().toLowerCase();
+  let user = users.find(u => u.email && u.email.toLowerCase() === cleanEmail);
+  if (user) return user;
+
+  // Search Firestore database
   try {
-    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+    const db = getFirestoreDb();
+    if (db) {
+      const q = query(collection(db, 'users'), where('email', '==', cleanEmail));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        const docData = querySnapshot.docs[0].data();
+        if (docData && docData.email) {
+          user = docData;
+          const existingIdx = users.findIndex(u => u.id === user.id);
+          if (existingIdx >= 0) users[existingIdx] = user;
+          else users.push(user);
+          return user;
+        }
+      }
+    }
   } catch (err) {
-    console.warn('[Users DB] Could not save users_db.json:', err.message);
+    console.warn('[Firestore findUserByEmail Warning]:', err.message);
   }
+
+  // Fallback: Check seedUsers
+  const seedMatch = seedUsers.find(s => s.email && s.email.toLowerCase() === cleanEmail);
+  if (seedMatch) {
+    user = { ...seedMatch };
+    users.push(user);
+    saveUsersToDisk();
+    return user;
+  }
+
+  return null;
+}
+
+async function findUserById(id) {
+  if (!id) return null;
+  let user = users.find(u => u.id === id);
+  if (user) return user;
+
+  try {
+    const db = getFirestoreDb();
+    if (db) {
+      const docRef = doc(db, 'users', String(id));
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        user = docSnap.data();
+        if (user && user.id) {
+          const existingIdx = users.findIndex(u => u.id === user.id);
+          if (existingIdx >= 0) users[existingIdx] = user;
+          else users.push(user);
+          return user;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[Firestore findUserById Warning]:', err.message);
+  }
+
+  return null;
 }
 
 // --- Meal Plans Data Store ---
@@ -217,17 +305,18 @@ const seedMealPlans = [
 
 function loadMealPlansFromDisk() {
   try {
-    if (fs.existsSync(MEAL_PLANS_FILE)) {
-      const parsed = JSON.parse(fs.readFileSync(MEAL_PLANS_FILE, 'utf8'));
+    const data = safeReadFileSync(MEAL_PLANS_FILE);
+    if (data) {
+      const parsed = JSON.parse(data);
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     }
   } catch (e) {}
-  try { fs.writeFileSync(MEAL_PLANS_FILE, JSON.stringify(seedMealPlans, null, 2)); } catch (e) {}
+  safeWriteFileSync(MEAL_PLANS_FILE, JSON.stringify(seedMealPlans, null, 2));
   return [...seedMealPlans];
 }
 const mealPlans = loadMealPlansFromDisk();
 function saveMealPlansToDisk() {
-  try { fs.writeFileSync(MEAL_PLANS_FILE, JSON.stringify(mealPlans, null, 2)); } catch (e) {}
+  safeWriteFileSync(MEAL_PLANS_FILE, JSON.stringify(mealPlans, null, 2));
 }
 
 // --- Shopping Lists Data Store ---
@@ -249,17 +338,18 @@ const seedShoppingLists = [
 
 function loadShoppingListsFromDisk() {
   try {
-    if (fs.existsSync(SHOPPING_LISTS_FILE)) {
-      const parsed = JSON.parse(fs.readFileSync(SHOPPING_LISTS_FILE, 'utf8'));
+    const data = safeReadFileSync(SHOPPING_LISTS_FILE);
+    if (data) {
+      const parsed = JSON.parse(data);
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     }
   } catch (e) {}
-  try { fs.writeFileSync(SHOPPING_LISTS_FILE, JSON.stringify(seedShoppingLists, null, 2)); } catch (e) {}
+  safeWriteFileSync(SHOPPING_LISTS_FILE, JSON.stringify(seedShoppingLists, null, 2));
   return [...seedShoppingLists];
 }
 const shoppingLists = loadShoppingListsFromDisk();
 function saveShoppingListsToDisk() {
-  try { fs.writeFileSync(SHOPPING_LISTS_FILE, JSON.stringify(shoppingLists, null, 2)); } catch (e) {}
+  safeWriteFileSync(SHOPPING_LISTS_FILE, JSON.stringify(shoppingLists, null, 2));
 }
 
 const appointments = [
@@ -282,23 +372,29 @@ const settings = {
 };
 
 // Auth Middleware Helper
-const authenticateToken = (req, res, next) => {
+const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
     // Return mock user if no auth header passed for seamless preview
-    req.user = users[3]; // user-001
+    req.user = users[3] || seedUsers[3]; // user-001
     return next();
   }
 
-  jwt.verify(token, JWT_SECRET, (err, decoded) => {
-    if (err) {
-      req.user = users[3]; // fallback to user-001 for dev
+  jwt.verify(token, JWT_SECRET, async (err, decoded) => {
+    if (err || !decoded) {
+      req.user = users[3] || seedUsers[3]; // fallback to user-001 for dev
       return next();
     }
-    const found = users.find(u => u.id === decoded.id || u.email === decoded.email);
-    req.user = found || users[3];
+    let found = users.find(u => u.id === decoded.id || u.email === decoded.email);
+    if (!found && decoded.email) {
+      found = await findUserByEmail(decoded.email);
+    }
+    if (!found && decoded.id) {
+      found = await findUserById(decoded.id);
+    }
+    req.user = found || users[3] || seedUsers[3];
     next();
   });
 };
@@ -306,7 +402,7 @@ const authenticateToken = (req, res, next) => {
 // ════════════════════ API ROUTES ════════════════════
 
 // --- Auth Routes ---
-app.post('/api/auth/register', (req, res) => {
+app.post('/api/auth/register', async (req, res) => {
   const { email, password, first_name, last_name, role } = req.body || {};
   if (!email || !password) {
     return errorResponse(res, 'Email and password required', 400);
@@ -314,7 +410,7 @@ app.post('/api/auth/register', (req, res) => {
   const cleanEmail = email.trim().toLowerCase();
   const cleanPassword = password.trim();
 
-  const existing = users.find(u => u.email && u.email.toLowerCase() === cleanEmail);
+  const existing = await findUserByEmail(cleanEmail);
   if (existing) {
     return errorResponse(res, 'User with this email already exists', 400);
   }
@@ -339,21 +435,12 @@ app.post('/api/auth/register', (req, res) => {
   users.push(newUser);
   saveUsersToDisk();
 
-  syncFirestoreDoc('users', newUser.id, {
-    uid: newUser.id,
-    email: newUser.email,
-    first_name: newUser.first_name,
-    last_name: newUser.last_name,
-    role: newUser.role,
-    status: newUser.status,
-    approval_status: newUser.approval_status,
-    profile_completed: newUser.profile_completed,
-    created_at: newUser.created_at
-  });
+  await syncFirestoreDoc('users', newUser.id, newUser);
+
   return successResponse(res, 'User registered successfully', { user_id: newUser.id, user: newUser }, 201);
 });
 
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body || {};
   if (!email || !password) {
     return errorResponse(res, 'Email and password required', 400);
@@ -361,17 +448,7 @@ app.post('/api/auth/login', (req, res) => {
   const cleanEmail = email.trim().toLowerCase();
   const cleanPassword = password.trim();
 
-  let user = users.find(u => u.email && u.email.toLowerCase() === cleanEmail);
-
-  // Fallback: If quick fill demo account was missing from memory, restore it from seedUsers
-  if (!user) {
-    const seedMatch = seedUsers.find(s => s.email.toLowerCase() === cleanEmail);
-    if (seedMatch) {
-      user = { ...seedMatch };
-      users.push(user);
-      saveUsersToDisk();
-    }
-  }
+  let user = await findUserByEmail(cleanEmail);
 
   if (!user) {
     return errorResponse(res, 'Invalid email or password', 401);
@@ -1368,17 +1445,18 @@ const seedSupportTickets = [
 
 function loadSupportTicketsFromDisk() {
   try {
-    if (fs.existsSync(SUPPORT_TICKETS_FILE)) {
-      const parsed = JSON.parse(fs.readFileSync(SUPPORT_TICKETS_FILE, 'utf8'));
+    const data = safeReadFileSync(SUPPORT_TICKETS_FILE);
+    if (data) {
+      const parsed = JSON.parse(data);
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     }
   } catch (e) {}
-  try { fs.writeFileSync(SUPPORT_TICKETS_FILE, JSON.stringify(seedSupportTickets, null, 2)); } catch (e) {}
+  safeWriteFileSync(SUPPORT_TICKETS_FILE, JSON.stringify(seedSupportTickets, null, 2));
   return [...seedSupportTickets];
 }
 const supportTickets = loadSupportTicketsFromDisk();
 function saveSupportTicketsToDisk() {
-  try { fs.writeFileSync(SUPPORT_TICKETS_FILE, JSON.stringify(supportTickets, null, 2)); } catch (e) {}
+  safeWriteFileSync(SUPPORT_TICKETS_FILE, JSON.stringify(supportTickets, null, 2));
 }
 
 // --- User Notifications Data Store ---
@@ -1416,17 +1494,18 @@ const seedNotifications = [
 
 function loadNotificationsFromDisk() {
   try {
-    if (fs.existsSync(NOTIFICATIONS_FILE)) {
-      const parsed = JSON.parse(fs.readFileSync(NOTIFICATIONS_FILE, 'utf8'));
+    const data = safeReadFileSync(NOTIFICATIONS_FILE);
+    if (data) {
+      const parsed = JSON.parse(data);
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     }
   } catch (e) {}
-  try { fs.writeFileSync(NOTIFICATIONS_FILE, JSON.stringify(seedNotifications, null, 2)); } catch (e) {}
+  safeWriteFileSync(NOTIFICATIONS_FILE, JSON.stringify(seedNotifications, null, 2));
   return [...seedNotifications];
 }
 const notifications = loadNotificationsFromDisk();
 function saveNotificationsToDisk() {
-  try { fs.writeFileSync(NOTIFICATIONS_FILE, JSON.stringify(notifications, null, 2)); } catch (e) {}
+  safeWriteFileSync(NOTIFICATIONS_FILE, JSON.stringify(notifications, null, 2));
 }
 
 // --- System Broadcast Announcements Data Store ---
@@ -1444,17 +1523,18 @@ const seedBroadcasts = [
 
 function loadBroadcastsFromDisk() {
   try {
-    if (fs.existsSync(BROADCASTS_FILE)) {
-      const parsed = JSON.parse(fs.readFileSync(BROADCASTS_FILE, 'utf8'));
+    const data = safeReadFileSync(BROADCASTS_FILE);
+    if (data) {
+      const parsed = JSON.parse(data);
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     }
   } catch (e) {}
-  try { fs.writeFileSync(BROADCASTS_FILE, JSON.stringify(seedBroadcasts, null, 2)); } catch (e) {}
+  safeWriteFileSync(BROADCASTS_FILE, JSON.stringify(seedBroadcasts, null, 2));
   return [...seedBroadcasts];
 }
 const broadcasts = loadBroadcastsFromDisk();
 function saveBroadcastsToDisk() {
-  try { fs.writeFileSync(BROADCASTS_FILE, JSON.stringify(broadcasts, null, 2)); } catch (e) {}
+  safeWriteFileSync(BROADCASTS_FILE, JSON.stringify(broadcasts, null, 2));
 }
 
 let systemBroadcast = broadcasts.length > 0 ? broadcasts[0] : null;
