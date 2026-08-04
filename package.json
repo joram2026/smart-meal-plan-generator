@@ -13,6 +13,7 @@
   "dependencies": {
     "@google/genai": "^2.15.0",
     "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
     "express": "^4.19.2",
     "firebase": "^12.17.0",
     "firebase-admin": "^14.2.0",

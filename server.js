@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
@@ -11,14 +12,51 @@ const app = express();
 const PORT = 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'smartlishe_secret_key_2026';
 
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
+}));
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Netlify path normalization
+// Netlify & Serverless Path Normalization Middleware
 app.use((req, res, next) => {
-  if (req.url.startsWith('/.netlify/functions/api')) {
-    req.url = req.url.replace('/.netlify/functions/api', '/api');
+  let url = req.url;
+  if (url.startsWith('/.netlify/functions/api')) {
+    url = url.replace('/.netlify/functions/api', '/api');
+  } else if (url.startsWith('/.netlify/functions')) {
+    url = url.replace('/.netlify/functions', '/api');
   }
+
+  if (!url.startsWith('/api') && (
+    url.startsWith('/auth') || 
+    url.startsWith('/user') || 
+    url.startsWith('/admin') || 
+    url.startsWith('/professional') || 
+    url.startsWith('/profile') || 
+    url.startsWith('/meal-plans') || 
+    url.startsWith('/shopping-lists') || 
+    url.startsWith('/support') || 
+    url.startsWith('/notifications') || 
+    url.startsWith('/broadcasts') || 
+    url.startsWith('/client') || 
+    url.startsWith('/reports') || 
+    url.startsWith('/audit-logs') || 
+    url.startsWith('/settings') || 
+    url.startsWith('/ai') ||
+    url.startsWith('/payments') ||
+    url.startsWith('/contact') ||
+    url.startsWith('/goals') ||
+    url.startsWith('/water-logs') ||
+    url.startsWith('/recipes') ||
+    url.startsWith('/foods') ||
+    url.startsWith('/nutriscan')
+  )) {
+    url = '/api' + (url.startsWith('/') ? url : '/' + url);
+  }
+  req.url = url;
   next();
 });
 
@@ -70,21 +108,49 @@ const errorResponse = (res, error, statusCode = 400) => {
 
 // --- Firebase Firestore Setup ---
 let firestoreDb = null;
+let isFirestoreSynced = false;
+
 function getFirestoreDb() {
   if (!firestoreDb) {
     try {
-      const configPath = path.join(__dirname, 'firebase-applet-config.json');
-      if (fs.existsSync(configPath)) {
-        const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+      let config = null;
+      try {
+        config = require('./firebase-applet-config.json');
+      } catch (e) {
+        const configPath = path.join(__dirname, 'firebase-applet-config.json');
+        if (fs.existsSync(configPath)) {
+          config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+        }
+      }
+
+      if (config) {
         const firebaseApp = initializeApp(config);
         firestoreDb = getFirestore(firebaseApp, config.firestoreDatabaseId);
         console.log('Firebase Firestore connected with database:', config.firestoreDatabaseId);
+        if (!isFirestoreSynced) {
+          isFirestoreSynced = true;
+          ensureFirestoreSynced();
+        }
+      } else {
+        console.warn('Firebase config not found');
       }
     } catch (err) {
       console.warn('Firebase Firestore warning:', err.message);
     }
   }
   return firestoreDb;
+}
+
+async function ensureFirestoreSynced() {
+  try {
+    const db = getFirestoreDb();
+    if (!db) return;
+    for (const u of seedUsers) {
+      await syncFirestoreDoc('users', u.id, u);
+    }
+  } catch (e) {
+    console.warn('[Ensure Firestore Synced Warning]:', e.message);
+  }
 }
 
 // Helper async firestore sync functions
