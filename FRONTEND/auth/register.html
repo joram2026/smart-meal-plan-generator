@@ -70,6 +70,64 @@
     .btn-loading .btn-text { visibility: hidden; }
     .btn-loading .spinner-small { position: absolute; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Sponsors Section */
+    .sponsors-section {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px dashed var(--basket-line);
+      text-align: center;
+    }
+    .sponsors-title {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+    .sponsors-grid {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    @media (max-width: 480px) {
+      .sponsors-grid { flex-direction: column; }
+    }
+    .sponsor-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--basket-line);
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    }
+    .sponsor-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--sukuma);
+      box-shadow: 0 6px 16px rgba(26, 122, 100, 0.12);
+      background: var(--bg-elevated);
+    }
+    .sponsor-img {
+      height: 44px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+    }
+    .sponsor-name {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-top: 6px;
+    }
   </style>
 </head>
 <body>
@@ -171,6 +229,21 @@
 
       <div class="auth-links">
         Already have an account? <a href="login.html">Sign in</a>
+      </div>
+
+      <!-- Official Sponsors & Partners -->
+      <div class="sponsors-section">
+        <span class="sponsors-title"><i class="fa-solid fa-handshake-angle" style="margin-right: 4px; color: var(--sukuma);"></i> Official Sponsors & Partners</span>
+        <div class="sponsors-grid">
+          <a href="https://www.jkuat.ac.ke/" target="_blank" rel="noopener" class="sponsor-card" title="Jomo Kenyatta University of Agriculture and Technology (JKUAT)">
+            <img src="../assets/images/jkuat-logo.svg" alt="JKUAT Logo" class="sponsor-img">
+            <span class="sponsor-name">JKUAT</span>
+          </a>
+          <a href="https://jhubafrica.com/" target="_blank" rel="noopener" class="sponsor-card" title="JHUB Africa - Innovations for Transformation">
+            <img src="../assets/images/jhub-africa-logo.svg" alt="JHUB Africa Logo" class="sponsor-img">
+            <span class="sponsor-name">JHUB Africa</span>
+          </a>
+        </div>
       </div>
     </div>
   </div>

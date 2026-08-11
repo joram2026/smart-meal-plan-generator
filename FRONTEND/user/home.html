@@ -18,6 +18,86 @@
 .qa-links a{padding:6px 14px;border-radius:20px;background:var(--bg-elevated);border:1px solid var(--basket-line);font-size:0.78rem;font-weight:600;color:var(--text-secondary);text-decoration:none;transition:all 0.2s ease;}
 .qa-links a:hover{background:var(--sukuma);color:#fff;border-color:var(--sukuma);transform:translateY(-2px);}
 .qa-links a i{margin-right:5px;}
+
+/* Official Sponsors Landing Section */
+.sponsors-landing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 32px;
+}
+.sponsor-landing-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--basket-line);
+  border-radius: var(--radius-lg, 16px);
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+.sponsor-landing-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--sukuma);
+  box-shadow: 0 12px 28px rgba(26, 122, 100, 0.12);
+  background: var(--bg-elevated, #ffffff);
+}
+.sponsor-logo-box {
+  width: 90px;
+  height: 90px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 10px;
+  border: 1px solid var(--basket-line);
+}
+.sponsor-logo-box img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.sponsor-info {
+  flex: 1;
+}
+.sponsor-info h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+}
+.sponsor-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--sukuma);
+  background: rgba(26, 122, 100, 0.08);
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.sponsor-info p {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin: 0;
+}
+@media (max-width: 576px) {
+  .sponsor-landing-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  .sponsor-tag {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
 </style>
 </head>
 <body>
@@ -286,6 +366,37 @@
                 <a href="../auth/register.html" class="btn btn-secondary btn-sm">Register to Chat →</a>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- ══ SPONSORS & PARTNERS SECTION ══ -->
+        <div class="section-block">
+          <div class="section-head" style="text-align:center;">
+            <div class="section-eyebrow" style="justify-content:center;"><i class="fa-solid fa-handshake-angle" style="color:var(--sukuma);"></i> Supported By Industry Leaders</div>
+            <h2 class="h2-display">Official Sponsors & Partners</h2>
+            <p>Smart Lishe is proudly supported in partnership with leading educational and innovation hubs committed to advancing health technology in Kenya and Africa.</p>
+          </div>
+          <div class="sponsors-landing-grid">
+            <a href="https://www.jkuat.ac.ke/" target="_blank" rel="noopener" class="sponsor-landing-card">
+              <div class="sponsor-logo-box">
+                <img src="../assets/images/jkuat-logo.svg" alt="JKUAT Logo">
+              </div>
+              <div class="sponsor-info">
+                <h3>JKUAT</h3>
+                <span class="sponsor-tag">Academic & Research Partner</span>
+                <p>Jomo Kenyatta University of Agriculture and Technology — Technology for Development.</p>
+              </div>
+            </a>
+            <a href="https://jhubafrica.com/" target="_blank" rel="noopener" class="sponsor-landing-card">
+              <div class="sponsor-logo-box">
+                <img src="../assets/images/jhub-africa-logo.svg" alt="JHUB Africa Logo">
+              </div>
+              <div class="sponsor-info">
+                <h3>JHUB Africa</h3>
+                <span class="sponsor-tag">Innovation & Acceleration Partner</span>
+                <p>Innovations for Transformation — Empowering digital health solutions across Africa.</p>
+              </div>
+            </a>
           </div>
         </div>
 

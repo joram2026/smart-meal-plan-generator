@@ -371,6 +371,62 @@
       .auth-check { flex-direction: column; gap: 10px; align-items: flex-start; }
       .demo-buttons { flex-direction: column; }
       .demo-btn { min-width: auto; }
+      .sponsors-grid { flex-direction: column; }
+    }
+
+    /* Sponsors Section */
+    .sponsors-section {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px dashed var(--basket-line);
+      text-align: center;
+    }
+    .sponsors-title {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+    .sponsors-grid {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    .sponsor-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--basket-line);
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    }
+    .sponsor-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--sukuma);
+      box-shadow: 0 6px 16px rgba(26, 122, 100, 0.12);
+      background: var(--bg-elevated);
+    }
+    .sponsor-img {
+      height: 44px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+    }
+    .sponsor-name {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-top: 6px;
     }
   </style>
 </head>
@@ -431,32 +487,24 @@
       </button>
     </form>
 
-    <!-- ===== DEMO SECTION ===== -->
-    <div class="demo-section">
-      <p><i class="fa-regular fa-flask" style="margin-right:6px;"></i> Quick Fill Demo Credentials</p>
-      <div class="demo-buttons" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <button type="button" class="demo-btn client" id="demoUserBtn" style="padding:8px 10px;font-size:0.8rem;">
-          <i class="fa-regular fa-user"></i> User
-        </button>
-        <button type="button" class="demo-btn admin" id="demoProBtn" style="padding:8px 10px;font-size:0.8rem;background:#059669;color:#fff;border-color:#059669;">
-          <i class="fa-solid fa-user-doctor"></i> Pro
-        </button>
-        <button type="button" class="demo-btn client" id="demoClientBtn" style="padding:8px 10px;font-size:0.8rem;">
-          <i class="fa-regular fa-user-gear"></i> Client
-        </button>
-        <button type="button" class="demo-btn admin" id="demoAdminBtn" style="padding:8px 10px;font-size:0.8rem;">
-          <i class="fa-regular fa-user-tie"></i> Admin
-        </button>
-      </div>
-      <div class="registered-users-note" style="margin-top:10px;">
-        <strong><i class="fa-regular fa-circle-info"></i> Instant Sign In</strong><br>
-        Click any role above to pre-fill test credentials, then click <strong>Sign In</strong>.
-      </div>
-    </div>
-
     <!-- Register link -->
     <div class="auth-links">
       Don't have an account? <a href="register.html">Register</a>
+    </div>
+
+    <!-- Official Sponsors & Partners -->
+    <div class="sponsors-section">
+      <span class="sponsors-title"><i class="fa-solid fa-handshake-angle" style="margin-right: 4px; color: var(--sukuma);"></i> Official Sponsors & Partners</span>
+      <div class="sponsors-grid">
+        <a href="https://www.jkuat.ac.ke/" target="_blank" rel="noopener" class="sponsor-card" title="Jomo Kenyatta University of Agriculture and Technology (JKUAT)">
+          <img src="../assets/images/jkuat-logo.svg" alt="JKUAT Logo" class="sponsor-img">
+          <span class="sponsor-name">JKUAT</span>
+        </a>
+        <a href="https://jhubafrica.com/" target="_blank" rel="noopener" class="sponsor-card" title="JHUB Africa - Innovations for Transformation">
+          <img src="../assets/images/jhub-africa-logo.svg" alt="JHUB Africa Logo" class="sponsor-img">
+          <span class="sponsor-name">JHUB Africa</span>
+        </a>
+      </div>
     </div>
 
   </div>
@@ -612,35 +660,6 @@ loginForm.addEventListener('submit', async function(e) {
     loginBtn.querySelector('.btn-text').style.display = 'flex';
     loginBtn.disabled = false;
   }
-});
-
-// --- Demo quick-fill buttons
-document.getElementById('demoUserBtn')?.addEventListener('click', function() {
-  emailInput.value = 'user@example.com';
-  passwordInput.value = 'UserPass123';
-  emailInput.dispatchEvent(new Event('input'));
-  showToast('Form filled with User credentials. Click Sign In.', 'success');
-});
-
-document.getElementById('demoProBtn')?.addEventListener('click', function() {
-  emailInput.value = 'pro@smartlishe.com';
-  passwordInput.value = 'ProPass123';
-  emailInput.dispatchEvent(new Event('input'));
-  showToast('Form filled with Professional credentials. Click Sign In.', 'success');
-});
-
-document.getElementById('demoClientBtn')?.addEventListener('click', function() {
-  emailInput.value = 'client@example.com';
-  passwordInput.value = 'SecurePass123';
-  emailInput.dispatchEvent(new Event('input'));
-  showToast('Form filled with Client credentials. Click Sign In.', 'success');
-});
-
-document.getElementById('demoAdminBtn')?.addEventListener('click', function() {
-  emailInput.value = 'adminlishe@gmail.com';
-  passwordInput.value = 'Admin@2003';
-  emailInput.dispatchEvent(new Event('input'));
-  showToast('Form filled with Admin credentials. Click Sign In.', 'success');
 });
 
 console.log('🔐 Login page integrated with Smart Lishe backend.');
