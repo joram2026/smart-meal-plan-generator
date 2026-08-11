@@ -27,4 +27,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/smart-lishe-app:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/smartmeal-app:latest
