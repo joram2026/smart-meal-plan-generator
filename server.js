@@ -782,42 +782,60 @@ Return ONLY a valid JSON object matching this strict schema without any addition
   ]
 }`;
 
-  const activeApiKey = process.env.GEMINI_API_KEY || req.headers['x-gemini-api-key'] || req.body?.apiKey;
+  const keysToTry = [
+    process.env.GEMINI_API_KEY,
+    process.env.SMARTLISHEAI,
+    req.headers['x-gemini-api-key'],
+    req.body?.apiKey
+  ].filter(Boolean).filter((k, idx, self) => self.indexOf(k) === idx);
 
-  if (activeApiKey) {
-    try {
-      const ai = new GoogleGenAI({
-        apiKey: activeApiKey,
-        httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
-      });
+  let response;
+  let responseError;
 
-      const contentsList = [];
-      if (Array.isArray(history) && history.length > 0) {
-        history.slice(-6).forEach(h => {
-          if (h.role && h.content) {
-            contentsList.push(`${h.role.toUpperCase()}: ${h.content}`);
-          }
+  if (keysToTry.length > 0) {
+    for (const activeApiKey of keysToTry) {
+      try {
+        const ai = new GoogleGenAI({
+          apiKey: activeApiKey,
+          httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
         });
-      }
 
-      let userPart = `USER: ${message || 'Please analyze this meal image and provide nutritional guidance.'}`;
-      
-      const requestPayload = {
-        model: 'gemini-3.6-flash',
-        contents: image ? [
-          { inlineData: { mimeType: image.startsWith('data:image/png') ? 'image/png' : 'image/jpeg', data: image.includes(',') ? image.split(',')[1] : image } },
-          `${contentsList.join('\n')}\n${userPart}`
-        ] : `${contentsList.join('\n')}\n${userPart}`,
-        config: {
-          systemInstruction,
-          responseMimeType: 'application/json',
-          maxOutputTokens: 1000,
-          temperature: 0.7
+        const contentsList = [];
+        if (Array.isArray(history) && history.length > 0) {
+          history.slice(-6).forEach(h => {
+            if (h.role && h.content) {
+              contentsList.push(`${h.role.toUpperCase()}: ${h.content}`);
+            }
+          });
         }
-      };
 
-      const response = await generateContentWithRetry(ai, requestPayload);
+        let userPart = `USER: ${message || 'Please analyze this meal image and provide nutritional guidance.'}`;
+        
+        const requestPayload = {
+          model: 'gemini-3.6-flash',
+          contents: image ? [
+            { inlineData: { mimeType: image.startsWith('data:image/png') ? 'image/png' : 'image/jpeg', data: image.includes(',') ? image.split(',')[1] : image } },
+            `${contentsList.join('\n')}\n${userPart}`
+          ] : `${contentsList.join('\n')}\n${userPart}`,
+          config: {
+            systemInstruction,
+            responseMimeType: 'application/json',
+            maxOutputTokens: 1000,
+            temperature: 0.7
+          }
+        };
 
+        response = await generateContentWithRetry(ai, requestPayload);
+        break; // Success! Exit key loop.
+      } catch (err) {
+        responseError = err;
+        console.warn(`Gemini API call failed with key, trying fallback if available:`, err);
+      }
+    }
+  }
+
+  if (response) {
+    try {
       function parseGeminiResponse(rawText) {
         if (!rawText) return { reply: 'Here is your personalized Smart Lishe clinical nutrition guidance:', card: null, followUps: [] };
         
@@ -888,7 +906,7 @@ Return ONLY a valid JSON object matching this strict schema without any addition
       });
 
     } catch (err) {
-      console.warn('Gemini API call failed, using dynamic local fallback:', err);
+      console.warn('Gemini API call processing failed, using dynamic local fallback:', err);
     }
   }
 
@@ -1017,22 +1035,38 @@ app.get('/api/ai/conversations', authenticateToken, (req, res) => {
 
 app.post(['/api/meals/generate', '/meals/generate'], async (req, res) => {
   const { calories = 2000, preferences = [], diet_type = 'Balanced Kenyan' } = req.body || {};
-  const activeApiKey = process.env.GEMINI_API_KEY || req.headers['x-gemini-api-key'] || req.body?.apiKey;
+  const keysToTry = [
+    process.env.GEMINI_API_KEY,
+    process.env.SMARTLISHEAI,
+    req.headers['x-gemini-api-key'],
+    req.body?.apiKey
+  ].filter(Boolean).filter((k, idx, self) => self.indexOf(k) === idx);
   
-  if (activeApiKey) {
+  let response;
+  if (keysToTry.length > 0) {
+    for (const activeApiKey of keysToTry) {
+      try {
+        const ai = new GoogleGenAI({
+          apiKey: activeApiKey,
+          httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+        });
+        response = await generateContentWithRetry(ai, {
+          model: 'gemini-3.6-flash',
+          contents: `Generate a detailed 1-day Kenyan meal plan targeting ${calories} kcal (${diet_type}).`,
+          config: {
+            systemInstruction: 'You are Smart Lishe AI. Return a JSON object with keys: title, target_calories, breakfast (name, calories, protein), lunch (name, calories, protein), dinner (name, calories, protein), snack (name, calories, protein), tips. Include authentic Kenyan dishes like Ugali, Sukuma Wiki, Githeri, Tilapia, Mukimo, Uji, Managu.',
+            responseMimeType: 'application/json'
+          }
+        });
+        break; // Success! Exit key loop.
+      } catch (err) {
+        console.warn('Gemini meal generator failed with key, trying fallback if available:', err);
+      }
+    }
+  }
+
+  if (response) {
     try {
-      const ai = new GoogleGenAI({
-        apiKey: activeApiKey,
-        httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
-      });
-      const response = await generateContentWithRetry(ai, {
-        model: 'gemini-3.6-flash',
-        contents: `Generate a detailed 1-day Kenyan meal plan targeting ${calories} kcal (${diet_type}).`,
-        config: {
-          systemInstruction: 'You are Smart Lishe AI. Return a JSON object with keys: title, target_calories, breakfast (name, calories, protein), lunch (name, calories, protein), dinner (name, calories, protein), snack (name, calories, protein), tips. Include authentic Kenyan dishes like Ugali, Sukuma Wiki, Githeri, Tilapia, Mukimo, Uji, Managu.',
-          responseMimeType: 'application/json'
-        }
-      });
       let json = {};
       try {
         const text = response.text ? response.text.trim() : '';
@@ -1043,7 +1077,7 @@ app.post(['/api/meals/generate', '/meals/generate'], async (req, res) => {
       }
       return successResponse(res, 'Meal plan generated', { plan: json });
     } catch (err) {
-      console.warn('Gemini meal generator failed, using fallback:', err);
+      console.warn('Failed parsing response:', err);
     }
   }
 
@@ -2873,30 +2907,37 @@ app.delete('/api/recipes/:id', authenticateToken, (req, res) => {
 // --- NutriScan & Health Conditions ---
 app.post(['/api/nutriscan', '/nutriscan'], async (req, res) => {
   const { image, food_name } = req.body || {};
-  const activeApiKey = process.env.GEMINI_API_KEY || req.headers['x-gemini-api-key'] || req.body?.apiKey;
+  const keysToTry = [
+    process.env.GEMINI_API_KEY,
+    process.env.SMARTLISHEAI,
+    req.headers['x-gemini-api-key'],
+    req.body?.apiKey
+  ].filter(Boolean).filter((k, idx, self) => self.indexOf(k) === idx);
 
-  if (activeApiKey && image) {
-    try {
-      const ai = new GoogleGenAI({
-        apiKey: activeApiKey,
-        httpOptions: {
-          headers: {
-            'User-Agent': 'aistudio-build'
+  let response;
+  if (keysToTry.length > 0 && image) {
+    for (const activeApiKey of keysToTry) {
+      try {
+        const ai = new GoogleGenAI({
+          apiKey: activeApiKey,
+          httpOptions: {
+            headers: {
+              'User-Agent': 'aistudio-build'
+            }
           }
-        }
-      });
-      const base64Data = image.includes(',') ? image.split(',')[1] : image;
-      let mimeType = 'image/jpeg';
-      if (image.startsWith('data:image/png')) mimeType = 'image/png';
-      else if (image.startsWith('data:image/webp')) mimeType = 'image/webp';
+        });
+        const base64Data = image.includes(',') ? image.split(',')[1] : image;
+        let mimeType = 'image/jpeg';
+        if (image.startsWith('data:image/png')) mimeType = 'image/png';
+        else if (image.startsWith('data:image/webp')) mimeType = 'image/webp';
 
-      const response = await generateContentWithRetry(ai, {
-        model: 'gemini-3.6-flash',
-        contents: [
-          {
-            inlineData: { mimeType: mimeType, data: base64Data }
-          },
-          `You are an expert AI clinical nutritionist specializing in East African, Kenyan, and global cuisine.
+        response = await generateContentWithRetry(ai, {
+          model: 'gemini-3.6-flash',
+          contents: [
+            {
+              inlineData: { mimeType: mimeType, data: base64Data }
+            },
+            `You are an expert AI clinical nutritionist specializing in East African, Kenyan, and global cuisine.
 
 CRITICAL INSTRUCTION FOR IMAGE VERIFICATION:
 First, inspect the uploaded photograph carefully to verify if it contains any food, dish, meal, beverage, food ingredient, or edible item.
@@ -2940,12 +2981,20 @@ Return ONLY a valid JSON object strictly adhering to this JSON structure without
     { "item": "Pan-Seared Lake Victoria Tilapia", "approx_grams": 150, "calories": 245 }
   ]
 }`
-        ],
-        config: {
-          responseMimeType: 'application/json'
-        }
-      });
+          ],
+          config: {
+            responseMimeType: 'application/json'
+          }
+        });
+        break; // Success! Exit key loop.
+      } catch (err) {
+        console.warn('NutriScan AI vision failed with key, trying fallback if available:', err);
+      }
+    }
+  }
 
+  if (response) {
+    try {
       let json = {};
       try {
         const text = response.text ? response.text.trim() : '';
@@ -2957,7 +3006,7 @@ Return ONLY a valid JSON object strictly adhering to this JSON structure without
       }
       return successResponse(res, 'NutriScan AI vision analysis complete', json);
     } catch (err) {
-      console.warn('NutriScan AI vision failed, using fallback:', err);
+      console.warn('NutriScan AI processing failed:', err);
     }
   }
 

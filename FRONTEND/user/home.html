@@ -130,6 +130,31 @@
   width: 80px;
   height: 80px;
   border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  transition: transform 0.3s ease;
+}
+.team-card:hover .team-avatar {
+  transform: scale(1.08);
+}
+.team-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  border-radius: 50%;
+}
+.team-initials {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -137,13 +162,11 @@
   font-size: 1.75rem;
   font-weight: 800;
   color: #ffffff;
-  margin-bottom: 16px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
   letter-spacing: 0.04em;
-  transition: transform 0.3s ease;
-}
-.team-card:hover .team-avatar {
-  transform: scale(1.08);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
 }
 .avatar-go { background: linear-gradient(135deg, #1A7A64 0%, #2D5016 100%); }
 .avatar-im { background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); }
@@ -151,7 +174,7 @@
 .avatar-jm { background: linear-gradient(135deg, #C1440E 0%, #9A3412 100%); }
 .avatar-sc { background: linear-gradient(135deg, #0D9488 0%, #0F766E 100%); }
 .avatar-lm { background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%); }
-.avatar-eo { background: linear-gradient(135deg, #DB2777 0%, #BE185D 100%); }
+.avatar-ak { background: linear-gradient(135deg, #DB2777 0%, #BE185D 100%); }
 .avatar-ha { background: linear-gradient(135deg, #059669 0%, #047857 100%); }
 
 .team-name {
@@ -489,44 +512,68 @@
           </div>
           <div class="team-grid">
             <div class="team-card">
-              <div class="team-avatar avatar-go">GO</div>
+              <div class="team-avatar">
+                <img src="../assets/images/team/gregory_omondi.jpg" alt="Gregory Omondi" class="team-img" onerror="this.style.display='none';">
+                <div class="team-initials avatar-go">GO</div>
+              </div>
               <h3 class="team-name">Gregory Omondi</h3>
               <span class="team-role-badge">Frontend Dev</span>
             </div>
             <div class="team-card">
-              <div class="team-avatar avatar-im">IM</div>
+              <div class="team-avatar">
+                <img src="../assets/images/team/ian_mwangi.jpg" alt="Ian Mwangi" class="team-img" onerror="this.style.display='none';">
+                <div class="team-initials avatar-im">IM</div>
+              </div>
               <h3 class="team-name">Ian Mwangi</h3>
-              <span class="team-role-badge">AI Lead</span>
+              <span class="team-role-badge">Backend Dev[security]</span>
             </div>
             <div class="team-card">
-              <div class="team-avatar avatar-jg">JG</div>
+              <div class="team-avatar">
+                <img src="../assets/images/team/julius_gachuhi.JPG" alt="Julius Gachuhi" class="team-img" onerror="this.style.display='none';">
+                <div class="team-initials avatar-jg">JG</div>
+              </div>
               <h3 class="team-name">Julius Gachuhi</h3>
-              <span class="team-role-badge">Backend Dev</span>
+              <span class="team-role-badge">Backend Dev [Subscription]</span>
             </div>
             <div class="team-card">
-              <div class="team-avatar avatar-jm">JM</div>
+              <div class="team-avatar">
+                <img src="../assets/images/team/joram_maina.jpg" alt="Joram Maina" class="team-img" onerror="this.style.display='none';">
+                <div class="team-initials avatar-jm">JM</div>
+              </div>
               <h3 class="team-name">Joram Maina</h3>
-              <span class="team-role-badge">Backend Dev</span>
+              <span class="team-role-badge">Backend Dev[API]</span>
             </div>
             <div class="team-card">
-              <div class="team-avatar avatar-sc">SC</div>
+              <div class="team-avatar">
+                <img src="../assets/images/team/serena_chepchirchir.jpg" alt="Serena Chepchirchir" class="team-img" onerror="this.style.display='none';">
+                <div class="team-initials avatar-sc">SC</div>
+              </div>
               <h3 class="team-name">Serena Chepchirchir</h3>
               <span class="team-role-badge">Database Manager</span>
             </div>
             <div class="team-card">
-              <div class="team-avatar avatar-lm">LM</div>
+              <div class="team-avatar">
+                <img src="../assets/images/team/liza_mwendwa.JPG" alt="Liza Mwendwa" class="team-img" onerror="this.style.display='none';">
+                <div class="team-initials avatar-lm">LM</div>
+              </div>
               <h3 class="team-name">Liza Mwendwa</h3>
-              <span class="team-role-badge">Project Manager</span>
+              <span class="team-role-badge">Frontend Dev</span>
             </div>
             <div class="team-card">
-              <div class="team-avatar avatar-eo">EO</div>
-              <h3 class="team-name">Esther Otieno</h3>
+              <div class="team-avatar">
+                <img src="../assets/images/team/andrew_kariuki.jpg" alt="Andrew Kariuki" class="team-img" onerror="this.style.display='none';">
+                <div class="team-initials avatar-ak">AK</div>
+              </div>
+              <h3 class="team-name">Andrew Kariuki</h3>
               <span class="team-role-badge">Mass Communication</span>
             </div>
             <div class="team-card">
-              <div class="team-avatar avatar-ha">HA</div>
+              <div class="team-avatar">
+                <img src="../assets/images/team/hadassah_abigail.jpg" alt="Hadassah Abigail" class="team-img" onerror="this.style.display='none';">
+                <div class="team-initials avatar-ha">HA</div>
+              </div>
               <h3 class="team-name">Hadassah Abigail</h3>
-              <span class="team-role-badge">Database</span>
+              <span class="team-role-badge">AI & ML</span>
             </div>
           </div>
         </div>
