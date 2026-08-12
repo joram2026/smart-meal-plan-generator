@@ -98,6 +98,84 @@
     margin-right: auto;
   }
 }
+
+/* Team Members & Roles Section */
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 24px;
+  margin-top: 32px;
+}
+.team-card {
+  background: var(--bg-card);
+  border: 1px solid var(--basket-line);
+  border-radius: var(--radius-md, 16px);
+  padding: 28px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  position: relative;
+  overflow: hidden;
+}
+.team-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--sukuma);
+  box-shadow: 0 14px 32px rgba(45, 80, 22, 0.12);
+  background: var(--bg-elevated, #ffffff);
+}
+.team-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display, 'Fraunces', serif);
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 16px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  letter-spacing: 0.04em;
+  transition: transform 0.3s ease;
+}
+.team-card:hover .team-avatar {
+  transform: scale(1.08);
+}
+.avatar-go { background: linear-gradient(135deg, #1A7A64 0%, #2D5016 100%); }
+.avatar-im { background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); }
+.avatar-jg { background: linear-gradient(135deg, #D97706 0%, #B45309 100%); }
+.avatar-jm { background: linear-gradient(135deg, #C1440E 0%, #9A3412 100%); }
+.avatar-sc { background: linear-gradient(135deg, #0D9488 0%, #0F766E 100%); }
+.avatar-lm { background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%); }
+.avatar-eo { background: linear-gradient(135deg, #DB2777 0%, #BE185D 100%); }
+.avatar-ha { background: linear-gradient(135deg, #059669 0%, #047857 100%); }
+
+.team-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 6px 0;
+  line-height: 1.3;
+}
+.team-role-badge {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--sukuma);
+  background: rgba(45, 80, 22, 0.08);
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-top: 4px;
+  letter-spacing: 0.02em;
+}
+[data-theme="dark"] .team-role-badge {
+  background: rgba(127, 179, 90, 0.15);
+  color: var(--accent, #7FB35A);
+}
 </style>
 </head>
 <body>
@@ -397,6 +475,59 @@
                 <p>Innovations for Transformation — Empowering digital health solutions across Africa.</p>
               </div>
             </a>
+          </div>
+        </div>
+
+        <!-- ══ TEAM MEMBERS & ROLES SECTION ══ -->
+        <div class="section-block" id="teamSection">
+          <div class="section-head" style="text-align:center;">
+            <div class="section-eyebrow" style="justify-content:center;">
+              <i class="fa-solid fa-users" style="color:var(--sukuma);"></i> Meet The Builders
+            </div>
+            <h2 class="h2-display">Team Members & Roles</h2>
+            <p>The dedicated innovators, engineers, and visionaries driving intelligence and health tech at Smart Lishe.</p>
+          </div>
+          <div class="team-grid">
+            <div class="team-card">
+              <div class="team-avatar avatar-go">GO</div>
+              <h3 class="team-name">Gregory Omondi</h3>
+              <span class="team-role-badge">Frontend Dev</span>
+            </div>
+            <div class="team-card">
+              <div class="team-avatar avatar-im">IM</div>
+              <h3 class="team-name">Ian Mwangi</h3>
+              <span class="team-role-badge">AI Lead</span>
+            </div>
+            <div class="team-card">
+              <div class="team-avatar avatar-jg">JG</div>
+              <h3 class="team-name">Julius Gachuhi</h3>
+              <span class="team-role-badge">Backend Dev</span>
+            </div>
+            <div class="team-card">
+              <div class="team-avatar avatar-jm">JM</div>
+              <h3 class="team-name">Joram Maina</h3>
+              <span class="team-role-badge">Backend Dev</span>
+            </div>
+            <div class="team-card">
+              <div class="team-avatar avatar-sc">SC</div>
+              <h3 class="team-name">Serena Chepchirchir</h3>
+              <span class="team-role-badge">Database Manager</span>
+            </div>
+            <div class="team-card">
+              <div class="team-avatar avatar-lm">LM</div>
+              <h3 class="team-name">Liza Mwendwa</h3>
+              <span class="team-role-badge">Project Manager</span>
+            </div>
+            <div class="team-card">
+              <div class="team-avatar avatar-eo">EO</div>
+              <h3 class="team-name">Esther Otieno</h3>
+              <span class="team-role-badge">Mass Communication</span>
+            </div>
+            <div class="team-card">
+              <div class="team-avatar avatar-ha">HA</div>
+              <h3 class="team-name">Hadassah Abigail</h3>
+              <span class="team-role-badge">Database</span>
+            </div>
           </div>
         </div>
 

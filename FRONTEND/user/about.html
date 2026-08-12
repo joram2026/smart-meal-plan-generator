@@ -186,50 +186,72 @@
 
   .about-team {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 24px;
     margin: 32px 0 40px;
   }
   .team-card {
     background: var(--bg-card);
-    padding: 24px 20px;
+    padding: 28px 20px;
     border-radius: var(--radius-md);
     border: 1px solid var(--basket-line);
     text-align: center;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
   }
   .team-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-hover);
+    transform: translateY(-6px);
+    box-shadow: 0 14px 32px rgba(45, 80, 22, 0.12);
+    border-color: var(--sukuma);
+    background: var(--bg-elevated, #ffffff);
   }
   .team-card .team-avatar {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    margin: 0 auto 12px;
+    margin: 0 auto 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2.2rem;
+    font-family: var(--font-display, 'Fraunces', serif);
+    font-size: 1.75rem;
+    font-weight: 800;
     color: white;
-    background: var(--sukuma);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    letter-spacing: 0.04em;
+    transition: transform 0.3s ease;
   }
-  .team-card:nth-child(2) .team-avatar { background: var(--maize-deep); }
-  .team-card:nth-child(3) .team-avatar { background: var(--char); }
+  .team-card:hover .team-avatar {
+    transform: scale(1.08);
+  }
+  .avatar-go { background: linear-gradient(135deg, #1A7A64 0%, #2D5016 100%); }
+  .avatar-im { background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); }
+  .avatar-jg { background: linear-gradient(135deg, #D97706 0%, #B45309 100%); }
+  .avatar-jm { background: linear-gradient(135deg, #C1440E 0%, #9A3412 100%); }
+  .avatar-sc { background: linear-gradient(135deg, #0D9488 0%, #0F766E 100%); }
+  .avatar-lm { background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%); }
+  .avatar-eo { background: linear-gradient(135deg, #DB2777 0%, #BE185D 100%); }
+  .avatar-ha { background: linear-gradient(135deg, #059669 0%, #047857 100%); }
+
   .team-card h4 {
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 6px 0;
   }
   .team-card .role {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-  }
-  .team-card p {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    margin-top: 8px;
-    line-height: 1.5;
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--sukuma);
+    background: rgba(45, 80, 22, 0.08);
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-top: 4px;
+    letter-spacing: 0.02em;
   }
 
   /* Back-to-home arrow style */
@@ -441,27 +463,49 @@
 
         <!-- ===== TEAM ===== -->
         <div class="section-head">
-          <div class="section-eyebrow" style="justify-content:center;">Meet the Team</div>
-          <h2 class="h2-display" style="text-align:center;">The People Behind Smart Lishe</h2>
+          <div class="section-eyebrow" style="justify-content:center;"><i class="fa-solid fa-users" style="color:var(--sukuma);"></i> Meet the Team</div>
+          <h2 class="h2-display" style="text-align:center;">Team Members & Roles</h2>
         </div>
         <div class="about-team">
           <div class="team-card">
-            <div class="team-avatar"><i class="fa-solid fa-user-tie"></i></div>
+            <div class="team-avatar avatar-go">GO</div>
             <h4>Gregory Omondi</h4>
-            <span class="role">Founder & CEO</span>
-            <p>Passionate about using technology to solve Kenya's nutrition challenges. Gregory brings 10+ years of experience in health tech.</p>
+            <span class="role">Frontend Dev</span>
           </div>
           <div class="team-card">
-            <div class="team-avatar"><i class="fa-solid fa-user-doctor"></i></div>
-            <h4>Dr. Ian</h4>
-            <span class="role">Lead Nutritionist</span>
-            <p>A registered nutritionist with a deep understanding of Kenyan dietary patterns and health conditions like diabetes and hypertension.</p>
+            <div class="team-avatar avatar-im">IM</div>
+            <h4>Ian Mwangi</h4>
+            <span class="role">AI Lead</span>
           </div>
           <div class="team-card">
-            <div class="team-avatar"><i class="fa-solid fa-user-gear"></i></div>
-            <h4>Haddasah</h4>
-            <span class="role">AI Engineer</span>
-            <p>Building the intelligence behind our meal generator and NutriScan — making AI work for real Kenyan food.</p>
+            <div class="team-avatar avatar-jg">JG</div>
+            <h4>Julius Gachuhi</h4>
+            <span class="role">Backend Dev</span>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar avatar-jm">JM</div>
+            <h4>Joram Maina</h4>
+            <span class="role">Backend Dev</span>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar avatar-sc">SC</div>
+            <h4>Serena Chepchirchir</h4>
+            <span class="role">Database Manager</span>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar avatar-lm">LM</div>
+            <h4>Liza Mwendwa</h4>
+            <span class="role">Project Manager</span>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar avatar-eo">EO</div>
+            <h4>Esther Otieno</h4>
+            <span class="role">Mass Communication</span>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar avatar-ha">HA</div>
+            <h4>Hadassah Abigail</h4>
+            <span class="role">Database</span>
           </div>
         </div>
 
