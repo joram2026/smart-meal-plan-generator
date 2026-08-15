@@ -143,15 +143,17 @@ ul{list-style:none;}
 
 /* ---- Auth Brand / Logo ---- */
 .auth-brand{text-align:center;margin-bottom:32px;}
-.auth-brand .brand-icon{
+.auth-brand .brand-icon, .brand-icon{
   width:64px;height:64px;
-  border-radius:16px;
-  background:linear-gradient(135deg,var(--sukuma),var(--maize));
+  border-radius:0 !important;
+  background:url('../assets/images/logo.svg') no-repeat center center !important;
+  background-size:contain !important;
   display:flex;align-items:center;justify-content:center;
-  color:#fff;
-  font-size:1.6rem;
   margin:0 auto 16px;
-  box-shadow:var(--shadow-soft);
+  box-shadow:none !important;
+}
+.brand-icon i{
+  display:none !important;
 }
 .auth-brand h1{
   font-family:var(--font-display);

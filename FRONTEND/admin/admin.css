@@ -114,13 +114,15 @@ body {
 .sidebar-brand .mark {
   width: 38px;
   height: 38px;
-  background: var(--sukuma);
-  color: #fff;
-  border-radius: 10px;
+  border-radius: 0 !important;
+  background: url('../assets/images/logo.svg') no-repeat center center !important;
+  background-size: contain !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
+}
+.mark i {
+  display: none !important;
 }
 
 .sidebar-brand .name {
@@ -322,13 +324,12 @@ body.dark-mode .theme-toggle .switch::after {
 .brand-mini .mark {
   width: 30px;
   height: 30px;
-  background: var(--sukuma);
-  color: #fff;
-  border-radius: 8px;
+  border-radius: 0 !important;
+  background: url('../assets/images/logo.svg') no-repeat center center !important;
+  background-size: contain !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
 }
 
 @media (max-width: 768px) {

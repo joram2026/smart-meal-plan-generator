@@ -152,12 +152,15 @@ input,select,textarea{font-family:inherit;}
 }
 .sidebar-brand .mark{
   width:40px;height:40px;
-  border-radius:12px;
-  background:linear-gradient(135deg,var(--sukuma),var(--maize));
+  border-radius:0 !important;
+  background:url('../assets/images/logo.svg') no-repeat center center !important;
+  background-size:contain !important;
   display:flex;align-items:center;justify-content:center;
-  color:#fff;font-size:18px;
   flex-shrink:0;
-  box-shadow:var(--shadow-soft);
+  box-shadow:none !important;
+}
+.mark i {
+  display:none !important;
 }
 .sidebar-brand .name{
   font-family:var(--font-display);

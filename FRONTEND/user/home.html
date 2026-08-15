@@ -212,6 +212,32 @@
 })();
 </script>
 
+<!-- ════ PUBLIC HEADER (renders full width for guests) ════ -->
+<header class="public-header" id="publicHeader">
+  <div class="public-header-container">
+    <a href="home.html" class="brand">
+      <div class="mark"><i class="fa-solid fa-seedling"></i></div>
+      <div class="name">Smart Lishe<span>Kenya</span></div>
+    </a>
+    <nav class="nav-links" id="publicNavLinks">
+      <a href="home.html" class="active">Home</a>
+      <a href="about.html">About Us</a>
+      <a href="contact.html">Contact</a>
+      <div class="mobile-only-ctas">
+        <a href="../auth/login.html" class="btn btn-signin">Sign In</a>
+        <a href="../auth/register.html" class="btn btn-primary">Get Started Free</a>
+      </div>
+    </nav>
+    <div class="ctas">
+      <a href="../auth/login.html" class="btn btn-signin">Sign In</a>
+      <a href="../auth/register.html" class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> Get Started Free</a>
+    </div>
+    <button class="public-mobile-trigger" id="publicMobileTrigger">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>
+
 <!-- Mobile topbar -->
 <div class="mobile-topbar">
   <div class="brand-mini">
@@ -511,6 +537,15 @@
             <p>The dedicated innovators, engineers, and visionaries driving intelligence and health tech at Smart Lishe.</p>
           </div>
           <div class="team-grid">
+            <div class="team-card supervisor-card">
+              <div class="team-avatar">
+                <img src="../assets/images/team/lawrence_nderu.jpg" alt="Dr. Lawrence Nderu" class="team-img" onerror="this.style.display='none';">
+                <div class="team-initials avatar-ln">LN</div>
+              </div>
+              <h3 class="team-name">Dr. Lawrence Nderu</h3>
+              <span class="team-role-badge" style="background: rgba(232, 163, 61, 0.12); color: var(--maize-deep, #C97F1F); border: 1px solid rgba(232, 163, 61, 0.25);">Lead Supervisor</span>
+              <span style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; font-weight: 600;">JKUAT / JHUB Africa</span>
+            </div>
             <div class="team-card">
               <div class="team-avatar">
                 <img src="../assets/images/team/gregory_omondi.jpg" alt="Gregory Omondi" class="team-img" onerror="this.style.display='none';">
@@ -712,6 +747,12 @@ function syncState(){
   var account = Store.get('account',null);
   var loggedIn = !!(role && (profile||account));
 
+  if (loggedIn) {
+    document.body.classList.remove('is-guest');
+  } else {
+    document.body.classList.add('is-guest');
+  }
+
   var nameEl  = document.getElementById('topbarName');
   var avEl    = document.getElementById('topbarAvatar');
   var chipEl  = document.getElementById('topbarChip');
@@ -821,6 +862,20 @@ document.addEventListener('DOMContentLoaded',function(){
   initNotif();
   initSearch();
   syncState();
+
+  // Handle public mobile navigation trigger
+  var trigger = document.getElementById('publicMobileTrigger');
+  var navLinks = document.getElementById('publicNavLinks');
+  if (trigger && navLinks) {
+    trigger.addEventListener('click', function() {
+      navLinks.classList.toggle('open');
+      var icon = trigger.querySelector('i');
+      if (icon) {
+        icon.classList.toggle('fa-bars');
+        icon.classList.toggle('fa-xmark');
+      }
+    });
+  }
 });
 </script>
 <script src="global-search.js"></script>

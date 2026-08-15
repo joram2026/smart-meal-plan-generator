@@ -198,35 +198,40 @@
   }
 </style>
 </head>
-<body>
+<body class="is-guest">
 
 <!-- ===== NO AUTH CHECK ===== -->
 
-<!-- ===== NO SIDEBAR – ONLY TOPBAR ===== -->
+<!-- ════ PUBLIC HEADER (renders full width for guests) ════ -->
+<header class="public-header" id="publicHeader" style="display: block !important;">
+  <div class="public-header-container">
+    <a href="home.html" class="brand">
+      <div class="mark"><i class="fa-solid fa-seedling"></i></div>
+      <div class="name">Smart Lishe<span>Kenya</span></div>
+    </a>
+    <nav class="nav-links" id="publicNavLinks">
+      <a href="home.html">Home</a>
+      <a href="about.html">About Us</a>
+      <a href="contact.html" class="active">Contact</a>
+      <div class="mobile-only-ctas">
+        <a href="../auth/login.html" class="btn btn-signin">Sign In</a>
+        <a href="../auth/register.html" class="btn btn-primary">Get Started Free</a>
+      </div>
+    </nav>
+    <div class="ctas">
+      <a href="../auth/login.html" class="btn btn-signin">Sign In</a>
+      <a href="../auth/register.html" class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> Get Started Free</a>
+    </div>
+    <button class="public-mobile-trigger" id="publicMobileTrigger">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>
 
 <div class="app-shell">
 
   <!-- ===== MAIN CONTENT (full width) ===== -->
-  <div class="main-content" style="margin-left:0;">
-
-    <!-- ===== TOPBAR ===== -->
-    <header class="topbar" style="margin-top:16px;">
-      <div style="display:flex; align-items:center; gap:12px; flex:1;">
-        <!-- Back to Home Arrow -->
-        <a href="home.html" class="back-home-arrow" title="Back to Home">
-          <i class="fa-solid fa-arrow-left"></i> Back to Home
-        </a>
-        <div class="search-box" style="flex:1; max-width:280px; margin-left:auto;">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" id="globalSearch" placeholder="Search...">
-        </div>
-      </div>
-      <div class="topbar-actions">
-        <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
-        <!-- No profile chip – just guest label -->
-        <span style="font-size:0.8rem; color:var(--text-secondary); font-weight:500;">Guest</span>
-      </div>
-    </header>
+  <div class="main-content" style="margin-left:0; padding-top:0;">
 
     <!-- ===== PAGE CONTENT ===== -->
     <section class="page active">
@@ -298,7 +303,7 @@
         </div>
 
         <!-- ===== FOOTER ===== -->
-        <footer class="site-footer" id="footer">
+        <footer class="public-footer site-footer" id="footer" style="display: block !important;">
           <div class="footer-grid">
             <div class="footer-brand">
               <div class="name font-display">Smart Lishe Kenya</div>
@@ -461,6 +466,20 @@ document.getElementById('globalSearch')?.addEventListener('keypress', function(e
 document.addEventListener('DOMContentLoaded', function() {
   initTheme();
   initScrollTop();
+
+  // Handle public mobile navigation trigger
+  var trigger = document.getElementById('publicMobileTrigger');
+  var navLinks = document.getElementById('publicNavLinks');
+  if (trigger && navLinks) {
+    trigger.addEventListener('click', function() {
+      navLinks.classList.toggle('open');
+      var icon = trigger.querySelector('i');
+      if (icon) {
+        icon.classList.toggle('fa-bars');
+        icon.classList.toggle('fa-xmark');
+      }
+    });
+  }
 });
 </script>
 <script src="global-search.js"></script>
