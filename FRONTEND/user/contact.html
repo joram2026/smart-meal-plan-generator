@@ -12,7 +12,7 @@
 <style>
   /* ===== CONTACT PAGE STYLES ===== */
   .contact-hero {
-    background: linear-gradient(135deg, var(--sukuma) 0%, #1a6e5a 100%);
+    background: linear-gradient(135deg, var(--maize-deep) 0%, var(--soil) 100%);
     border-radius: var(--radius-lg);
     padding: 48px 56px;
     color: white;
@@ -21,6 +21,7 @@
     gap: 40px;
     align-items: center;
     margin-bottom: 40px;
+    border: 1px solid var(--basket-line);
   }
   .contact-hero h1 {
     font-size: 2.4rem;
@@ -35,14 +36,28 @@
   }
   .contact-hero p {
     font-size: 1.1rem;
-    opacity: 0.9;
+    color: #FFF8EE !important;
+    opacity: 0.95 !important;
     margin-top: 12px;
     line-height: 1.7;
+  }
+  .contact-fallback-visual {
+    display: none;
+    width: 100%;
+    height: 240px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-md);
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    color: rgba(255, 255, 255, 0.35);
   }
   .contact-hero-img {
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 100%;
   }
   .contact-hero-img img {
     width: 100%;
@@ -164,37 +179,51 @@
     color: var(--sukuma);
   }
 
-  /* No sidebar – main content full width */
+  /* Centered, boxed layout for guest public pages */
   .app-shell {
     display: block;
+    width: 100%;
   }
   .main-content {
-    margin-left: 0;
-    padding: 0 24px 40px;
+    margin-left: 0 !important;
+    padding: 0 !important;
+  }
+  .page-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
   }
   .mobile-topbar {
-    display: none; /* we use the regular topbar */
+    display: none;
   }
   .sidebar-overlay {
     display: none;
   }
 
   @media (max-width: 992px) {
+    .page-inner {
+      padding: 32px 20px 60px;
+    }
     .contact-hero {
       grid-template-columns: 1fr;
-      padding: 32px 28px;
+      padding: 36px 28px;
       text-align: center;
+      gap: 24px;
     }
-    .contact-hero h1 { font-size: 2rem; }
-    .contact-grid { grid-template-columns: 1fr; }
+    .contact-hero h1 { font-size: 2.1rem; }
+    .contact-grid { grid-template-columns: 1fr 1fr; gap: 20px; }
     .contact-form-wrap .form-row { grid-template-columns: 1fr; }
   }
-  @media (max-width: 480px) {
-    .contact-hero { padding: 24px 16px; }
-    .contact-hero h1 { font-size: 1.6rem; }
+  @media (max-width: 600px) {
+    .page-inner {
+      padding: 24px 16px 40px;
+    }
+    .contact-hero { padding: 28px 16px; gap: 16px; }
+    .contact-hero h1 { font-size: 1.75rem; }
+    .contact-hero p { font-size: 0.98rem; }
+    .contact-grid { grid-template-columns: 1fr; gap: 16px; }
     .contact-form-wrap { padding: 24px 16px; }
     .contact-info-card { padding: 20px 16px; }
-    .main-content { padding: 0 12px 30px; }
   }
 </style>
 </head>
@@ -247,7 +276,10 @@
             <p>Have questions, feedback, or partnership ideas? Reach out to us — we're here to help make Kenyan nutrition better for everyone.</p>
           </div>
           <div class="contact-hero-img">
-            <img src="https://images.unsplash.com/photo-1488590528505-98d2b853aba4?q=80&w=900&auto=format&fit=crop" alt="Contact Smart Lishe" loading="lazy">
+            <div class="contact-fallback-visual">
+              <i class="fa-solid fa-headset"></i>
+            </div>
+            <img src="https://images.unsplash.com/photo-1521791136364-7286472b3152?auto=format&fit=crop&w=600&q=80" alt="Contact Smart Lishe" loading="lazy" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';">
           </div>
         </div>
 

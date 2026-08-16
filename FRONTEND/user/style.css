@@ -4225,6 +4225,19 @@ input,select,textarea{font-family:inherit;}
   border-top: 1px solid rgba(226, 210, 172, 0.15);
   margin-top: 64px;
 }
+.public-footer .footer-brand p,
+.public-footer .footer-col p,
+.public-footer .contact-line,
+.public-footer .footer-col li,
+.public-footer .footer-col li a {
+  color: #cbd5e1 !important;
+}
+.public-footer .footer-brand .name {
+  color: #fff !important;
+}
+.public-footer .footer-col h4 {
+  color: #fff !important;
+}
 .public-footer-container {
   max-width: 1200px;
   margin: 0 auto;

@@ -11,7 +11,7 @@
 <style>
   /* ===== ABOUT PAGE STYLES ===== */
   .about-hero {
-    background: linear-gradient(135deg, var(--maize-deep) 0%, #8B6B3D 100%);
+    background: linear-gradient(135deg, var(--sukuma) 0%, var(--soil) 100%);
     border-radius: var(--radius-lg);
     padding: 48px 56px;
     color: white;
@@ -20,6 +20,7 @@
     gap: 40px;
     align-items: center;
     margin-bottom: 40px;
+    border: 1px solid var(--basket-line);
   }
   .about-hero h1 {
     font-size: 2.4rem;
@@ -34,14 +35,28 @@
   }
   .about-hero p {
     font-size: 1.1rem;
-    opacity: 0.9;
+    color: #FFF8EE !important;
+    opacity: 0.95 !important;
     margin-top: 12px;
     line-height: 1.7;
+  }
+  .about-fallback-visual {
+    display: none;
+    width: 100%;
+    height: 240px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-md);
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    color: rgba(255, 255, 255, 0.35);
   }
   .about-hero-img {
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 100%;
   }
   .about-hero-img img {
     width: 100%;
@@ -292,13 +307,19 @@
     color: var(--sukuma);
   }
 
-  /* No sidebar – main content full width */
+  /* Centered, boxed layout for guest public pages */
   .app-shell {
     display: block;
+    width: 100%;
   }
   .main-content {
-    margin-left: 0;
-    padding: 0 24px 40px;
+    margin-left: 0 !important;
+    padding: 0 !important;
+  }
+  .page-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
   }
   .mobile-topbar {
     display: none;
@@ -308,26 +329,33 @@
   }
 
   @media (max-width: 992px) {
+    .page-inner {
+      padding: 32px 20px 60px;
+    }
     .about-hero {
       grid-template-columns: 1fr;
-      padding: 32px 28px;
+      padding: 36px 28px;
       text-align: center;
+      gap: 24px;
     }
-    .about-hero h1 { font-size: 2rem; }
-    .about-mission { grid-template-columns: 1fr 1fr; }
-    .values-grid { grid-template-columns: 1fr 1fr; }
-    .about-stats { grid-template-columns: 1fr 1fr; }
-    .about-team { grid-template-columns: 1fr 1fr; }
+    .about-hero h1 { font-size: 2.1rem; }
+    .about-mission { grid-template-columns: 1fr 1fr; gap: 20px; }
+    .values-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+    .about-stats { grid-template-columns: 1fr 1fr; gap: 16px; padding: 24px; }
+    .about-team { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
   }
   @media (max-width: 600px) {
-    .about-hero { padding: 24px 16px; }
-    .about-hero h1 { font-size: 1.6rem; }
-    .about-mission { grid-template-columns: 1fr; }
-    .values-grid { grid-template-columns: 1fr; }
-    .about-stats { grid-template-columns: 1fr 1fr; padding: 24px 16px; }
-    .about-team { grid-template-columns: 1fr; }
+    .page-inner {
+      padding: 24px 16px 40px;
+    }
+    .about-hero { padding: 28px 16px; gap: 16px; }
+    .about-hero h1 { font-size: 1.75rem; }
+    .about-hero p { font-size: 0.98rem; }
+    .about-mission { grid-template-columns: 1fr; gap: 16px; }
+    .values-grid { grid-template-columns: 1fr; gap: 12px; }
+    .about-stats { grid-template-columns: 1fr 1fr; padding: 20px 12px; gap: 12px; }
+    .about-team { grid-template-columns: 1fr; gap: 16px; }
     .about-story { padding: 24px 16px; }
-    .main-content { padding: 0 12px 30px; }
   }
 </style>
 </head>
@@ -380,7 +408,10 @@
             <p>We believe that healthy eating should celebrate the food you already love — not replace it with expensive imports or unrealistic diets.</p>
           </div>
           <div class="about-hero-img">
-            <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=900&auto=format&fit=crop" alt="Fresh Kenyan produce at local market" loading="lazy">
+            <div class="about-fallback-visual">
+              <i class="fa-solid fa-seedling"></i>
+            </div>
+            <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=900&auto=format&fit=crop" alt="Fresh Kenyan produce at local market" loading="lazy" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';">
           </div>
         </div>
 
