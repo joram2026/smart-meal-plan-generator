@@ -35,14 +35,27 @@
     "bio": "Am ready",
     "payment_methods": [
       {
-        "id": "pm-1785581370171",
         "type": "mpesa",
         "title": "M-Pesa Express",
+        "created_at": "2026-08-01T10:49:30.171Z",
         "detail": "+254 712345678",
         "is_default": true,
-        "created_at": "2026-08-01T10:49:30.171Z"
+        "id": "pm-1785581370171"
       }
-    ]
+    ],
+    "duration": "4 Weeks",
+    "assigned_plan_details": {
+      "client_id": "user-1785580185267",
+      "duration": "12 Weeks",
+      "program": "12-Week Personalised Nutrition Plan",
+      "startDate": "2026-08-03"
+    },
+    "name": "Paul John",
+    "professional_name": "Profes 01",
+    "assigned_professional_email": "profess@gmail.com",
+    "goal": "weight-loss",
+    "program": "12-Week Personalised Nutrition Plan",
+    "uid": "user-1785580185267"
   },
   {
     "id": "user-1785583834173",
@@ -54,7 +67,10 @@
     "role": "admin",
     "status": "active",
     "profile_completed": true,
-    "created_at": "2026-08-01T11:30:34.269Z"
+    "created_at": "2026-08-01T11:30:34.269Z",
+    "approval_status": "approved",
+    "phone": "+254 700 000 000",
+    "uid": "user-1785583834173"
   },
   {
     "id": "user-1785585586932",
@@ -90,6 +106,417 @@
     "specialty": [
       "weight-management",
       "pregnancy"
-    ]
+    ],
+    "verified_at": "2026-08-04T00:46:35.106Z",
+    "uid": "user-1785585586932"
+  },
+  {
+    "id": "admin-002",
+    "email": "admin@smartlishe.com",
+    "password": "Admin@2003",
+    "passwordHash": "$2b$10$LF4Dc8Qg98/rCSHkiO1AOOkkisYMX/Z.z84QarDauZ1hKibXutIAu",
+    "first_name": "System",
+    "last_name": "Admin",
+    "role": "admin",
+    "phone": "+254 700 000 000",
+    "status": "active",
+    "approval_status": "approved",
+    "profile_completed": true,
+    "created_at": "2026-08-17T14:29:32.816Z"
+  },
+  {
+    "id": "pro-001",
+    "email": "pro@smartlishe.com",
+    "password": "ProPass123",
+    "passwordHash": "$2b$10$wXbftcuZTZHBA4FmaUGWGuyBePGRgGWkKBoJXfGuGsQI.KyfH0QmS",
+    "first_name": "Dr. Wanjiru",
+    "last_name": "Njuguna",
+    "role": "professional",
+    "phone": "+254 711 223 344",
+    "title": "Clinical Nutritionist",
+    "profession": "Clinical Nutritionist",
+    "specialization": "Diabetes & Hypertension Dietetics",
+    "license_no": "KNDI-8842",
+    "status": "active",
+    "approval_status": "approved",
+    "created_at": "2026-08-17T14:29:32.916Z"
+  },
+  {
+    "id": "client-001",
+    "email": "client@example.com",
+    "password": "SecurePass123",
+    "passwordHash": "$2b$10$N4H9cB7JR9F8ti3LnPPjf.vrhKGadeSv9rqSIhvyENsim.a3f7ymW",
+    "first_name": "Amina",
+    "last_name": "Ochieng",
+    "role": "client",
+    "phone": "+254 722 334 455",
+    "status": "active",
+    "approval_status": "approved",
+    "target_calories": 2000,
+    "daily_water_target_ml": 2500,
+    "assigned_professional": "Dr. Wanjiru Njuguna",
+    "created_at": "2026-08-17T14:29:33.010Z"
+  },
+  {
+    "id": "user-001",
+    "email": "user@example.com",
+    "password": "NewStrongPassword123!",
+    "passwordHash": "$2b$10$p1UOg6FCCLYXBI0ngo8sHOZVbIrv0xmPmQlV48XDlppJEr7xHPWEa",
+    "first_name": "Joram",
+    "last_name": "Kiprop",
+    "role": "user",
+    "phone": "+254 733 445 566",
+    "status": "active",
+    "approval_status": "approved",
+    "target_calories": 2200,
+    "daily_water_target_ml": 3000,
+    "created_at": "2026-08-17T14:29:33.105Z",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null
+  },
+  {
+    "passwordHash": "$2b$10$lt4o0epy7rtpLdi5KtvrN.AOd89t6vSjIebPwTeo1ifzF3nzVP.NK",
+    "status": "active",
+    "email": "mwangimwaske@gmail.com",
+    "payment_methods": [
+      {
+        "id": "pm-1786346333398",
+        "is_default": true,
+        "type": "mpesa",
+        "detail": "+254 700 000 000",
+        "created_at": "2026-08-10T07:18:53.398Z",
+        "title": "M-Pesa Express"
+      }
+    ],
+    "created_at": "2026-08-10T06:46:43.021Z",
+    "professional_name": "Profes 01",
+    "medical_conditions": [],
+    "program": "Weight Loss Plan",
+    "id": "user-1786344402852",
+    "first_name": "Ian",
+    "goal": "weight-loss",
+    "role": "user",
+    "name": "Ian Mwangi",
+    "assigned_professional_email": "profess@gmail.com",
+    "last_name": "mwangi",
+    "duration": "8 Weeks",
+    "phone": "+254704714977",
+    "height_cm": 169.2,
+    "weight_kg": 68,
+    "diet_preference": "",
+    "disliked_foods": [],
+    "water_goal_ml": null,
+    "gender": "male",
+    "date_of_birth": "2000-02-05",
+    "bio": "",
+    "lifestyle": "moderately_active",
+    "calorie_goal": null,
+    "bmi": 23.752438117912696,
+    "approval_status": "active",
+    "activity_level": 4,
+    "allergies": [],
+    "password": "8m4p8snJBxBwhV4",
+    "profile_completed": false,
+    "favorite_foods": []
+  },
+  {
+    "height_cm": 156,
+    "approval_status": "active",
+    "weight_kg": 68,
+    "role": "user",
+    "first_name": "Ian",
+    "favorite_foods": [],
+    "created_at": "2026-08-03T06:24:58.415Z",
+    "phone": "7986766765",
+    "bio": "",
+    "uid": "user-1785738298320",
+    "lifestyle": "moderately_active",
+    "activity_level": 4,
+    "email": "mwangi@g.com",
+    "medical_conditions": [],
+    "date_of_birth": "1994-01-13",
+    "payment_methods": [
+      {
+        "detail": "7986766765",
+        "id": "pm-1785738965535",
+        "title": "M-Pesa Express",
+        "type": "mpesa",
+        "created_at": "2026-08-03T06:36:05.535Z",
+        "is_default": true
+      }
+    ],
+    "disliked_foods": [],
+    "calorie_goal": null,
+    "gender": "male",
+    "bmi": 27.94214332675871,
+    "water_goal_ml": null,
+    "diet_preference": "",
+    "status": "active",
+    "allergies": [],
+    "password": "1q2w3e4r",
+    "last_name": "Mwangi",
+    "id": "user-1785738298320",
+    "profile_completed": false
+  },
+  {
+    "approval_status": "active",
+    "email": "juliusgachuhi180@gmail.com",
+    "water_goal_ml": 500,
+    "disliked_foods": [
+      "rice"
+    ],
+    "lifestyle": "lightly_active",
+    "medical_conditions": [],
+    "date_of_birth": "2005-03-02",
+    "passwordHash": "$2b$10$kN5XFmemeza1TRGqBlOBrOmlvvwQVW5SLf2ybqGAQq1NnW5kgippO",
+    "weight_kg": 67,
+    "height_cm": 185,
+    "bio": "I am just a normal person trying to gain weight",
+    "password": "julitez96#",
+    "last_name": "Gachuhi",
+    "payment_methods": [
+      {
+        "type": "mpesa",
+        "detail": "+254703656466",
+        "is_default": true,
+        "created_at": "2026-08-10T08:27:51.330Z",
+        "title": "M-Pesa Express",
+        "id": "pm-1786350471330"
+      }
+    ],
+    "allergies": [],
+    "bmi": 19.576333089846603,
+    "diet_preference": "",
+    "created_at": "2026-08-10T08:20:32.078Z",
+    "favorite_foods": [
+      "ugali",
+      "eggs"
+    ],
+    "profile_completed": false,
+    "calorie_goal": 500,
+    "first_name": "Julius",
+    "phone": "+254703656466",
+    "id": "user-1786350031912",
+    "gender": "male",
+    "status": "active",
+    "role": "user",
+    "activity_level": 2.5
+  },
+  {
+    "passwordHash": "$2b$10$3ps6tsSZhd2lzMJLHnOESeN2EAngokTmV7ysvH7XKqGceUXUKxdem",
+    "password": "lizamwesh",
+    "email": "lizagitobu50@gmail.com",
+    "created_at": "2026-08-10T09:34:46.323Z",
+    "allergies": [],
+    "bmi": 27.94214332675871,
+    "last_name": "Gitobu",
+    "first_name": "Liza",
+    "approval_status": "active",
+    "disliked_foods": [],
+    "status": "active",
+    "gender": "female",
+    "activity_level": 4,
+    "role": "user",
+    "height_cm": 156,
+    "weight_kg": 68,
+    "settings": {
+      "goal": "maintain",
+      "health_conditions": [
+        "none"
+      ],
+      "location": "",
+      "medications": [],
+      "target_weight": 0
+    },
+    "bio": "",
+    "diet_preference": "",
+    "medical_conditions": [],
+    "favorite_foods": [
+      "meat"
+    ],
+    "profile_completed": false,
+    "date_of_birth": "2001-09-06",
+    "water_goal_ml": 1000,
+    "phone": "",
+    "id": "user-1786354486078",
+    "payment_methods": [
+      {
+        "type": "mpesa",
+        "created_at": "2026-08-10T09:36:50.742Z",
+        "detail": "+254 700 000 000",
+        "title": "M-Pesa Express",
+        "id": "pm-1786354610742",
+        "is_default": true
+      }
+    ],
+    "lifestyle": "moderately_active",
+    "calorie_goal": null
+  },
+  {
+    "email": "me@gmail.com",
+    "first_name": "Me",
+    "profile_completed": false,
+    "approval_status": "active",
+    "id": "user-1786354737209",
+    "passwordHash": "$2b$10$baXvP2Ie7xBWtwHp7LlAFeB1w07erLgU5/UNAC6K6Wn9MLlIropjW",
+    "status": "active",
+    "role": "user",
+    "password": "memememe",
+    "last_name": "Meme",
+    "created_at": "2026-08-10T09:38:57.366Z"
+  },
+  {
+    "height_cm": 162,
+    "weight_kg": 62,
+    "water_goal_ml": 2500,
+    "bio": "A computer scientist",
+    "created_at": "2026-08-10T12:03:22.103Z",
+    "disliked_foods": [
+      "Spinach"
+    ],
+    "gender": "male",
+    "profile_completed": false,
+    "date_of_birth": "2026-08-13",
+    "status": "active",
+    "payment_methods": [
+      {
+        "detail": "0701105757",
+        "title": "M-Pesa Express",
+        "is_default": true,
+        "created_at": "2026-08-10T13:17:16.680Z",
+        "id": "pm-1786367836680",
+        "type": "mpesa"
+      }
+    ],
+    "phone": "0701105757",
+    "medical_conditions": [],
+    "id": "user-1786363401940",
+    "diet_preference": "",
+    "lifestyle": "lightly_active",
+    "calorie_goal": null,
+    "first_name": "Gregory",
+    "favorite_foods": [
+      "Chicken"
+    ],
+    "email": "gregoryomondi64@gmail.com",
+    "passwordHash": "$2b$10$1CFw9yBH4e0qagS9qDbC2ebf97zpDvY2ThBTj4bdCnH943hmImk8C",
+    "activity_level": 2.5,
+    "approval_status": "active",
+    "last_name": "Omondi",
+    "allergies": [],
+    "role": "user",
+    "bmi": 23.624447492760247,
+    "password": "12345678"
+  },
+  {
+    "role": "professional",
+    "email": "wogap20322@careney.com",
+    "first_name": "test",
+    "passwordHash": "$2b$10$4WpOu9byV.GHkeRr1IGJS.2mYKMWhiCfvOHaumSHn83PoStOsCfVC",
+    "created_at": "2026-08-11T08:29:14.324Z",
+    "last_name": "oga",
+    "id": "user-1786436954239",
+    "profile_completed": false,
+    "approval_status": "approved",
+    "status": "active",
+    "password": "Password1"
+  },
+  {
+    "profile_completed": false,
+    "email": "holmestony39@gmail.com",
+    "role": "user",
+    "created_at": "2026-08-11T16:00:41.713Z",
+    "status": "active",
+    "last_name": "hhh",
+    "passwordHash": "$2b$10$3WP7V8ZyxvL1vI3JotTL8.jv9b6aI7fgWjyUG/9SG8NscMTSd6goe",
+    "id": "user-1786464041627",
+    "password": "12345678",
+    "first_name": "jane",
+    "approval_status": "active"
+  },
+  {
+    "phone": "700011122",
+    "height_cm": 150,
+    "weight_kg": 60,
+    "diet_preference": "low-carb",
+    "disliked_foods": [
+      "spinach"
+    ],
+    "water_goal_ml": null,
+    "medical_conditions": [
+      "diabetes"
+    ],
+    "id": "user-1786604611649",
+    "gender": "",
+    "date_of_birth": "",
+    "bio": "i am ready",
+    "passwordHash": "$2b$10$zDZ5F1PD0dHPVxCgpnlpfudoi3D7bsqR4JD/jRZe91Ekq7oHKnDDi",
+    "lifestyle": "very_active",
+    "status": "active",
+    "role": "user",
+    "calorie_goal": null,
+    "bmi": 26.666666666666668,
+    "approval_status": "active",
+    "created_at": "2026-08-13T07:03:31.795Z",
+    "activity_level": 6.5,
+    "allergies": [],
+    "email": "muthoni@gmail.com",
+    "password": "1q2w3e4r",
+    "last_name": "Muthoni",
+    "profile_completed": false,
+    "favorite_foods": [
+      "chicken"
+    ],
+    "first_name": "Jane"
+  },
+  {
+    "specialty": [
+      "weight-management"
+    ],
+    "allergies": [],
+    "last_name": "mwangi",
+    "qualification": "Dietitian - Sports Nutrition",
+    "years_experience": 2,
+    "status": "pending",
+    "availability": "{\"days\":[\"weekdays\"],\"sessions\":[\"virtual\"]}",
+    "license_number": "KDDFG345",
+    "gender": "",
+    "profile_completed": false,
+    "calorie_goal": null,
+    "email": "mwangike@gmail.com",
+    "favorite_foods": [],
+    "diet_preference": "",
+    "password": "8m4p8snJBxBwhV4",
+    "medical_conditions": [],
+    "passwordHash": "$2b$10$KIscOlR.saDruFKD8QAfFeTNizt20djsxdMGVb1r7Lzb7QGruk7IC",
+    "first_name": "Ian",
+    "biography": "NBJDSBMNB VSDLvjhkdfv",
+    "lifestyle": "sedentary",
+    "phone": "",
+    "date_of_birth": "",
+    "created_at": "2026-08-13T07:23:47.885Z",
+    "weight_kg": null,
+    "disliked_foods": [],
+    "height_cm": null,
+    "approval_status": "pending",
+    "consultation_fee": 0,
+    "id": "user-1786605827667",
+    "water_goal_ml": null,
+    "role": "professional"
+  },
+  {
+    "id": "user-1786978854980",
+    "email": "joram4036@gmail.com",
+    "password": "Password123!",
+    "passwordHash": "$2b$10$b16TgAWJTVRejXVCm23FBOe.STsD7/G2F0sqchT2y9Eh/lm9H0wIe",
+    "first_name": "Joram",
+    "last_name": "Kombo",
+    "role": "user",
+    "status": "active",
+    "approval_status": "active",
+    "profile_completed": false,
+    "created_at": "2026-08-17T15:00:55.075Z",
+    "resetPasswordToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzZXItMTc4Njk3ODg1NDk4MCIsImVtYWlsIjoiam9yYW00MDM2QGdtYWlsLmNvbSIsInR5cGUiOiJwYXNzd29yZF9yZXNldCIsImlhdCI6MTc4Njk3ODg1OCwiZXhwIjoxNzg2OTgyNDU4fQ.ENVxElfIOftvEFdSMi5GW9AAB1_kCxGLhZcpXZ05ZeY",
+    "resetPasswordExpires": 1786982458231
   }
 ]

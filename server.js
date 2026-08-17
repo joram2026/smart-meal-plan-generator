@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const nodemailer = require('nodemailer');
 const { GoogleGenAI } = require('@google/genai');
 const { initializeApp } = require('firebase/app');
 const { getFirestore, doc, setDoc, getDoc, getDocs, collection, query, where } = require('firebase/firestore');
@@ -650,12 +651,656 @@ app.post('/api/auth/login', async (req, res) => {
   return successResponse(res, 'Login successful', { access_token: token, user });
 });
 
-app.post('/api/auth/request-reset', (req, res) => {
-  return successResponse(res, 'If that email exists, we sent a reset link.');
+// --- Email Dispatcher Service (Nodemailer) ---
+let mailTransporter = null;
+
+function getMailTransporter() {
+  if (mailTransporter) return mailTransporter;
+
+  if (process.env.SMTP_HOST && process.env.SMTP_USER) {
+    try {
+      mailTransporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT || '587', 10),
+        secure: process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465',
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS || process.env.SMTP_PASSWORD
+        }
+      });
+    } catch (err) {
+      console.warn('[Mail Service] Failed to initialize custom SMTP transporter:', err.message);
+    }
+  } else if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
+    try {
+      const cleanPass = process.env.GMAIL_APP_PASSWORD.replace(/\s+/g, '');
+      mailTransporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.GMAIL_USER.trim(),
+          pass: cleanPass
+        }
+      });
+    } catch (err) {
+      console.warn('[Mail Service] Failed to initialize Gmail transporter:', err.message);
+    }
+  }
+  return mailTransporter;
+}
+
+// 1. Password Reset Email
+async function sendPasswordResetEmail({ to, name, resetUrl }) {
+  const senderEmail = process.env.GMAIL_USER || process.env.SMTP_USER || 'info.jhub@jkuat.ac.ke';
+  const fromAddress = process.env.EMAIL_FROM || `"Smart Lishe Kenya" <${senderEmail}>`;
+  const subject = 'Reset Your Smart Lishe Password';
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <title>${subject}</title>
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #FFF8EE; margin: 0; padding: 24px; color: #1A1F16; }
+        .container { max-width: 580px; margin: 0 auto; background: #FFFFFF; border-radius: 16px; padding: 36px; border: 1px solid #E2D2AC; }
+        .brand { font-size: 22px; font-weight: 700; color: #2D5016; margin-bottom: 20px; display: inline-block; }
+        .hero { font-size: 20px; font-weight: 700; margin-bottom: 16px; color: #1A1F16; }
+        .content { font-size: 15px; line-height: 1.6; color: #5B5546; margin-bottom: 24px; }
+        .btn-wrapper { text-align: center; margin: 32px 0; }
+        .btn { display: inline-block; background: #2D5016; color: #FFFFFF !important; text-decoration: none; padding: 14px 32px; font-size: 15px; font-weight: 600; border-radius: 12px; }
+        .fallback { font-size: 13px; color: #8A8472; word-break: break-all; margin-top: 24px; padding: 14px; background: #FFF8EE; border-radius: 8px; }
+        .footer { margin-top: 32px; border-top: 1px solid #E2D2AC; padding-top: 20px; font-size: 12px; color: #8A8472; text-align: center; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="brand">🌱 Smart Lishe Kenya</div>
+        <div class="hero">Password Reset Request</div>
+        <div class="content">
+          <p>Habari <strong>${name || 'there'}</strong>,</p>
+          <p>We received a request to reset the password for your Smart Lishe account (<strong>${to}</strong>).</p>
+          <p>Click the button below to choose a new, secure password:</p>
+          <div class="btn-wrapper">
+            <a href="${resetUrl}" class="btn" target="_blank" rel="noopener noreferrer">Reset Password</a>
+          </div>
+          <p>This password reset link is valid for <strong>1 hour</strong>. If you did not make this request, you can safely ignore this email — your password will remain unchanged.</p>
+          <div class="fallback">
+            <p style="margin-top:0;"><strong>Alternative link:</strong> If the button above does not work, copy and paste this URL into your browser:</p>
+            <p style="margin-bottom:0;"><a href="${resetUrl}" style="color: #2D5016;">${resetUrl}</a></p>
+          </div>
+        </div>
+        <div class="footer">
+          &copy; 2026 Smart Lishe Kenya • Jhub Africa, Juja, Nairobi • info.jhub@jkuat.ac.ke
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const textContent = `Habari ${name || 'there'},\n\nWe received a request to reset the password for your Smart Lishe account.\n\nReset your password here:\n${resetUrl}\n\nThis link will expire in 1 hour. If you didn't request this, please ignore this email.\n\nSmart Lishe Kenya\ninfo.jhub@jkuat.ac.ke`;
+
+  const transporter = getMailTransporter();
+  if (transporter) {
+    try {
+      const info = await transporter.sendMail({
+        from: fromAddress,
+        to,
+        subject,
+        text: textContent,
+        html: htmlContent
+      });
+      console.log(`[Email Sent] Password reset dispatched to ${to} (Message ID: ${info.messageId})`);
+      return { success: true, messageId: info.messageId };
+    } catch (err) {
+      console.error(`[Email Error] Failed to send email to ${to}:`, err.message);
+      return { success: false, error: err.message };
+    }
+  } else {
+    console.log(`[Password Reset Dev Log] No active SMTP configuration found in env. Generated reset URL for ${to}: ${resetUrl}`);
+    return { success: true, preview: true, resetUrl };
+  }
+}
+
+// 2. Professional Invitation to Client Email
+async function sendClientInvitationEmail({ to, clientName, proName, proEmail, program, duration, goal, inviteUrl }) {
+  const senderEmail = process.env.GMAIL_USER || process.env.SMTP_USER || 'info.jhub@jkuat.ac.ke';
+  const fromAddress = process.env.EMAIL_FROM || `"Smart Lishe Kenya" <${senderEmail}>`;
+  const subject = `🌱 Invitation from ${proName || 'Your Nutritionist'} — Join Smart Lishe`;
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <title>${subject}</title>
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F4F7F4; margin: 0; padding: 24px; color: #1E293B; }
+        .container { max-width: 600px; margin: 0 auto; background: #FFFFFF; border-radius: 16px; padding: 36px; border: 1px solid #DCE6DC; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .brand { font-size: 22px; font-weight: 700; color: #1A7A64; margin-bottom: 20px; display: inline-flex; align-items: center; gap: 8px; }
+        .hero { font-size: 20px; font-weight: 700; margin-bottom: 12px; color: #0F172A; }
+        .badge { display: inline-block; background: #E6F4F0; color: #1A7A64; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 16px; }
+        .content { font-size: 15px; line-height: 1.6; color: #475569; margin-bottom: 24px; }
+        .card-highlight { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; margin: 20px 0; }
+        .card-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+        .card-row:last-child { margin-bottom: 0; }
+        .card-label { color: #64748B; font-weight: 500; }
+        .card-val { color: #0F172A; font-weight: 600; text-align: right; }
+        .btn-wrapper { text-align: center; margin: 32px 0; }
+        .btn { display: inline-block; background: #1A7A64; color: #FFFFFF !important; text-decoration: none; padding: 14px 36px; font-size: 15px; font-weight: 600; border-radius: 12px; box-shadow: 0 4px 10px rgba(26,122,100,0.25); }
+        .perks { margin: 24px 0; padding-left: 20px; color: #475569; font-size: 14px; line-height: 1.7; }
+        .fallback { font-size: 12px; color: #94A3B8; word-break: break-all; margin-top: 24px; padding: 12px; background: #F8FAFC; border-radius: 8px; }
+        .footer { margin-top: 32px; border-top: 1px solid #E2E8F0; padding-top: 20px; font-size: 12px; color: #94A3B8; text-align: center; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="brand">🌱 Smart Lishe Kenya</div>
+        <div class="badge">Professional Care Invitation</div>
+        <div class="hero">You're Invited by ${proName || 'Your Nutrition Professional'}</div>
+        <div class="content">
+          <p>Habari <strong>${clientName || 'there'}</strong>,</p>
+          <p>Your nutrition and wellness professional, <strong>${proName}</strong> (${proEmail}), has enrolled you into the <strong>Smart Lishe Client Management Portal</strong> to support your personalized nutrition journey.</p>
+          
+          <div class="card-highlight">
+            <div class="card-row">
+              <span class="card-label">Assigned Professional:</span>
+              <span class="card-val">${proName}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Nutrition Program:</span>
+              <span class="card-val">${program || 'Personalized Nutrition Coaching'}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Program Duration:</span>
+              <span class="card-val">${duration || '12 Weeks'}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Primary Goal:</span>
+              <span class="card-val">${goal || 'Health & General Wellness'}</span>
+            </div>
+          </div>
+
+          <p>Through your private Smart Lishe Client Portal, you will be able to:</p>
+          <ul class="perks">
+            <li>🥗 Access customized Kenyan meal plans & nutritional recommendations</li>
+            <li>📊 Log daily meals, hydration, and track weight progress</li>
+            <li>📅 View and attend scheduled one-on-one virtual or in-person consultations</li>
+            <li>💬 Direct messaging and guidance from ${proName}</li>
+          </ul>
+
+          <p>Click below to activate your client account and create your password:</p>
+          <div class="btn-wrapper">
+            <a href="${inviteUrl}" class="btn" target="_blank" rel="noopener noreferrer">Accept Invitation & Activate Portal</a>
+          </div>
+
+          <p style="font-size: 13px; color: #64748B;">Already registered with Smart Lishe? You can also log into your account and accept this invitation directly from your notification bell.</p>
+
+          <div class="fallback">
+            <p style="margin-top:0;"><strong>Direct activation URL:</strong></p>
+            <p style="margin-bottom:0;"><a href="${inviteUrl}" style="color: #1A7A64;">${inviteUrl}</a></p>
+          </div>
+        </div>
+        <div class="footer">
+          &copy; 2026 Smart Lishe Kenya • Jhub Africa, Juja, Nairobi • info.jhub@jkuat.ac.ke
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const textContent = `Habari ${clientName || 'there'},\n\nYour nutrition professional, ${proName} (${proEmail}), has invited you to join the Smart Lishe Client Portal for personalized nutrition coaching.\n\nProgram: ${program || 'Personalized Nutrition Plan'}\nDuration: ${duration || '12 Weeks'}\nGoal: ${goal || 'General Wellness'}\n\nActivate your account and access your meal plans here:\n${inviteUrl}\n\nSmart Lishe Kenya\ninfo.jhub@jkuat.ac.ke`;
+
+  const transporter = getMailTransporter();
+  if (transporter) {
+    try {
+      const info = await transporter.sendMail({
+        from: fromAddress,
+        to,
+        subject,
+        text: textContent,
+        html: htmlContent
+      });
+      console.log(`[Email Sent] Client invitation dispatched to ${to} (Message ID: ${info.messageId})`);
+      return { success: true, messageId: info.messageId };
+    } catch (err) {
+      console.error(`[Email Error] Failed to send client invitation to ${to}:`, err.message);
+      return { success: false, error: err.message };
+    }
+  } else {
+    console.log(`[Client Invite Dev Log] Generated invite URL for ${to}: ${inviteUrl}`);
+    return { success: true, preview: true, inviteUrl };
+  }
+}
+
+// 3. Client Accepted Invitation Email to Professional
+async function sendClientAcceptedEmailToProfessional({ proEmail, proName, clientName, clientEmail, program, goal, portalUrl }) {
+  const senderEmail = process.env.GMAIL_USER || process.env.SMTP_USER || 'info.jhub@jkuat.ac.ke';
+  const fromAddress = process.env.EMAIL_FROM || `"Smart Lishe Kenya" <${senderEmail}>`;
+  const subject = `✅ Client Invitation Accepted: ${clientName}`;
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <title>${subject}</title>
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F4F7F4; margin: 0; padding: 24px; color: #1E293B; }
+        .container { max-width: 580px; margin: 0 auto; background: #FFFFFF; border-radius: 16px; padding: 36px; border: 1px solid #DCE6DC; }
+        .brand { font-size: 22px; font-weight: 700; color: #1A7A64; margin-bottom: 20px; display: inline-block; }
+        .hero { font-size: 20px; font-weight: 700; margin-bottom: 12px; color: #0F172A; }
+        .content { font-size: 15px; line-height: 1.6; color: #475569; margin-bottom: 24px; }
+        .card-highlight { background: #E6F4F0; border: 1px solid #B8E2D8; border-radius: 12px; padding: 18px; margin: 18px 0; color: #0D4F40; }
+        .btn-wrapper { text-align: center; margin: 28px 0; }
+        .btn { display: inline-block; background: #1A7A64; color: #FFFFFF !important; text-decoration: none; padding: 12px 28px; font-size: 14px; font-weight: 600; border-radius: 10px; }
+        .footer { margin-top: 32px; border-top: 1px solid #E2E8F0; padding-top: 20px; font-size: 12px; color: #94A3B8; text-align: center; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="brand">🌱 Smart Lishe Kenya</div>
+        <div class="hero">🎉 Client Joined Your Portal!</div>
+        <div class="content">
+          <p>Dr./Nutritionist <strong>${proName || 'Professional'}</strong>,</p>
+          <p>Great news! <strong>${clientName}</strong> (${clientEmail}) has accepted your invitation and activated their client portal account.</p>
+          
+          <div class="card-highlight">
+            <p style="margin:0 0 6px 0;"><strong>Client:</strong> ${clientName} (${clientEmail})</p>
+            <p style="margin:0 0 6px 0;"><strong>Program:</strong> ${program || 'Active Coaching Program'}</p>
+            <p style="margin:0;"><strong>Goal:</strong> ${goal || 'General Health'}</p>
+          </div>
+
+          <p>You can now assign meal plans, create dietary schedules, and book one-on-one appointments.</p>
+
+          <div class="btn-wrapper">
+            <a href="${portalUrl}" class="btn" target="_blank" rel="noopener noreferrer">View Client on Professional Portal</a>
+          </div>
+        </div>
+        <div class="footer">
+          &copy; 2026 Smart Lishe Kenya • Jhub Africa, Juja, Nairobi • info.jhub@jkuat.ac.ke
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const textContent = `Habari ${proName},\n\nGreat news! ${clientName} (${clientEmail}) has accepted your invitation and activated their client portal on Smart Lishe.\n\nOpen your professional dashboard:\n${portalUrl}\n\nSmart Lishe Kenya`;
+
+  const transporter = getMailTransporter();
+  if (transporter) {
+    try {
+      await transporter.sendMail({
+        from: fromAddress,
+        to: proEmail,
+        subject,
+        text: textContent,
+        html: htmlContent
+      });
+      console.log(`[Email Sent] Acceptance notice sent to professional ${proEmail}`);
+    } catch (err) {
+      console.error(`[Email Error] Failed to notify professional:`, err.message);
+    }
+  }
+}
+
+// 4. Appointment Scheduled Notification Email
+async function sendAppointmentScheduledEmail({ clientEmail, clientName, proName, proEmail, apptTitle, apptDate, apptTime, apptDuration, apptType, apptNotes, portalUrl }) {
+  const senderEmail = process.env.GMAIL_USER || process.env.SMTP_USER || 'info.jhub@jkuat.ac.ke';
+  const fromAddress = process.env.EMAIL_FROM || `"Smart Lishe Kenya" <${senderEmail}>`;
+  const subject = `📅 Consultation Scheduled with ${proName || 'Your Nutritionist'}`;
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <title>${subject}</title>
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F4F7F4; margin: 0; padding: 24px; color: #1E293B; }
+        .container { max-width: 580px; margin: 0 auto; background: #FFFFFF; border-radius: 16px; padding: 36px; border: 1px solid #DCE6DC; }
+        .brand { font-size: 22px; font-weight: 700; color: #1A7A64; margin-bottom: 20px; display: inline-block; }
+        .hero { font-size: 20px; font-weight: 700; margin-bottom: 12px; color: #0F172A; }
+        .content { font-size: 15px; line-height: 1.6; color: #475569; margin-bottom: 24px; }
+        .card-highlight { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px; margin: 18px 0; }
+        .card-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .card-row:last-child { margin-bottom: 0; }
+        .btn-wrapper { text-align: center; margin: 28px 0; }
+        .btn { display: inline-block; background: #1A7A64; color: #FFFFFF !important; text-decoration: none; padding: 12px 28px; font-size: 14px; font-weight: 600; border-radius: 10px; }
+        .footer { margin-top: 32px; border-top: 1px solid #E2E8F0; padding-top: 20px; font-size: 12px; color: #94A3B8; text-align: center; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="brand">🌱 Smart Lishe Kenya</div>
+        <div class="hero">📅 New Appointment Scheduled</div>
+        <div class="content">
+          <p>Habari <strong>${clientName || 'there'}</strong>,</p>
+          <p>Your nutrition professional, <strong>${proName}</strong> (${proEmail}), has scheduled a consultation with you.</p>
+          
+          <div class="card-highlight">
+            <div class="card-row"><strong>Title:</strong> <span>${apptTitle || 'Nutrition Consultation'}</span></div>
+            <div class="card-row"><strong>Date:</strong> <span>${apptDate || 'Upcoming'}</span></div>
+            <div class="card-row"><strong>Time:</strong> <span>${apptTime || 'TBD'}</span></div>
+            <div class="card-row"><strong>Duration:</strong> <span>${apptDuration || '30'} minutes</span></div>
+            <div class="card-row"><strong>Format:</strong> <span>${apptType || 'Virtual Consultation'}</span></div>
+            ${apptNotes ? `<div class="card-row" style="margin-top:10px;border-top:1px dashed #E2E8F0;padding-top:8px;"><strong>Notes:</strong> <span>${apptNotes}</span></div>` : ''}
+          </div>
+
+          <div class="btn-wrapper">
+            <a href="${portalUrl}" class="btn" target="_blank" rel="noopener noreferrer">View Consultation in Client Portal</a>
+          </div>
+        </div>
+        <div class="footer">
+          &copy; 2026 Smart Lishe Kenya • Jhub Africa, Juja, Nairobi • info.jhub@jkuat.ac.ke
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const textContent = `Habari ${clientName},\n\nYour nutrition professional, ${proName}, has scheduled an appointment:\n${apptTitle}\nDate: ${apptDate} at ${apptTime}\nFormat: ${apptType}\n\nView details: ${portalUrl}\n\nSmart Lishe Kenya`;
+
+  const transporter = getMailTransporter();
+  if (transporter && clientEmail) {
+    try {
+      await transporter.sendMail({
+        from: fromAddress,
+        to: clientEmail,
+        subject,
+        text: textContent,
+        html: htmlContent
+      });
+      console.log(`[Email Sent] Appointment email sent to ${clientEmail}`);
+    } catch (err) {
+      console.error(`[Email Error] Failed to send appointment email:`, err.message);
+    }
+  }
+}
+
+// 5. Meal Plan Assigned Email
+async function sendMealPlanAssignedEmail({ clientEmail, clientName, proName, proEmail, planTitle, duration, dailyCalories, notes, portalUrl }) {
+  const senderEmail = process.env.GMAIL_USER || process.env.SMTP_USER || 'info.jhub@jkuat.ac.ke';
+  const fromAddress = process.env.EMAIL_FROM || `"Smart Lishe Kenya" <${senderEmail}>`;
+  const subject = `🥗 New Meal Plan Assigned: ${planTitle}`;
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <title>${subject}</title>
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F4F7F4; margin: 0; padding: 24px; color: #1E293B; }
+        .container { max-width: 580px; margin: 0 auto; background: #FFFFFF; border-radius: 16px; padding: 36px; border: 1px solid #DCE6DC; }
+        .brand { font-size: 22px; font-weight: 700; color: #1A7A64; margin-bottom: 20px; display: inline-block; }
+        .hero { font-size: 20px; font-weight: 700; margin-bottom: 12px; color: #0F172A; }
+        .content { font-size: 15px; line-height: 1.6; color: #475569; margin-bottom: 24px; }
+        .card-highlight { background: #E6F4F0; border: 1px solid #B8E2D8; border-radius: 12px; padding: 18px; margin: 18px 0; color: #0D4F40; }
+        .btn-wrapper { text-align: center; margin: 28px 0; }
+        .btn { display: inline-block; background: #1A7A64; color: #FFFFFF !important; text-decoration: none; padding: 12px 28px; font-size: 14px; font-weight: 600; border-radius: 10px; }
+        .footer { margin-top: 32px; border-top: 1px solid #E2E8F0; padding-top: 20px; font-size: 12px; color: #94A3B8; text-align: center; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="brand">🌱 Smart Lishe Kenya</div>
+        <div class="hero">🥗 New Meal Plan Assigned!</div>
+        <div class="content">
+          <p>Habari <strong>${clientName || 'there'}</strong>,</p>
+          <p>Your nutrition professional, <strong>${proName}</strong> (${proEmail}), has assigned a new personalized meal plan to your Smart Lishe profile.</p>
+          
+          <div class="card-highlight">
+            <p style="margin:0 0 6px 0;"><strong>Plan Title:</strong> ${planTitle}</p>
+            <p style="margin:0 0 6px 0;"><strong>Duration:</strong> ${duration || '12 Weeks'}</p>
+            ${dailyCalories ? `<p style="margin:0 0 6px 0;"><strong>Target Calories:</strong> ${dailyCalories} kcal/day</p>` : ''}
+            ${notes ? `<p style="margin:0;"><strong>Nutritionist Notes:</strong> ${notes}</p>` : ''}
+          </div>
+
+          <p>Visit your client dashboard to view your daily breakfasts, lunches, dinners, and customized grocery shopping lists.</p>
+
+          <div class="btn-wrapper">
+            <a href="${portalUrl}" class="btn" target="_blank" rel="noopener noreferrer">View My Meal Plan & Recipes</a>
+          </div>
+        </div>
+        <div class="footer">
+          &copy; 2026 Smart Lishe Kenya • Jhub Africa, Juja, Nairobi • info.jhub@jkuat.ac.ke
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const textContent = `Habari ${clientName},\n\n${proName} has assigned you the "${planTitle}" meal plan.\nView your plan on Smart Lishe:\n${portalUrl}\n\nSmart Lishe Kenya`;
+
+  const transporter = getMailTransporter();
+  if (transporter && clientEmail) {
+    try {
+      await transporter.sendMail({
+        from: fromAddress,
+        to: clientEmail,
+        subject,
+        text: textContent,
+        html: htmlContent
+      });
+      console.log(`[Email Sent] Meal plan email sent to ${clientEmail}`);
+    } catch (err) {
+      console.error(`[Email Error] Failed to send meal plan email:`, err.message);
+    }
+  }
+}
+
+// 6. Direct Message Notification Email
+async function sendDirectMessageEmail({ clientEmail, clientName, proName, proEmail, subject: msgSubject, message, portalUrl }) {
+  const senderEmail = process.env.GMAIL_USER || process.env.SMTP_USER || 'info.jhub@jkuat.ac.ke';
+  const fromAddress = process.env.EMAIL_FROM || `"Smart Lishe Kenya" <${senderEmail}>`;
+  const subject = `💬 Message from ${proName || 'Your Nutritionist'}: ${msgSubject || 'Update'}`;
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <title>${subject}</title>
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F4F7F4; margin: 0; padding: 24px; color: #1E293B; }
+        .container { max-width: 580px; margin: 0 auto; background: #FFFFFF; border-radius: 16px; padding: 36px; border: 1px solid #DCE6DC; }
+        .brand { font-size: 22px; font-weight: 700; color: #1A7A64; margin-bottom: 20px; display: inline-block; }
+        .hero { font-size: 18px; font-weight: 700; margin-bottom: 12px; color: #0F172A; }
+        .content { font-size: 15px; line-height: 1.6; color: #475569; margin-bottom: 24px; }
+        .msg-box { background: #F8FAFC; border-left: 4px solid #1A7A64; padding: 16px 20px; margin: 20px 0; border-radius: 0 8px 8px 0; font-size: 15px; color: #1E293B; font-style: italic; }
+        .btn-wrapper { text-align: center; margin: 28px 0; }
+        .btn { display: inline-block; background: #1A7A64; color: #FFFFFF !important; text-decoration: none; padding: 12px 28px; font-size: 14px; font-weight: 600; border-radius: 10px; }
+        .footer { margin-top: 32px; border-top: 1px solid #E2E8F0; padding-top: 20px; font-size: 12px; color: #94A3B8; text-align: center; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="brand">🌱 Smart Lishe Kenya</div>
+        <div class="hero">💬 Direct Message from ${proName}</div>
+        <div class="content">
+          <p>Habari <strong>${clientName || 'there'}</strong>,</p>
+          <p>You have received a new direct message regarding your nutrition program:</p>
+          
+          <div class="msg-box">
+            "${message}"
+          </div>
+
+          <div class="btn-wrapper">
+            <a href="${portalUrl}" class="btn" target="_blank" rel="noopener noreferrer">Reply on Client Portal</a>
+          </div>
+        </div>
+        <div class="footer">
+          &copy; 2026 Smart Lishe Kenya • Jhub Africa, Juja, Nairobi • info.jhub@jkuat.ac.ke
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const textContent = `Habari ${clientName},\n\nMessage from ${proName}:\n"${message}"\n\nReply on your portal: ${portalUrl}\n\nSmart Lishe Kenya`;
+
+  const transporter = getMailTransporter();
+  if (transporter && clientEmail) {
+    try {
+      await transporter.sendMail({
+        from: fromAddress,
+        to: clientEmail,
+        subject,
+        text: textContent,
+        html: htmlContent
+      });
+      console.log(`[Email Sent] Direct message email sent to ${clientEmail}`);
+    } catch (err) {
+      console.error(`[Email Error] Failed to send direct message email:`, err.message);
+    }
+  }
+}
+
+app.post('/api/auth/request-reset', async (req, res) => {
+  const { email } = req.body || {};
+  if (!email || !email.trim()) {
+    return errorResponse(res, 'Email address is required', 400);
+  }
+  const cleanEmail = email.trim().toLowerCase();
+  const user = await findUserByEmail(cleanEmail);
+
+  if (!user) {
+    return errorResponse(res, 'No account found with this email address. Please verify your email or register.', 404);
+  }
+
+  const token = jwt.sign(
+    { id: user.id, email: user.email, type: 'password_reset' },
+    JWT_SECRET,
+    { expiresIn: '1h' }
+  );
+  user.resetPasswordToken = token;
+  user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+  saveUsersToDisk();
+  await syncFirestoreDoc('users', user.id, {
+    resetPasswordToken: token,
+    resetPasswordExpires: user.resetPasswordExpires
+  });
+
+  const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+  const host = req.headers['x-forwarded-host'] || req.get('host');
+  let origin = `${protocol}://${host}`;
+  if (req.headers['origin']) {
+    origin = req.headers['origin'];
+  } else if (req.headers['referer']) {
+    try {
+      origin = new URL(req.headers['referer']).origin;
+    } catch (e) {}
+  }
+  const resetUrl = `${origin}/auth/reset-password.html?token=${encodeURIComponent(token)}`;
+
+  auditLogs.push({
+    id: `log-${Date.now()}`,
+    action: 'Password Reset Requested',
+    user: user.email,
+    timestamp: new Date().toISOString()
+  });
+
+  const sendResult = await sendPasswordResetEmail({
+    to: user.email,
+    name: user.first_name || user.name || 'User',
+    resetUrl
+  });
+
+  if (sendResult && sendResult.error) {
+    return errorResponse(res, `Failed to dispatch reset email: ${sendResult.error}`, 500);
+  }
+
+  return successResponse(res, `Password reset link sent to ${user.email}. Please check your inbox and spam folder.`);
 });
 
-app.post('/api/auth/reset-password', (req, res) => {
-  return successResponse(res, 'Password reset successfully');
+app.post('/api/auth/resend-verification', async (req, res) => {
+  const { email } = req.body || {};
+  if (!email || !email.trim()) {
+    return errorResponse(res, 'Email address is required', 400);
+  }
+  const cleanEmail = email.trim().toLowerCase();
+  const user = await findUserByEmail(cleanEmail);
+
+  if (user) {
+    const token = jwt.sign(
+      { id: user.id, email: user.email, type: 'password_reset' },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+    const host = req.headers['x-forwarded-host'] || req.get('host');
+    let origin = `${protocol}://${host}`;
+    if (req.headers['origin']) {
+      origin = req.headers['origin'];
+    } else if (req.headers['referer']) {
+      try { origin = new URL(req.headers['referer']).origin; } catch (e) {}
+    }
+    const resetUrl = `${origin}/auth/reset-password.html?token=${encodeURIComponent(token)}`;
+
+    await sendPasswordResetEmail({
+      to: user.email,
+      name: user.first_name || user.name || 'User',
+      resetUrl
+    });
+  }
+
+  return successResponse(res, 'Verification instructions have been dispatched.');
+});
+
+app.post('/api/auth/reset-password', async (req, res) => {
+  const { token, new_password } = req.body || {};
+  if (!token || !new_password) {
+    return errorResponse(res, 'Reset token and new password are required', 400);
+  }
+
+  if (typeof new_password !== 'string' || new_password.trim().length < 8) {
+    return errorResponse(res, 'New password must be at least 8 characters long', 400);
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(token, JWT_SECRET);
+  } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      return errorResponse(res, 'Reset link has expired. Please request a new one.', 400);
+    }
+    return errorResponse(res, 'Invalid reset token. Please request a new link.', 400);
+  }
+
+  if (!decoded || decoded.type !== 'password_reset' || !decoded.email) {
+    return errorResponse(res, 'Invalid or malformed reset token', 400);
+  }
+
+  let user = await findUserByEmail(decoded.email.toLowerCase());
+  if (!user && decoded.id) {
+    user = await findUserById(decoded.id);
+  }
+
+  if (!user) {
+    return errorResponse(res, 'User account not found', 404);
+  }
+
+  const cleanPassword = new_password.trim();
+  user.passwordHash = bcrypt.hashSync(cleanPassword, 10);
+  user.password = cleanPassword;
+  delete user.resetPasswordToken;
+  delete user.resetPasswordExpires;
+
+  saveUsersToDisk();
+  await syncFirestoreDoc('users', user.id, {
+    passwordHash: user.passwordHash,
+    resetPasswordToken: null,
+    resetPasswordExpires: null
+  });
+
+  auditLogs.push({
+    id: `log-${Date.now()}`,
+    action: 'Password Reset Completed',
+    user: user.email,
+    timestamp: new Date().toISOString()
+  });
+
+  return successResponse(res, 'Password reset successfully. You can now log in with your new password.');
 });
 
 // --- Profile & Settings ---
@@ -1361,8 +2006,150 @@ app.get('/api/client/reports', authenticateToken, (req, res) => {
   return successResponse(res, 'Reports retrieved', reports);
 });
 
-app.post('/api/client/verify', (req, res) => {
-  return successResponse(res, 'Account verified successfully');
+app.get('/api/client/invitation-info', async (req, res) => {
+  const { token } = req.query;
+  if (!token) {
+    return errorResponse(res, 'Invitation token is required', 400);
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = users.find(u => u.id === decoded.id || (u.email && u.email.toLowerCase() === (decoded.email || '').toLowerCase()));
+    if (!user) {
+      return errorResponse(res, 'Invalid invitation: user account not found', 404);
+    }
+
+    const proEmail = user.assigned_professional_email || decoded.pro_email || '';
+    const proUser = users.find(u => u.email && u.email.toLowerCase() === proEmail.toLowerCase());
+    const proName = proUser 
+      ? ((proUser.first_name || proUser.last_name) ? `${proUser.first_name || ''} ${proUser.last_name || ''}`.trim() : proUser.name)
+      : (user.professional_name || 'Nutrition Professional');
+
+    return successResponse(res, 'Invitation details retrieved', {
+      email: user.email,
+      first_name: user.first_name || '',
+      last_name: user.last_name || '',
+      name: user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+      status: user.status || 'pending',
+      goal: user.goal || 'General Wellness',
+      program: user.program || 'Personalized Nutrition Plan',
+      duration: user.duration || '12 Weeks',
+      professional: {
+        name: proName,
+        email: proEmail,
+        title: proUser?.title || 'Clinical Dietitian & Nutritionist'
+      }
+    });
+  } catch (err) {
+    return errorResponse(res, 'This invitation link is invalid or has expired. Please request a new invitation.', 400);
+  }
+});
+
+app.post('/api/client/verify', async (req, res) => {
+  const { token, password } = req.body || {};
+  if (!token) {
+    return errorResponse(res, 'Invitation token is required', 400);
+  }
+  if (!password || password.length < 8) {
+    return errorResponse(res, 'Password must be at least 8 characters long', 400);
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    let user = users.find(u => u.id === decoded.id || (u.email && u.email.toLowerCase() === (decoded.email || '').toLowerCase()));
+    
+    if (!user) {
+      return errorResponse(res, 'User account associated with this invitation was not found', 404);
+    }
+
+    user.passwordHash = bcrypt.hashSync(password, 10);
+    user.status = 'active';
+    user.role = 'client';
+    user.profile_completed = true;
+    if (decoded.pro_email && !user.assigned_professional_email) {
+      user.assigned_professional_email = decoded.pro_email.toLowerCase();
+    }
+    
+    // Find professional details
+    const proEmail = (user.assigned_professional_email || decoded.pro_email || '').toLowerCase();
+    const proUser = users.find(u => u.email && u.email.toLowerCase() === proEmail);
+    const proName = proUser 
+      ? ((proUser.first_name || proUser.last_name) ? `${proUser.first_name || ''} ${proUser.last_name || ''}`.trim() : proUser.name)
+      : (user.professional_name || 'Nutrition Professional');
+    user.professional_name = proName;
+
+    // Mark any related invitation notifications as accepted
+    notifications.forEach(n => {
+      if ((n.user_email && n.user_email.toLowerCase() === user.email.toLowerCase()) && n.type === 'pro_invite') {
+        n.status = 'accepted';
+        n.is_read = true;
+      }
+    });
+
+    saveUsersToDisk();
+    saveNotificationsToDisk();
+    syncFirestoreDoc('users', user.id, user);
+
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+    const host = req.headers['x-forwarded-host'] || req.get('host');
+    let origin = `${protocol}://${host}`;
+    if (req.headers['origin']) {
+      origin = req.headers['origin'];
+    }
+
+    // Notify the professional via in-app notification & email
+    const clientName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.name || user.email;
+    if (proEmail) {
+      const proNotif = {
+        id: `notif-joined-${Date.now()}`,
+        user_email: proEmail,
+        title: `🎉 Client Activated Portal: ${clientName}`,
+        message: `${clientName} (${user.email}) has set their password and activated their client portal for ${user.program || 'Nutrition Program'}.`,
+        type: 'invite_accepted',
+        is_read: false,
+        created_at: new Date().toISOString()
+      };
+      notifications.unshift(proNotif);
+      saveNotificationsToDisk();
+      syncFirestoreDoc('notifications', proNotif.id, proNotif);
+
+      await sendClientAcceptedEmailToProfessional({
+        proEmail: proEmail,
+        proName: proName,
+        clientName: clientName,
+        clientEmail: user.email,
+        program: user.program || 'Personalized Nutrition Coaching',
+        goal: user.goal || 'General Health & Wellness',
+        portalUrl: `${origin}/professional/clients.html`
+      });
+    }
+
+    // Generate JWT access token for instant login
+    const accessToken = jwt.sign(
+      { id: user.id, email: user.email, role: user.role, name: user.name || clientName },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    return successResponse(res, 'Account activated successfully! You are now connected with your professional.', {
+      access_token: accessToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: clientName,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        role: user.role,
+        status: user.status,
+        assigned_professional_email: user.assigned_professional_email,
+        professional_name: user.professional_name,
+        program: user.program,
+        goal: user.goal
+      }
+    });
+  } catch (err) {
+    return errorResponse(res, 'Invalid or expired invitation token: ' + err.message, 400);
+  }
 });
 
 // --- Professional Portal API ---
@@ -1397,7 +2184,7 @@ app.get('/api/professional/clients', authenticateToken, (req, res) => {
   return successResponse(res, 'Clients retrieved', clientsList);
 });
 
-app.post('/api/professional/clients', authenticateToken, (req, res) => {
+app.post('/api/professional/clients', authenticateToken, async (req, res) => {
   const cleanEmail = (req.body.email || '').trim().toLowerCase();
   if (!cleanEmail) {
     return errorResponse(res, 'Client email address is required', 400);
@@ -1417,6 +2204,7 @@ app.post('/api/professional/clients', authenticateToken, (req, res) => {
     targetUser.role = targetUser.role || 'client';
     targetUser.status = 'pending'; // Pending invitation acceptance
     targetUser.assigned_professional_email = proEmail;
+    targetUser.professional_name = proName;
     if (req.body.medical_conditions) targetUser.medical_conditions = req.body.medical_conditions;
     if (req.body.goal) targetUser.goal = req.body.goal;
     if (req.body.program) targetUser.program = req.body.program;
@@ -1432,6 +2220,7 @@ app.post('/api/professional/clients', authenticateToken, (req, res) => {
       role: 'client',
       status: 'pending', // Pending invitation acceptance
       assigned_professional_email: proEmail,
+      professional_name: proName,
       medical_conditions: req.body.medical_conditions || [],
       goal: req.body.goal || 'General Wellness',
       program: req.body.program || 'Standard Nutrition Plan',
@@ -1444,7 +2233,32 @@ app.post('/api/professional/clients', authenticateToken, (req, res) => {
   saveUsersToDisk();
   syncFirestoreDoc('users', targetUser.id, targetUser);
 
-  // Send invitation notification to the user
+  // Generate invitation & activation JWT token (valid for 7 days)
+  const inviteToken = jwt.sign(
+    { 
+      id: targetUser.id, 
+      email: targetUser.email, 
+      pro_email: proEmail, 
+      pro_name: proName,
+      type: 'client_invitation' 
+    },
+    JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+
+  const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+  const host = req.headers['x-forwarded-host'] || req.get('host');
+  let origin = `${protocol}://${host}`;
+  if (req.headers['origin']) {
+    origin = req.headers['origin'];
+  } else if (req.headers['referer']) {
+    try {
+      origin = new URL(req.headers['referer']).origin;
+    } catch (e) {}
+  }
+  const inviteUrl = `${origin}/client/set-password.html?token=${encodeURIComponent(inviteToken)}`;
+
+  // Send invitation notification to in-app notification center
   const inviteId = `inv-${Date.now()}`;
   const notifObj = {
     id: `notif-${Date.now()}`,
@@ -1453,6 +2267,7 @@ app.post('/api/professional/clients', authenticateToken, (req, res) => {
     message: `${proName} has invited you to join their client management portal for personalized nutrition coaching (${req.body.program || 'Nutrition Program'}). Accept to share your health goals and receive tailored meal plans.`,
     type: 'pro_invite',
     invite_id: inviteId,
+    invite_token: inviteToken,
     pro_email: proEmail,
     pro_name: proName,
     status: 'pending',
@@ -1464,10 +2279,26 @@ app.post('/api/professional/clients', authenticateToken, (req, res) => {
   saveNotificationsToDisk();
   syncFirestoreDoc('notifications', notifObj.id, notifObj);
 
-  return successResponse(res, `Client invitation sent to ${cleanEmail}. They will see an invitation in their Notifications section to accept or decline.`, targetUser, 201);
+  // Dispatch Invitation Email
+  const clientName = `${targetUser.first_name || ''} ${targetUser.last_name || ''}`.trim() || 'Client';
+  await sendClientInvitationEmail({
+    to: cleanEmail,
+    clientName: clientName,
+    proName: proName,
+    proEmail: proEmail,
+    program: targetUser.program,
+    duration: targetUser.duration,
+    goal: targetUser.goal,
+    inviteUrl: inviteUrl
+  });
+
+  return successResponse(res, `Client invitation and activation email sent to ${cleanEmail}. They can activate their portal via email or notification bell.`, {
+    client: targetUser,
+    invite_url: inviteUrl
+  }, 201);
 });
 
-app.post(['/api/user/invitations/:id/respond', '/api/client/invitations/:id/respond', '/api/notifications/:id/respond'], authenticateToken, (req, res) => {
+app.post(['/api/user/invitations/:id/respond', '/api/client/invitations/:id/respond', '/api/notifications/:id/respond'], authenticateToken, async (req, res) => {
   const notifId = req.params.id;
   const action = (req.body.action || '').toLowerCase();
   if (!['accept', 'accepted', 'decline', 'declined'].includes(action)) {
@@ -1503,7 +2334,7 @@ app.post(['/api/user/invitations/:id/respond', '/api/client/invitations/:id/resp
     syncFirestoreDoc('users', currentUser.id, currentUser);
   }
 
-  // Notify professional
+  // Notify professional in-app
   const clientName = (req.user.first_name || req.user.last_name) 
     ? `${req.user.first_name || ''} ${req.user.last_name || ''}`.trim() 
     : (req.user.name || userEmail);
@@ -1523,6 +2354,26 @@ app.post(['/api/user/invitations/:id/respond', '/api/client/invitations/:id/resp
   notifications.unshift(proNotif);
   saveNotificationsToDisk();
   syncFirestoreDoc('notifications', proNotif.id, proNotif);
+
+  // If accepted, send email to the professional
+  if (isAccept && notif.pro_email) {
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+    const host = req.headers['x-forwarded-host'] || req.get('host');
+    let origin = `${protocol}://${host}`;
+    if (req.headers['origin']) {
+      origin = req.headers['origin'];
+    }
+
+    await sendClientAcceptedEmailToProfessional({
+      proEmail: notif.pro_email,
+      proName: notif.pro_name || 'Professional',
+      clientName: clientName,
+      clientEmail: userEmail,
+      program: currentUser?.program || 'Nutrition Coaching Program',
+      goal: currentUser?.goal || 'General Health',
+      portalUrl: `${origin}/professional/clients.html`
+    });
+  }
 
   return successResponse(res, isAccept ? 'Invitation accepted! You are now connected with your professional.' : 'Invitation declined.', { status: newStatus });
 });
@@ -1552,7 +2403,7 @@ app.get('/api/professional/clients/:id/mealplans', authenticateToken, (req, res)
   return successResponse(res, 'Client meal plans', mealPlans);
 });
 
-app.post('/api/professional/clients/:id/send-message', authenticateToken, (req, res) => {
+app.post('/api/professional/clients/:id/send-message', authenticateToken, async (req, res) => {
   const clientId = req.params.id;
   const client = users.find(u => u.id === clientId || u.email === clientId) || users.find(u => u.role === 'client');
   if (!client) {
@@ -1583,10 +2434,25 @@ app.post('/api/professional/clients/:id/send-message', authenticateToken, (req, 
   saveNotificationsToDisk();
   syncFirestoreDoc('notifications', notifObj.id, notifObj);
 
-  return successResponse(res, `Message sent to ${client.name || client.email}. They will receive a notification in their portal.`, notifObj);
+  const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+  const host = req.headers['x-forwarded-host'] || req.get('host');
+  let origin = `${protocol}://${host}`;
+  if (req.headers['origin']) origin = req.headers['origin'];
+
+  await sendDirectMessageEmail({
+    clientEmail: client.email,
+    clientName: client.name || client.first_name || 'Client',
+    proName: proName,
+    proEmail: proEmail,
+    subject: subject || 'Nutrition Consultation Update',
+    message: message,
+    portalUrl: `${origin}/client/dashboard.html`
+  });
+
+  return successResponse(res, `Message and email notification sent to ${client.name || client.email}.`, notifObj);
 });
 
-app.post(['/api/professional/clients/:id/assign-plan', '/api/professional/meal-plans/assign'], authenticateToken, (req, res) => {
+app.post(['/api/professional/clients/:id/assign-plan', '/api/professional/meal-plans/assign'], authenticateToken, async (req, res) => {
   const clientId = req.params.id || req.body.client_id;
   const client = users.find(u => u.id === clientId || u.email === clientId) || users.find(u => u.role === 'client');
   if (!client) {
@@ -1601,6 +2467,7 @@ app.post(['/api/professional/clients/:id/assign-plan', '/api/professional/meal-p
   const proName = (req.user.first_name || req.user.last_name) 
     ? `${req.user.first_name || ''} ${req.user.last_name || ''}`.trim() 
     : (req.user.name || 'Nutrition Professional');
+  const proEmail = (req.user.email || '').toLowerCase();
 
   const notifObj = {
     id: `notif-plan-${Date.now()}`,
@@ -1617,7 +2484,24 @@ app.post(['/api/professional/clients/:id/assign-plan', '/api/professional/meal-p
   saveNotificationsToDisk();
   syncFirestoreDoc('notifications', notifObj.id, notifObj);
 
-  return successResponse(res, `Plan "${planName}" assigned to ${client.name || client.email} successfully.`);
+  const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+  const host = req.headers['x-forwarded-host'] || req.get('host');
+  let origin = `${protocol}://${host}`;
+  if (req.headers['origin']) origin = req.headers['origin'];
+
+  await sendMealPlanAssignedEmail({
+    clientEmail: client.email,
+    clientName: client.name || client.first_name || 'Client',
+    proName: proName,
+    proEmail: proEmail,
+    planTitle: planName,
+    duration: req.body.duration || '12 Weeks',
+    dailyCalories: req.body.daily_calories || req.body.calories,
+    notes: req.body.description || req.body.notes,
+    portalUrl: `${origin}/client/dashboard.html`
+  });
+
+  return successResponse(res, `Plan "${planName}" assigned to ${client.name || client.email} and notification email sent successfully.`);
 });
 
 app.get('/api/professional/meal-plans', authenticateToken, (req, res) => {
@@ -1628,7 +2512,7 @@ app.get('/api/professional/appointments', authenticateToken, (req, res) => {
   return successResponse(res, 'Appointments', appointments);
 });
 
-app.post('/api/professional/appointments', authenticateToken, (req, res) => {
+app.post('/api/professional/appointments', authenticateToken, async (req, res) => {
   const proName = (req.user.first_name || req.user.last_name) 
     ? `${req.user.first_name || ''} ${req.user.last_name || ''}`.trim() 
     : (req.user.name || 'Nutrition Professional');
@@ -1644,18 +2528,23 @@ app.post('/api/professional/appointments', authenticateToken, (req, res) => {
   };
   appointments.push(appt);
 
-  // Notify client
+  // Notify client via notification & email
   let clientEmail = req.body.client_email || req.body.email;
-  if (!clientEmail && req.body.client_id) {
-    const cl = users.find(u => u.id === req.body.client_id);
-    if (cl) clientEmail = cl.email;
+  let clientObj = null;
+  if (req.body.client_id) {
+    clientObj = users.find(u => u.id === req.body.client_id || u.email === req.body.client_id);
+    if (clientObj) clientEmail = clientObj.email;
   }
+  if (!clientObj && clientEmail) {
+    clientObj = users.find(u => u.email && u.email.toLowerCase() === clientEmail.toLowerCase());
+  }
+
   if (clientEmail) {
     const notifObj = {
       id: `notif-app-${Date.now()}`,
       user_email: clientEmail.toLowerCase(),
       title: `📅 New Appointment Scheduled with ${proName}`,
-      message: `A consultation (${req.body.type || 'Virtual Consultation'}) has been scheduled for ${req.body.date || 'upcoming date'} at ${req.body.time || 'scheduled time'}. Notes: ${req.body.notes || 'No additional notes.'}`,
+      message: `A consultation (${req.body.type || 'Virtual Consultation'}) has been scheduled for ${req.body.date || req.body.appointment_date || 'upcoming date'} at ${req.body.time || req.body.appointment_time || 'scheduled time'}. Notes: ${req.body.notes || req.body.description || 'No additional notes.'}`,
       type: 'pro_appointment',
       pro_name: proName,
       is_read: false,
@@ -1664,9 +2553,28 @@ app.post('/api/professional/appointments', authenticateToken, (req, res) => {
     notifications.unshift(notifObj);
     saveNotificationsToDisk();
     syncFirestoreDoc('notifications', notifObj.id, notifObj);
+
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+    const host = req.headers['x-forwarded-host'] || req.get('host');
+    let origin = `${protocol}://${host}`;
+    if (req.headers['origin']) origin = req.headers['origin'];
+
+    await sendAppointmentScheduledEmail({
+      clientEmail: clientEmail,
+      clientName: clientObj?.name || clientObj?.first_name || 'Client',
+      proName: proName,
+      proEmail: proEmail,
+      apptTitle: req.body.title || 'Nutrition Consultation',
+      apptDate: req.body.appointment_date || req.body.date,
+      apptTime: req.body.appointment_time || req.body.time,
+      apptDuration: req.body.duration_minutes || req.body.duration || '30',
+      apptType: req.body.type || 'Virtual Consultation',
+      apptNotes: req.body.description || req.body.notes,
+      portalUrl: `${origin}/client/dashboard.html`
+    });
   }
 
-  return successResponse(res, 'Appointment created', appt, 201);
+  return successResponse(res, 'Appointment created and confirmation email dispatched', appt, 201);
 });
 
 app.get('/api/user/my-professional', authenticateToken, (req, res) => {
