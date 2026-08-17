@@ -181,11 +181,11 @@
     "payment_methods": [
       {
         "id": "pm-1786346333398",
-        "is_default": true,
-        "type": "mpesa",
         "detail": "+254 700 000 000",
+        "type": "mpesa",
+        "title": "M-Pesa Express",
         "created_at": "2026-08-10T07:18:53.398Z",
-        "title": "M-Pesa Express"
+        "is_default": true
       }
     ],
     "created_at": "2026-08-10T06:46:43.021Z",
@@ -237,12 +237,12 @@
     "date_of_birth": "1994-01-13",
     "payment_methods": [
       {
-        "detail": "7986766765",
         "id": "pm-1785738965535",
-        "title": "M-Pesa Express",
+        "detail": "7986766765",
         "type": "mpesa",
-        "created_at": "2026-08-03T06:36:05.535Z",
-        "is_default": true
+        "title": "M-Pesa Express",
+        "is_default": true,
+        "created_at": "2026-08-03T06:36:05.535Z"
       }
     ],
     "disliked_foods": [],
@@ -276,12 +276,12 @@
     "last_name": "Gachuhi",
     "payment_methods": [
       {
-        "type": "mpesa",
-        "detail": "+254703656466",
-        "is_default": true,
         "created_at": "2026-08-10T08:27:51.330Z",
+        "is_default": true,
+        "id": "pm-1786350471330",
+        "type": "mpesa",
         "title": "M-Pesa Express",
-        "id": "pm-1786350471330"
+        "detail": "+254703656466"
       }
     ],
     "allergies": [],
@@ -320,12 +320,12 @@
     "height_cm": 156,
     "weight_kg": 68,
     "settings": {
+      "location": "",
       "goal": "maintain",
+      "medications": [],
       "health_conditions": [
         "none"
       ],
-      "location": "",
-      "medications": [],
       "target_weight": 0
     },
     "bio": "",
@@ -342,10 +342,10 @@
     "payment_methods": [
       {
         "type": "mpesa",
-        "created_at": "2026-08-10T09:36:50.742Z",
         "detail": "+254 700 000 000",
         "title": "M-Pesa Express",
         "id": "pm-1786354610742",
+        "created_at": "2026-08-10T09:36:50.742Z",
         "is_default": true
       }
     ],
@@ -380,12 +380,12 @@
     "status": "active",
     "payment_methods": [
       {
-        "detail": "0701105757",
+        "type": "mpesa",
         "title": "M-Pesa Express",
-        "is_default": true,
         "created_at": "2026-08-10T13:17:16.680Z",
-        "id": "pm-1786367836680",
-        "type": "mpesa"
+        "is_default": true,
+        "detail": "0701105757",
+        "id": "pm-1786367836680"
       }
     ],
     "phone": "0701105757",
@@ -516,7 +516,38 @@
     "approval_status": "active",
     "profile_completed": false,
     "created_at": "2026-08-17T15:00:55.075Z",
-    "resetPasswordToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzZXItMTc4Njk3ODg1NDk4MCIsImVtYWlsIjoiam9yYW00MDM2QGdtYWlsLmNvbSIsInR5cGUiOiJwYXNzd29yZF9yZXNldCIsImlhdCI6MTc4Njk3ODg1OCwiZXhwIjoxNzg2OTgyNDU4fQ.ENVxElfIOftvEFdSMi5GW9AAB1_kCxGLhZcpXZ05ZeY",
-    "resetPasswordExpires": 1786982458231
+    "resetPasswordToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzZXItMTc4Njk3ODg1NDk4MCIsImVtYWlsIjoiam9yYW00MDM2QGdtYWlsLmNvbSIsInR5cGUiOiJwYXNzd29yZF9yZXNldCIsImlhdCI6MTc4Njk5OTQ3NywiZXhwIjoxNzg3MDAzMDc3fQ.8c-d65RhERyDCBQ1zZwfxhQm7yAm7Q8FVrg6qBnVAcM",
+    "resetPasswordExpires": 1787003077084
+  },
+  {
+    "phone": "7986766765",
+    "last_name": "Kombo",
+    "favorite_foods": [],
+    "disliked_foods": [],
+    "role": "user",
+    "first_name": "Joram",
+    "weight_kg": 56,
+    "allergies": [],
+    "date_of_birth": "2026-08-28",
+    "approval_status": "active",
+    "water_goal_ml": null,
+    "gender": "female",
+    "resetPasswordToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzZXItMTc4Njk3OTc3MzcxMyIsImVtYWlsIjoiam9yYW0zODQ3QGdtYWlsLmNvbSIsInR5cGUiOiJwYXNzd29yZF9yZXNldCIsImlhdCI6MTc4Njk5OTMzNSwiZXhwIjoxNzg3MDAyOTM1fQ.ydA4r2BtG8N1GYXnb37BAXGCdbcv6X1BTaOlaGTJFyM",
+    "id": "user-1786979773713",
+    "status": "active",
+    "lifestyle": "moderately_active",
+    "medical_conditions": [],
+    "password": "R7PfHN554PkSQKn",
+    "profile_completed": false,
+    "calorie_goal": null,
+    "passwordHash": "$2b$10$ss.N7XmlxQjgQ7gE6LDjkOf2X432NsBT.739T2OXbzCpLpiVomAGC",
+    "activity_level": 4,
+    "bmi": 56,
+    "height_cm": 100,
+    "diet_preference": "",
+    "created_at": "2026-08-17T15:16:13.804Z",
+    "resetPasswordExpires": 1787002935136,
+    "bio": "",
+    "email": "joram3847@gmail.com"
   }
 ]

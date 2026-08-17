@@ -651,13 +651,30 @@ app.post('/api/auth/login', async (req, res) => {
   return successResponse(res, 'Login successful', { access_token: token, user });
 });
 
-// --- Email Dispatcher Service (Nodemailer) ---
+// --- Email Dispatcher Service (Gmail / Google Workspace) ---
 let mailTransporter = null;
 
 function getMailTransporter() {
   if (mailTransporter) return mailTransporter;
 
-  if (process.env.SMTP_HOST && process.env.SMTP_USER) {
+  const gmailUser = (process.env.GMAIL_USER || 'joram.kombo@students.jkuat.ac.ke').trim();
+  const rawPass = process.env.GMAIL_APP_PASSWORD || 'fpgp mftx btmm frum';
+  const cleanPass = rawPass.replace(/\s+/g, '');
+
+  if (gmailUser && cleanPass) {
+    try {
+      mailTransporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: gmailUser,
+          pass: cleanPass
+        }
+      });
+      console.log(`[Mail Service] Gmail transporter initialized for ${gmailUser}`);
+    } catch (err) {
+      console.warn('[Mail Service] Failed to initialize Gmail transporter:', err.message);
+    }
+  } else if (process.env.SMTP_HOST && process.env.SMTP_USER) {
     try {
       mailTransporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
@@ -670,19 +687,6 @@ function getMailTransporter() {
       });
     } catch (err) {
       console.warn('[Mail Service] Failed to initialize custom SMTP transporter:', err.message);
-    }
-  } else if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
-    try {
-      const cleanPass = process.env.GMAIL_APP_PASSWORD.replace(/\s+/g, '');
-      mailTransporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: process.env.GMAIL_USER.trim(),
-          pass: cleanPass
-        }
-      });
-    } catch (err) {
-      console.warn('[Mail Service] Failed to initialize Gmail transporter:', err.message);
     }
   }
   return mailTransporter;
