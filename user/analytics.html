@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<title>Nutrition Analytics — Smart Lishe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<!-- ===== YOUR EXISTING STYLE.CSS ===== -->
+<link rel="stylesheet" href="style.css">
+
+<!-- ===== ANALYTICS‑SPECIFIC OVERRIDES (minimal) ===== -->
+<style>
+  /* Upgrade banner (same as dashboard) */
+  .upgrade-banner {
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    border: 1px solid #10b981;
+    border-radius: var(--radius-md, 16px);
+    padding: 16px 24px;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .upgrade-banner.show { display: flex; }
+  .upgrade-banner .ub-icon { font-size: 1.8rem; color: #047857; }
+  .upgrade-banner .ub-text { flex: 1; font-weight: 600; color: #065f46; font-size: 0.95rem; }
+  .upgrade-banner .ub-text strong { display: block; font-size: 1.05rem; margin-bottom: 2px; }
+  .upgrade-banner .btn-upgrade {
+    background: #047857;
+    color: #fff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .upgrade-banner .btn-upgrade:hover { background: #065f46; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(4, 120, 87, 0.3); }
+
+  /* Floating AI button */
+  .floating-ai-btn {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 999;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--sukuma, #2b7a4b);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    box-shadow: 0 6px 20px rgba(43, 122, 75, 0.4);
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+    cursor: pointer;
+  }
+  .floating-ai-btn:hover { transform: scale(1.05); box-shadow: 0 8px 28px rgba(43, 122, 75, 0.5); }
+  .floating-ai-btn i { line-height: 1; }
+
+  @media (max-width: 600px) {
+    .upgrade-banner {
+      flex-direction: column;
+      text-align: center;
+      padding: 16px;
+    }
+    .upgrade-banner .ub-icon { font-size: 1.4rem; }
+    .floating-ai-btn {
+      width: 52px;
+      height: 52px;
+      font-size: 1.4rem;
+      bottom: 20px;
+      right: 20px;
+    }
+    .analytics-stats-row {
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .analytics-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== AUTH CHECK ===== -->
+<script>
+(function() {
+  const email = localStorage.getItem('email');
+  const role = localStorage.getItem('smartlishe_role') || localStorage.getItem('role');
+  const profile = localStorage.getItem('smartlishe_profile');
+  const loggedIn = localStorage.getItem('smartlishe_logged_in') === 'true';
+  
+  if (!email && !profile && !loggedIn) {
+    window.location.href = 'home.html';
+    return;
+  }
+  if (role === 'Professional') {
+    window.location.href = '../professional/home.html';
+    return;
+  }
+  if (role === 'Client') {
+    window.location.href = '../client/dashboard.html';
+    return;
+  }
+})();
+</script>
+
+<!-- ===== MOBILE TOPBAR ===== -->
+<div class="mobile-topbar">
+  <div class="brand-mini">
+    <div class="mark"><i class="fa-solid fa-seedling"></i></div>
+    <span>Smart Lishe</span>
+  </div>
+  <button class="hamburger-btn" id="hamburgerBtn"><i class="fa-solid fa-bars"></i></button>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="app-shell">
+
+  <!-- ===== SIDEBAR (no Membership, no About/Contact) ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="mark"><i class="fa-solid fa-seedling"></i></div>
+      <div class="name">Smart Lishe<span>Kenya</span></div>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      
+      <div class="nav-section-divider"><span>Plan &amp; Discover</span><i class="fa-solid fa-layer-group"></i></div>
+      <div class="service-group" data-group="plan">
+        <button type="button" class="service-group-header" data-group-toggle="plan">
+          <div class="sg-icon-wrap" style="background:var(--sukuma);"><i class="fa-solid fa-bowl-food"></i></div>
+          <span class="sg-title">Plan &amp; Discover</span>
+          <span class="sg-count">6</span>
+          <span class="sg-dropdown-hint"><i class="fa-solid fa-chevron-down sg-chevron"></i></span>
+        </button>
+        <div class="service-group-body">
+          <a href="ai-assistant.html" class="nav-link"><i class="fa-solid fa-robot"></i> AI Meal Assistant</a>
+          <a href="meal-generator.html" class="nav-link"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Meal Generator</a>
+          <a href="nutriscan.html" class="nav-link"><i class="fa-solid fa-camera-retro"></i> NutriScan</a>
+          <a href="health-conditions.html" class="nav-link"><i class="fa-solid fa-heart-pulse"></i> Health Conditions</a>
+          <a href="meal-planner.html" class="nav-link"><i class="fa-solid fa-calendar-days"></i> Meal Planner</a>
+          <a href="recipes.html" class="nav-link"><i class="fa-solid fa-book-open"></i> Recipes</a>
+        </div>
+      </div>
+      
+      <div class="nav-section-divider"><span>Track &amp; Achieve</span><i class="fa-solid fa-chart-simple"></i></div>
+      <div class="service-group open" data-group="track">
+        <button type="button" class="service-group-header" data-group-toggle="track">
+          <div class="sg-icon-wrap" style="background:var(--char);"><i class="fa-solid fa-chart-simple"></i></div>
+          <span class="sg-title">Track &amp; Achieve</span>
+          <span class="sg-count">4</span>
+          <span class="sg-dropdown-hint"><i class="fa-solid fa-chevron-down sg-chevron"></i></span>
+        </button>
+        <div class="service-group-body">
+          <a href="goal-tracker.html" class="nav-link"><i class="fa-solid fa-bullseye"></i> Goal Tracker</a>
+          <a href="water-tracker.html" class="nav-link"><i class="fa-solid fa-droplet"></i> Water Tracker</a>
+          <a href="analytics.html" class="nav-link active"><i class="fa-solid fa-chart-line"></i> Nutrition Analytics</a>
+          <a href="shopping-list.html" class="nav-link"><i class="fa-solid fa-basket-shopping"></i> Shopping List</a>
+        </div>
+      </div>
+      
+      <!-- ===== PROFILE – only User Profile & Settings (no About/Contact) ===== -->
+      <div class="nav-section-divider"><span>Profile</span><i class="fa-solid fa-user-gear"></i></div>
+      <div class="service-group" data-group="profile">
+        <button type="button" class="service-group-header" data-group-toggle="profile">
+          <div class="sg-icon-wrap" style="background:#3D6FA8;"><i class="fa-solid fa-user"></i></div>
+          <span class="sg-title">Profile</span>
+          <span class="sg-count">2</span>
+          <span class="sg-dropdown-hint"><i class="fa-solid fa-chevron-down sg-chevron"></i></span>
+        </button>
+        <div class="service-group-body">
+          <a href="profile.html" class="nav-link"><i class="fa-solid fa-id-card"></i> User Profile</a>
+          <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> Settings</a>
+          <a href="#" class="nav-link open-support-btn" onclick="event.preventDefault(); window.openSupportModal();"><i class="fa-solid fa-headset" style="color:var(--sukuma);"></i> Support &amp; Tickets</a>
+          <!-- About and Contact removed -->
+        </div>
+      </div>
+
+      <!-- ===== Logout (properly clears storage) ===== -->
+      <div style="margin-top:12px;">
+        <a href="#" class="nav-link" onclick="event.preventDefault(); localStorage.clear(); sessionStorage.clear(); window.location.href='home.html';" style="color:var(--char);">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="theme-toggle" id="themeToggle">
+        <span><i class="fa-solid fa-moon" id="themeIcon"></i> Dark mode</span>
+        <span class="switch"></span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="globalSearch" placeholder="Search recipes, meals, conditions...">
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        <a href="profile.html" class="profile-chip" style="cursor:pointer;">
+          <div class="avatar" id="topbarAvatar">U</div>
+          <span class="label" id="topbarName">User</span>
+        </a>
+      </div>
+    </header>
+
+    <section class="page active">
+      <div class="page-inner">
+        <div class="page-header">
+          <div class="section-eyebrow">Nutrition Analytics</div>
+          <h2>Your nutrition, visualised</h2>
+          <p>Track calorie trends, macro balance, and water intake over time — all in one place.</p>
+        </div>
+
+        <!-- ===== UPGRADE BANNER (free users) ===== -->
+        <div class="upgrade-banner" id="upgradeBanner">
+          <div class="ub-icon"><i class="fa-regular fa-crown"></i></div>
+          <div class="ub-text">
+            <strong>Unlock Premium Features</strong>
+            <span>Get unlimited AI requests, advanced analytics, priority support, and more – only KES 2,500/month.</span>
+          </div>
+          <a href="billing.html" class="btn-upgrade">
+            <i class="fa-solid fa-arrow-right"></i> Upgrade Now
+          </a>
+        </div>
+
+        <!-- ===== STATS CARDS (data from localStorage) ===== -->
+        <div class="analytics-stats-row">
+          <div class="analytics-stat-card">
+            <div class="stat-val" style="color:var(--sukuma);" id="statCalories">0</div>
+            <div class="stat-label">Avg daily calories</div>
+            <div class="stat-change up" id="statCalChange"><i class="fa-solid fa-arrow-up"></i> +0%</div>
+          </div>
+          <div class="analytics-stat-card">
+            <div class="stat-val" style="color:var(--char);" id="statProtein">0g</div>
+            <div class="stat-label">Avg protein</div>
+            <div class="stat-change up" id="statProteinChange"><i class="fa-solid fa-arrow-up"></i> +0%</div>
+          </div>
+          <div class="analytics-stat-card">
+            <div class="stat-val" style="color:var(--maize-deep);" id="statCarbs">0g</div>
+            <div class="stat-label">Avg carbs</div>
+            <div class="stat-change down" id="statCarbsChange"><i class="fa-solid fa-arrow-down"></i> -0%</div>
+          </div>
+          <div class="analytics-stat-card">
+            <div class="stat-val" style="color:#3D6FA8;" id="statWater">0L</div>
+            <div class="stat-label">Avg water intake</div>
+            <div class="stat-change up" id="statWaterChange"><i class="fa-solid fa-arrow-up"></i> +0%</div>
+          </div>
+        </div>
+
+        <!-- ===== CHART PANELS ===== -->
+        <div class="analytics-grid">
+          <div class="analytics-chart-panel">
+            <h4><i class="fa-solid fa-fire" style="color:var(--char);margin-right:6px;"></i>Calorie trend (7 days)</h4>
+            <div id="chartCalorieTrend" style="height:180px;display:flex;align-items:flex-end;gap:12px;padding:20px 10px 10px;"></div>
+          </div>
+          <div class="analytics-chart-panel">
+            <h4><i class="fa-solid fa-chart-pie" style="color:var(--sukuma);margin-right:6px;"></i>Macro breakdown</h4>
+            <div id="chartMacroBreakdown" style="height:180px;display:flex;align-items:center;justify-content:space-around;padding:10px;"></div>
+          </div>
+          <div class="analytics-chart-panel">
+            <h4><i class="fa-solid fa-droplet" style="color:#3D6FA8;margin-right:6px;"></i>Water intake (7 days)</h4>
+            <div id="chartWaterTrend" style="height:180px;display:flex;align-items:flex-end;gap:12px;padding:20px 10px 10px;"></div>
+          </div>
+          <div class="analytics-chart-panel">
+            <h4><i class="fa-solid fa-weight-scale" style="color:var(--accent-3);margin-right:6px;"></i>Weight progress</h4>
+            <div id="chartWeightTrend" style="height:180px;padding:10px;"></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- ===== FLOATING AI BUTTON ===== -->
+<a href="ai-assistant.html" class="floating-ai-btn" id="chatbotFab" aria-label="Smart Lishe AI Assistant" title="Open Smart Lishe AI Assistant">
+  <i class="fa-solid fa-robot"></i>
+  <span class="ping" style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:var(--char,#2e7d32);border:2px solid #fff;"></span>
+</a>
+
+<button class="scroll-top-btn" id="scrollTopBtn"><i class="fa-solid fa-arrow-up"></i></button>
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+// ============================================================
+// SMART LISHE — NUTRITION ANALYTICS (ALL DATA FROM localStorage)
+// ============================================================
+
+const Store = {
+  get(key, fallback){
+    try{
+      const raw = localStorage.getItem('smartlishe_' + key);
+      return raw ? JSON.parse(raw) : fallback;
+    }catch(e){ return fallback; }
+  },
+  set(key, value){
+    try{
+      localStorage.setItem('smartlishe_' + key, JSON.stringify(value));
+      return true;
+    }catch(e){ return false; }
+  }
+};
+
+function showToast(message, type = 'success'){
+  const stack = document.getElementById('toastStack');
+  const toast = document.createElement('div');
+  toast.className = 'toast' + (type === 'error' ? ' error' : '');
+  const icon = type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check';
+  toast.innerHTML = `<i class="fa-solid ${icon}"></i><span>${message}</span>`;
+  stack.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(40px)';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+// ===== UPGRADE BANNER =====
+(function checkUpgradeBanner() {
+  const banner = document.getElementById('upgradeBanner');
+  if (!banner) return;
+  const membership = localStorage.getItem('user_membership') || 'free';
+  if (membership === 'free') {
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+})();
+
+// ===== LOAD STATS & CHARTS =====
+function loadAnalyticsStats() {
+  const calories = parseInt(localStorage.getItem('caloriesConsumed')) || 1920;
+  document.getElementById('statCalories').textContent = calories;
+
+  const protein = parseInt(localStorage.getItem('protein')) || 78;
+  document.getElementById('statProtein').textContent = protein + 'g';
+
+  const carbs = parseInt(localStorage.getItem('carbs')) || 240;
+  document.getElementById('statCarbs').textContent = carbs + 'g';
+
+  const water = parseFloat(localStorage.getItem('waterConsumed')) || 2.2;
+  document.getElementById('statWater').textContent = water.toFixed(1) + 'L';
+
+  renderAnalyticsCharts();
+}
+
+function renderAnalyticsCharts() {
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  // 1. Calorie trend chart
+  const calorieContainer = document.getElementById('chartCalorieTrend');
+  if (calorieContainer) {
+    const weeklyCalories = JSON.parse(localStorage.getItem('weeklyCalories') || '[1850, 2100, 1700, 1950, 2200, 1600, 1920]');
+    const maxCal = Math.max(...weeklyCalories, 2400);
+    const todayIndex = (new Date().getDay() + 6) % 7;
+    calorieContainer.innerHTML = days.map((day, i) => {
+      const h = Math.round((weeklyCalories[i] / maxCal) * 100);
+      const isToday = i === todayIndex;
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+        <span style="font-size:0.65rem;color:var(--text-muted);margin-bottom:4px;">${weeklyCalories[i]}</span>
+        <div style="width:100%;max-width:24px;height:${h}%;background:${isToday ? 'var(--sukuma)' : 'var(--char)'};border-radius:4px;transition:height 0.4s ease;"></div>
+        <span style="font-size:0.75rem;margin-top:6px;font-weight:${isToday ? '700' : '500'};">${day}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // 2. Macro breakdown chart
+  const macroContainer = document.getElementById('chartMacroBreakdown');
+  if (macroContainer) {
+    const p = parseInt(localStorage.getItem('protein')) || 78;
+    const c = parseInt(localStorage.getItem('carbs')) || 240;
+    const f = parseInt(localStorage.getItem('fat')) || 45;
+    const total = p + c + f || 1;
+    const pPct = Math.round((p / total) * 100);
+    const cPct = Math.round((c / total) * 100);
+    const fPct = Math.round((f / total) * 100);
+
+    macroContainer.innerHTML = `
+      <div style="position:relative;width:120px;height:120px;border-radius:50%;background:conic-gradient(var(--sukuma) 0% ${cPct}%, var(--char) ${cPct}% ${cPct + pPct}%, var(--maize-deep) ${cPct + pPct}% 100%);display:flex;align-items:center;justify-content:center;">
+        <div style="width:80px;height:80px;background:var(--bg-card);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+          <span style="font-size:0.7rem;color:var(--text-muted);">Total</span>
+          <strong style="font-size:0.9rem;">${total}g</strong>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:0.85rem;">
+        <div style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:3px;background:var(--sukuma);"></span> <strong>Carbs:</strong> ${c}g (${cPct}%)</div>
+        <div style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:3px;background:var(--char);"></span> <strong>Protein:</strong> ${p}g (${pPct}%)</div>
+        <div style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:3px;background:var(--maize-deep);"></span> <strong>Fat:</strong> ${f}g (${fPct}%)</div>
+      </div>
+    `;
+  }
+
+  // 3. Water trend chart
+  const waterContainer = document.getElementById('chartWaterTrend');
+  if (waterContainer) {
+    const waterData = Store.get('waterData', { history: {} });
+    const todayDate = new Date();
+    const dayIndex = todayDate.getDay();
+    const mondayOffset = dayIndex === 0 ? 6 : dayIndex - 1;
+    const waterList = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(todayDate);
+      d.setDate(d.getDate() - mondayOffset + i);
+      const key = d.toISOString().slice(0, 10);
+      const glasses = waterData.history[key] ? waterData.history[key].glasses : (i === 6 ? Math.round((parseFloat(localStorage.getItem('waterConsumed')) || 2.2) / 0.25) : 8);
+      waterList.push((glasses * 0.25));
+    }
+    waterContainer.innerHTML = days.map((day, i) => {
+      const l = waterList[i];
+      const h = Math.min(100, Math.round((l / 3.0) * 100));
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;">
+        <span style="font-size:0.65rem;color:var(--text-muted);margin-bottom:4px;">${l.toFixed(1)}L</span>
+        <div style="width:100%;max-width:24px;height:${h}%;background:#3D6FA8;border-radius:4px;transition:height 0.4s ease;"></div>
+        <span style="font-size:0.75rem;margin-top:6px;font-weight:500;">${day}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // 4. Weight progress chart
+  const weightContainer = document.getElementById('chartWeightTrend');
+  if (weightContainer) {
+    const goalData = Store.get('goalTrackerData', {
+      currentWeight: 71.2,
+      targetWeight: 66.0,
+      history: [
+        { date: 'May', weight: 74.0 },
+        { date: 'Jun 1', weight: 73.4 },
+        { date: 'Jun 8', weight: 72.7 },
+        { date: 'Jun 15', weight: 72.0 },
+        { date: 'Today', weight: parseFloat(localStorage.getItem('currentWeight')) || 71.2 }
+      ]
+    });
+    const history = goalData.history;
+    const minW = Math.min(...history.map(h => h.weight)) - 1;
+    const maxW = Math.max(...history.map(h => h.weight)) + 1;
+    const pts = history.map((h, i) => {
+      const x = 30 + (i / (history.length - 1 || 1)) * 520;
+      const y = 140 - ((h.weight - minW) / (maxW - minW || 1)) * 100;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+
+    weightContainer.innerHTML = `
+      <svg width="100%" height="100%" viewBox="0 0 580 160" preserveAspectRatio="none">
+        <polyline fill="none" stroke="var(--sukuma)" stroke-width="3" points="${pts}" stroke-linecap="round"/>
+        ${history.map((h, i) => {
+          const x = 30 + (i / (history.length - 1 || 1)) * 520;
+          const y = 140 - ((h.weight - minW) / (maxW - minW || 1)) * 100;
+          return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="var(--sukuma)"/>
+                  <text x="${x.toFixed(1)}" y="${(y - 10).toFixed(1)}" font-size="10" fill="var(--text-muted)" text-anchor="middle">${h.weight}kg</text>
+                  <text x="${x.toFixed(1)}" y="155" font-size="10" fill="var(--text-muted)" text-anchor="middle">${h.date}</text>`;
+        }).join('')}
+      </svg>
+    `;
+  }
+}
+
+// ===== USER NAME / AVATAR =====
+function loadUserInfo() {
+  const userProfile = Store.get('userProfile', {});
+  const profile = JSON.parse(localStorage.getItem('smartlishe_profile') || '{}');
+  const firstName = localStorage.getItem('firstName') || 'User';
+  const email = localStorage.getItem('email') || '';
+
+  let userName = 'User';
+  if (userProfile.fullName) userName = userProfile.fullName.split(' ')[0];
+  else if (profile.name) userName = profile.name;
+  else if (firstName && firstName !== 'User') userName = firstName;
+  else if (email) userName = email.split('@')[0];
+
+  document.getElementById('topbarName').textContent = userName;
+  document.getElementById('topbarAvatar').textContent = userName.charAt(0).toUpperCase();
+}
+
+// ===== THEME =====
+function initTheme(){
+  const saved = Store.get('theme', 'light');
+  document.body.setAttribute('data-theme', saved);
+  document.getElementById('themeIcon').className = saved === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const current = document.body.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', next);
+    document.getElementById('themeIcon').className = next === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    Store.set('theme', next);
+  });
+}
+
+// ===== SIDEBAR =====
+function initSidebar(){
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const hamburger = document.getElementById('hamburgerBtn');
+  function openSidebar(){ sidebar.classList.add('open'); overlay.classList.add('show'); }
+  function closeSidebar(){ sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  hamburger.addEventListener('click', openSidebar);
+  overlay.addEventListener('click', closeSidebar);
+  document.querySelectorAll('.service-group-header').forEach(header => {
+    header.addEventListener('click', () => {
+      const group = header.closest('.service-group');
+      const wasOpen = group.classList.contains('open');
+      document.querySelectorAll('.service-group').forEach(g => g.classList.remove('open'));
+      if(!wasOpen) group.classList.add('open');
+    });
+  });
+  document.querySelectorAll('.nav-link').forEach(link => link.addEventListener('click', closeSidebar));
+}
+
+// ===== SCROLL TOP =====
+function initScrollTop(){
+  const btn = document.getElementById('scrollTopBtn');
+  window.addEventListener('scroll', () => btn.classList.toggle('show', window.scrollY > 400));
+  btn.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
+}
+
+// ===== CHATBOT =====
+const chatKnowledge = [
+  { keys:['weight loss','lose weight','slim','cut weight'], reply:"For healthy weight loss, aim for a moderate calorie deficit — about 300–500 kcal below your maintenance level. Favour ugali in smaller portions, more sukuma wiki and other vegetables, lean proteins like omena, tilapia or chicken." },
+  { keys:['diabetes','diabetic','blood sugar','sugar level'], reply:"For diabetes-friendly eating, choose high-fibre carbs in moderate portions — mukimo, githeri, and brown rice are better than white rice or refined ugali alone." },
+  { keys:['water','hydration','how much water','drink water'], reply:"Most adults should aim for about 2 to 2.5 litres of water a day — roughly 8 glasses, more if you're active, pregnant, or it's hot." },
+  { keys:['hypertension','blood pressure','high bp'], reply:"For hypertension, reduce salt — go easy on the maggi cubes and added salt when cooking. Favour potassium-rich foods like bananas, avocado, sweet potatoes, and managu." },
+  { keys:['recipe','meal idea','what should i eat'], reply:"Try ugali with sukuma wiki and omena, or githeri with avocado. Head to the Recipes page for over 50 Kenyan dishes with full nutrition breakdowns." },
+];
+
+function findBotReply(text){
+  const lower = text.toLowerCase();
+  for(const entry of chatKnowledge){
+    if(entry.keys.some(k => lower.includes(k))) return entry.reply;
+  }
+  return "I'm still learning that one. Try asking me about weight loss, diabetes-friendly meals, hypertension, hydration, or Kenyan recipes.";
+}
+
+function formatTime(date){ return date.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' }); }
+
+function addChatMessage(text, sender){
+  const body = document.getElementById('chatbotBody');
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg ' + sender;
+  msg.innerHTML = `<div class="bubble">${text}</div><span class="timestamp">${formatTime(new Date())}</span>`;
+  body.appendChild(msg);
+  body.scrollTop = body.scrollHeight;
+}
+
+function showTypingIndicator(){
+  const body = document.getElementById('chatbotBody');
+  const typing = document.createElement('div');
+  typing.className = 'chat-msg bot';
+  typing.id = 'typingIndicator';
+  typing.innerHTML = `<div class="bubble typing-dots"><span></span><span></span><span></span></div>`;
+  body.appendChild(typing);
+  body.scrollTop = body.scrollHeight;
+}
+
+function removeTypingIndicator(){ const el = document.getElementById('typingIndicator'); if(el) el.remove(); }
+
+function sendChatMessage(text){
+  if(!text.trim()) return;
+  addChatMessage(text, 'user');
+  document.getElementById('chatbotInput').value = '';
+  showTypingIndicator();
+  setTimeout(() => {
+    removeTypingIndicator();
+    addChatMessage(findBotReply(text), 'bot');
+  }, 700 + Math.random() * 500);
+}
+
+function initChatbot(){
+  const fab = document.getElementById('chatbotFab');
+  if(fab){
+    fab.addEventListener('click', (e) => {
+      window.location.href = 'ai-assistant.html';
+    });
+  }
+}
+
+function initNotifications(){
+  document.getElementById('notifBtn').addEventListener('click', () => showToast("You're all caught up — no new notifications."));
+}
+
+function initGlobalSearch(){
+  document.getElementById('globalSearch').addEventListener('keypress', (e) => {
+    if(e.key === 'Enter' && e.target.value.trim()) showToast(`Searching for "${e.target.value.trim()}"...`);
+  });
+}
+
+// ===== BOOT =====
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  initSidebar();
+  initScrollTop();
+  loadUserInfo();
+  loadAnalyticsStats();
+  initChatbot();
+  initNotifications();
+  initGlobalSearch();
+});
+</script>
+<script src="global-search.js"></script>
+<script src="../support-widget.js"></script>
+</body>
+</html>

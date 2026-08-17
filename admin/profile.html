@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Admin Profile — Smart Lishe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="admin.css">
+  <style>
+    .profile-hero {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      padding: 32px 36px;
+      border: 1px solid var(--basket-line);
+      margin-bottom: 28px;
+    }
+    .profile-hero .avatar-large {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: var(--sukuma);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.8rem;
+      font-weight: 700;
+      font-family: var(--font-display);
+      flex-shrink: 0;
+    }
+    .profile-hero .info h2 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+    }
+    .profile-hero .info p {
+      color: var(--text-secondary);
+      margin: 4px 0;
+    }
+    .profile-hero .info .badge {
+      font-size: 0.7rem;
+      padding: 2px 12px;
+    }
+    .profile-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .profile-form .field-group {
+      margin-bottom: 16px;
+    }
+    .profile-form .field-group label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    .profile-form .field-group input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--basket-line);
+      background: var(--bg-body);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      transition: border 0.2s ease;
+    }
+    .profile-form .field-group input:focus {
+      outline: none;
+      border-color: var(--sukuma);
+    }
+    .profile-form .field-group input:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .profile-form .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 600px) {
+      .profile-hero {
+        flex-direction: column;
+        text-align: center;
+        padding: 24px;
+      }
+      .profile-form .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== AUTH CHECK ===== -->
+<script>
+(function() {
+  const token = localStorage.getItem('access_token');
+  const role = localStorage.getItem('smartlishe_role') || localStorage.getItem('role');
+  if (!token || (role && role.toLowerCase() !== 'admin')) { window.location.href = '../auth/login.html'; }
+})();
+</script>
+
+<!-- ===== MOBILE TOPBAR ===== -->
+<div class="mobile-topbar">
+  <div class="brand-mini">
+    <div class="mark"><i class="fa-solid fa-seedling"></i></div>
+    <span>Smart Lishe Admin</span>
+  </div>
+  <button class="hamburger-btn" id="hamburgerBtn"><i class="fa-solid fa-bars"></i></button>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="app-shell">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="mark"><i class="fa-solid fa-seedling"></i></div>
+      <div class="name">Smart Lishe<span>Admin</span></div>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <div class="nav-link" id="accountsToggle">
+        <i class="fa-solid fa-users"></i> Accounts
+        <span class="dropdown-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="nav-dropdown" id="accountsDropdown">
+        <a href="accounts.html#users" class="nav-link"><i class="fa-solid fa-user"></i> Users</a>
+        <a href="accounts.html#professionals" class="nav-link"><i class="fa-solid fa-user-md"></i> Professionals</a>
+        <a href="accounts.html#clients" class="nav-link"><i class="fa-solid fa-user-group"></i> Clients</a>
+      </div>
+      <div class="nav-link" id="operationsToggle">
+        <i class="fa-solid fa-gears"></i> Operations
+        <span class="dropdown-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="nav-dropdown" id="operationsDropdown">
+        <a href="operations.html#billing" class="nav-link"><i class="fa-solid fa-credit-card"></i> Billing</a>
+        <a href="operations.html#recipes" class="nav-link"><i class="fa-solid fa-book-open"></i> Recipes</a>
+        <a href="operations.html#datasets" class="nav-link"><i class="fa-solid fa-database"></i> Datasets</a>
+        <a href="operations.html#reports" class="nav-link"><i class="fa-solid fa-chart-bar"></i> Reports</a>
+        <a href="operations.html#ai-monitoring" class="nav-link"><i class="fa-solid fa-robot"></i> AI Monitoring</a>
+      </div>
+      <a href="support.html" class="nav-link"><i class="fa-solid fa-headset"></i> Support</a>
+      <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> Settings</a>
+      <a href="profile.html" class="nav-link active"><i class="fa-solid fa-user-circle"></i> Profile</a>
+      <div style="margin-top:12px;">
+        <a href="#" class="nav-link" onclick="event.preventDefault(); logout();" style="color:var(--char);">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="theme-toggle" id="themeToggle">
+        <span><i class="fa-solid fa-moon" id="themeIcon"></i> Dark mode</span>
+        <span class="switch"></span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn" id="topbarHamburger"><i class="fa-solid fa-bars"></i></button>
+        <div class="search-box">
+          <i class="fa-solid fa-search"></i>
+          <input type="text" id="globalSearch" placeholder="Search...">
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        <a href="profile.html" class="profile-chip">
+          <div class="avatar" id="adminAvatar">A</div>
+          <span class="label" id="adminName">Admin</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="page-header">
+      <div>
+        <div class="section-eyebrow"><i class="fa-solid fa-user-circle"></i> Profile</div>
+        <h1>Admin Profile</h1>
+        <p>Manage your account details and preferences.</p>
+      </div>
+    </div>
+
+    <!-- Profile Hero -->
+    <div class="profile-hero">
+      <div class="avatar-large" id="profileAvatar">A</div>
+      <div class="info">
+        <h2 id="profileName">Administrator</h2>
+        <p id="profileEmail">admin@smartlishe.co.ke</p>
+        <p style="font-size:0.85rem;color:var(--text-muted);">
+          <i class="fa-regular fa-calendar"></i> Member since Jan 2025 &nbsp;·&nbsp;
+          <i class="fa-regular fa-clock"></i> Last login: Today, 10:30 AM
+        </p>
+        <span class="badge badge-success">Administrator</span>
+        <div class="profile-actions">
+          <button class="btn btn-primary btn-sm" id="editProfileBtn"><i class="fa-regular fa-pen"></i> Edit Profile</button>
+          <button class="btn btn-secondary btn-sm" id="changePasswordBtn"><i class="fa-solid fa-key"></i> Change Password</button>
+          <button class="btn btn-danger btn-sm" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Profile Form -->
+    <div class="card" id="profileEditForm" style="display:none;">
+      <h4 style="font-size:1rem;margin-bottom:16px;"><i class="fa-regular fa-pen" style="color:var(--sukuma);margin-right:8px;"></i> Edit Profile</h4>
+      <form class="profile-form" id="profileForm">
+        <div class="form-row">
+          <div class="field-group">
+            <label>Full Name</label>
+            <input type="text" id="editName" value="Administrator">
+          </div>
+          <div class="field-group">
+            <label>Email Address</label>
+            <input type="email" id="editEmail" value="admin@smartlishe.co.ke">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field-group">
+            <label>Phone Number</label>
+            <input type="tel" id="editPhone" value="+254 700 123 456">
+          </div>
+          <div class="field-group">
+            <label>Role</label>
+            <input type="text" value="Administrator" disabled>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:12px;">
+          <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+          <button type="button" class="btn btn-secondary" id="cancelEditBtn">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Change Password Form -->
+    <div class="card" id="changePasswordForm" style="display:none;margin-top:16px;">
+      <h4 style="font-size:1rem;margin-bottom:16px;"><i class="fa-solid fa-key" style="color:var(--maize-deep);margin-right:8px;"></i> Change Password</h4>
+      <form class="profile-form" id="passwordForm">
+        <div class="field-group">
+          <label>Current Password</label>
+          <input type="password" id="currentPassword" placeholder="Enter current password">
+        </div>
+        <div class="field-group">
+          <label>New Password</label>
+          <input type="password" id="newPassword" placeholder="Enter new password">
+        </div>
+        <div class="field-group">
+          <label>Confirm New Password</label>
+          <input type="password" id="confirmPassword" placeholder="Confirm new password">
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px;">
+          <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Update Password</button>
+          <button type="button" class="btn btn-secondary" id="cancelPwBtn">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+// ============================================================
+// ADMIN PROFILE
+// ============================================================
+
+const Store = {
+  get: function(k, fb) {
+    try { const raw = localStorage.getItem('smartlishe_' + k); return raw ? JSON.parse(raw) : fb; }
+    catch(e) { return fb; }
+  },
+  set: function(k, v) {
+    try { localStorage.setItem('smartlishe_' + k, JSON.stringify(v)); return true; }
+    catch(e) { return false; }
+  }
+};
+
+function showToast(msg, type) {
+  type = type || 'success';
+  const stack = document.getElementById('toastStack');
+  if (!stack) return;
+  const t = document.createElement('div');
+  t.className = 'toast' + (type === 'error' ? ' error' : '');
+  const icon = type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check';
+  t.innerHTML = '<i class="fa-solid ' + icon + '"></i><span>' + msg + '</span>';
+  stack.appendChild(t);
+  setTimeout(function() {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(40px)';
+    setTimeout(function() { t.remove(); }, 300);
+  }, 3500);
+}
+window.showToast = showToast;
+
+function initTheme() {
+  const saved = Store.get('theme', 'light');
+  document.body.setAttribute('data-theme', saved);
+  if (saved === 'dark') document.body.classList.add('dark-mode');
+  const icon = document.getElementById('themeIcon');
+  if (icon) icon.className = saved === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+  const toggle = document.getElementById('themeToggle');
+  if (toggle) {
+    toggle.addEventListener('click', function() {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      if (icon) icon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+      Store.set('theme', isDark ? 'dark' : 'light');
+      document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    });
+  }
+}
+
+function initSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const hamburger = document.getElementById('hamburgerBtn');
+  const topbarHamburger = document.getElementById('topbarHamburger');
+
+  function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('show'); }
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+
+  if (hamburger) hamburger.addEventListener('click', openSidebar);
+  if (topbarHamburger) topbarHamburger.addEventListener('click', openSidebar);
+  if (overlay) overlay.addEventListener('click', closeSidebar);
+
+  function toggleDropdown(headerId, dropdownId) {
+    const header = document.getElementById(headerId);
+    const dropdown = document.getElementById(dropdownId);
+    if (!header || !dropdown) return;
+    header.addEventListener('click', function(e) {
+      e.preventDefault();
+      const isOpen = dropdown.classList.contains('open');
+      document.querySelectorAll('.nav-dropdown').forEach(d => d.classList.remove('open'));
+      document.querySelectorAll('.dropdown-chevron').forEach(c => c.classList.remove('open'));
+      if (!isOpen) {
+        dropdown.classList.add('open');
+        header.querySelector('.dropdown-chevron').classList.add('open');
+      }
+    });
+  }
+  toggleDropdown('accountsToggle', 'accountsDropdown');
+  toggleDropdown('operationsToggle', 'operationsDropdown');
+
+  document.querySelectorAll('.nav-link').forEach(function(link) {
+    link.addEventListener('click', function() {
+      if (window.innerWidth <= 768) closeSidebar();
+    });
+  });
+}
+
+function loadAdminInfo() {
+  const profile = Store.get('profileData', null);
+  const profileRaw = localStorage.getItem('smartlishe_profile');
+  let name = 'Administrator';
+  let email = 'admin@smartlishe.co.ke';
+  if (profileRaw) {
+    try {
+      const p = JSON.parse(profileRaw);
+      if (p.name) name = p.name;
+      if (p.email) email = p.email;
+    } catch(e) {}
+  }
+  if (profile && profile.name) name = profile.name;
+  if (profile && profile.email) email = profile.email;
+
+  document.getElementById('adminName').textContent = name;
+  document.getElementById('adminAvatar').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('profileName').textContent = name;
+  document.getElementById('profileEmail').textContent = email;
+  document.getElementById('editName').value = name;
+  document.getElementById('editEmail').value = email;
+}
+
+function initProfileActions() {
+  const editBtn = document.getElementById('editProfileBtn');
+  const editForm = document.getElementById('profileEditForm');
+  const cancelEdit = document.getElementById('cancelEditBtn');
+
+  editBtn.addEventListener('click', function() {
+    editForm.style.display = 'block';
+    document.getElementById('changePasswordForm').style.display = 'none';
+    editForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+
+  cancelEdit.addEventListener('click', function() {
+    editForm.style.display = 'none';
+  });
+
+  document.getElementById('profileForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = document.getElementById('editName').value.trim();
+    const email = document.getElementById('editEmail').value.trim();
+    if (!name || !email) { showToast('Please fill in all fields.', 'error'); return; }
+    // Save to localStorage
+    const profile = Store.get('profileData', {});
+    profile.name = name;
+    profile.email = email;
+    Store.set('profileData', profile);
+
+    // Also update smartlishe_profile
+    let p = {};
+    try { const raw = localStorage.getItem('smartlishe_profile'); if (raw) p = JSON.parse(raw); } catch(e) {}
+    p.name = name;
+    p.email = email;
+    localStorage.setItem('smartlishe_profile', JSON.stringify(p));
+
+    loadAdminInfo();
+    editForm.style.display = 'none';
+    showToast('Profile updated successfully.');
+  });
+
+  const pwBtn = document.getElementById('changePasswordBtn');
+  const pwForm = document.getElementById('changePasswordForm');
+  pwBtn.addEventListener('click', function() {
+    pwForm.style.display = 'block';
+    document.getElementById('profileEditForm').style.display = 'none';
+    pwForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+
+  document.getElementById('cancelPwBtn').addEventListener('click', function() {
+    pwForm.style.display = 'none';
+  });
+
+  document.getElementById('passwordForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const current = document.getElementById('currentPassword').value;
+    const newPw = document.getElementById('newPassword').value;
+    const confirm = document.getElementById('confirmPassword').value;
+
+    if (!current || !newPw || !confirm) { showToast('Please fill in all fields.', 'error'); return; }
+    if (newPw !== confirm) { showToast('Passwords do not match.', 'error'); return; }
+    if (newPw.length < 8) { showToast('Password must be at least 8 characters.', 'error'); return; }
+
+    // In a real app, verify current password with backend
+    localStorage.setItem('smartlishe_password', newPw);
+    pwForm.style.display = 'none';
+    showToast('Password updated successfully.');
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+  });
+}
+
+function initNotifications() {
+  const btn = document.getElementById('notifBtn');
+  if (btn) btn.addEventListener('click', function() { showToast('You have no new notifications.'); });
+}
+
+function initSearch() {
+  const input = document.getElementById('globalSearch');
+  if (input) input.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' && e.target.value.trim()) {
+      showToast('Searching for "' + e.target.value.trim() + '"...');
+    }
+  });
+}
+
+function logout() {
+  localStorage.clear();
+  sessionStorage.clear();
+  window.location.href = '../auth/login.html';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  initTheme();
+  initSidebar();
+  loadAdminInfo();
+  initProfileActions();
+  initNotifications();
+  initSearch();
+});
+</script>
+</body>
+</html>

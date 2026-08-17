@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upgrade Plan — Smart Lishe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<!-- ===== MOBILE TOPBAR ===== -->
+<div class="mobile-topbar">
+  <div class="brand-mini">
+    <div class="mark"><i class="fa-solid fa-seedling"></i></div>
+    <span>Smart Lishe</span>
+  </div>
+  <button class="hamburger-btn" id="hamburgerBtn"><i class="fa-solid fa-bars"></i></button>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="app-shell">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="mark"><i class="fa-solid fa-seedling"></i></div>
+      <div class="name">Smart Lishe<span>Kenya</span></div>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <a href="../home.html" class="nav-link"><i class="fa-solid fa-house"></i> Home</a>
+      <a href="../dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      
+      <div class="nav-section-divider"><span>Plan &amp; Discover</span><i class="fa-solid fa-layer-group"></i></div>
+      <div class="service-group" data-group="plan">
+        <button type="button" class="service-group-header" data-group-toggle="plan">
+          <div class="sg-icon-wrap" style="background:var(--sukuma);"><i class="fa-solid fa-bowl-food"></i></div>
+          <span class="sg-title">Plan &amp; Discover</span>
+          <span class="sg-count">5</span>
+          <span class="sg-dropdown-hint"><i class="fa-solid fa-chevron-down sg-chevron"></i></span>
+        </button>
+        <div class="service-group-body">
+          <a href="../meal-generator.html" class="nav-link"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Meal Generator</a>
+          <a href="../nutriscan.html" class="nav-link"><i class="fa-solid fa-camera-retro"></i> NutriScan</a>
+          <a href="../health-conditions.html" class="nav-link"><i class="fa-solid fa-heart-pulse"></i> Health Conditions</a>
+          <a href="../meal-planner.html" class="nav-link"><i class="fa-solid fa-calendar-days"></i> Meal Planner</a>
+          <a href="../recipes.html" class="nav-link"><i class="fa-solid fa-book-open"></i> Recipes</a>
+        </div>
+      </div>
+      
+      <div class="nav-section-divider"><span>Track &amp; Achieve</span><i class="fa-solid fa-chart-simple"></i></div>
+      <div class="service-group" data-group="track">
+        <button type="button" class="service-group-header" data-group-toggle="track">
+          <div class="sg-icon-wrap" style="background:var(--char);"><i class="fa-solid fa-chart-simple"></i></div>
+          <span class="sg-title">Track &amp; Achieve</span>
+          <span class="sg-count">4</span>
+          <span class="sg-dropdown-hint"><i class="fa-solid fa-chevron-down sg-chevron"></i></span>
+        </button>
+        <div class="service-group-body">
+          <a href="../goal-tracker.html" class="nav-link"><i class="fa-solid fa-bullseye"></i> Goal Tracker</a>
+          <a href="../water-tracker.html" class="nav-link"><i class="fa-solid fa-droplet"></i> Water Tracker</a>
+          <a href="../analytics.html" class="nav-link"><i class="fa-solid fa-chart-line"></i> Nutrition Analytics</a>
+          <a href="../shopping-list.html" class="nav-link"><i class="fa-solid fa-basket-shopping"></i> Shopping List</a>
+        </div>
+      </div>
+      
+      <div class="nav-section-divider"><span>Profile</span><i class="fa-solid fa-user-gear"></i></div>
+      <div class="service-group" data-group="profile">
+        <button type="button" class="service-group-header" data-group-toggle="profile">
+          <div class="sg-icon-wrap" style="background:#3D6FA8;"><i class="fa-solid fa-user"></i></div>
+          <span class="sg-title">Profile</span>
+          <span class="sg-count">4</span>
+          <span class="sg-dropdown-hint"><i class="fa-solid fa-chevron-down sg-chevron"></i></span>
+        </button>
+        <div class="service-group-body">
+          <a href="../profile.html" class="nav-link"><i class="fa-solid fa-id-card"></i> User Profile</a>
+          <a href="../settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> Settings</a>
+          <a href="../about.html" class="nav-link"><i class="fa-solid fa-circle-info"></i> About</a>
+          <a href="../contact.html" class="nav-link"><i class="fa-solid fa-envelope"></i> Contact</a>
+        </div>
+      </div>
+
+      <!-- ✅ MEMBERSHIP: same folder (NO ../) -->
+      <div class="nav-section-divider"><span>Membership</span><i class="fa-solid fa-crown"></i></div>
+      <div class="service-group open" data-group="membership">
+        <button type="button" class="service-group-header" data-group-toggle="membership">
+          <div class="sg-icon-wrap" style="background:var(--accent-2);"><i class="fa-solid fa-crown"></i></div>
+          <span class="sg-title">Membership</span>
+          <span class="sg-count">9</span>
+          <span class="sg-dropdown-hint"><i class="fa-solid fa-chevron-down sg-chevron"></i></span>
+        </button>
+        <div class="service-group-body">
+          <a href="membership.html" class="nav-link"><i class="fa-solid fa-id-card"></i> Current Membership</a>
+          <a href="pricing.html" class="nav-link"><i class="fa-solid fa-tags"></i> Pricing Plans</a>
+          <a href="benefits.html" class="nav-link"><i class="fa-solid fa-gift"></i> Benefits</a>
+          <a href="billing.html" class="nav-link"><i class="fa-solid fa-credit-card"></i> Billing</a>
+          <a href="invoices.html" class="nav-link"><i class="fa-solid fa-file-invoice"></i> Invoices</a>
+          <a href="upgrade.html" class="nav-link active"><i class="fa-solid fa-arrow-trend-up"></i> Upgrade Plan</a>
+          <a href="history.html" class="nav-link"><i class="fa-solid fa-clock-rotate-left"></i> Subscription History</a>
+          <a href="professional-access.html" class="nav-link"><i class="fa-solid fa-briefcase"></i> Professional Access</a>
+          <a href="clinic-access.html" class="nav-link"><i class="fa-solid fa-hospital"></i> Clinic Access</a>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <a href="#" class="nav-link" onclick="event.preventDefault(); showToast('Logging out...');" style="color:var(--char);"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="theme-toggle" id="themeToggle">
+        <span><i class="fa-solid fa-moon" id="themeIcon"></i> Dark mode</span>
+        <span class="switch"></span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="globalSearch" placeholder="Search recipes, meals, conditions...">
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        <a href="../profile.html" class="profile-chip" style="cursor:pointer;">
+          <div class="avatar" id="topbarAvatar">W</div>
+          <span class="label" id="topbarName">Wanjiru</span>
+        </a>
+      </div>
+    </header>
+
+    <section class="page active">
+      <div class="page-inner">
+        <div class="page-header">
+          <div class="section-eyebrow">Membership</div>
+          <h2>Upgrade Your Plan</h2>
+          <p>Get more from Smart Lishe by upgrading to a plan that fits your needs.</p>
+        </div>
+
+        <!-- ===== UPGRADE COMPARISON ===== -->
+        <div class="upgrade-comparison">
+          <!-- Current Plan -->
+          <div class="upgrade-current-box">
+            <div class="current-label">Current Plan</div>
+            <div class="plan-name">Premium</div>
+            <div class="plan-price">KES 999 / month</div>
+            <div style="margin-top:12px;">
+              <span class="invoice-status paid" style="font-size:0.8rem;">Active</span>
+            </div>
+            <div style="margin-top:16px;font-size:0.85rem;color:var(--text-secondary);">
+              <i class="fa-solid fa-check" style="color:var(--sukuma);"></i> Unlimited Meal Plans<br>
+              <i class="fa-solid fa-check" style="color:var(--sukuma);"></i> NutriScan<br>
+              <i class="fa-solid fa-check" style="color:var(--sukuma);"></i> Advanced Analytics<br>
+              <i class="fa-solid fa-check" style="color:var(--sukuma);"></i> Shopping Lists<br>
+              <i class="fa-solid fa-check" style="color:var(--sukuma);"></i> Premium Recipes
+            </div>
+          </div>
+
+          <!-- Upgrade Options -->
+          <div class="upgrade-option-box">
+            <div class="option-name">Professional</div>
+            <div class="option-price">KES 3,999 <span>/month</span></div>
+            <div class="savings"><i class="fa-solid fa-tag"></i> Save 20% with Yearly Billing</div>
+            <div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:16px;">
+              <i class="fa-solid fa-check" style="color:var(--sukuma);"></i> Everything in Premium<br>
+              <i class="fa-solid fa-check" style="color:var(--sukuma);"></i> Unlimited Clients<br>
+              <i class="fa-solid fa-check" style="color:var(--sukuma);"></i> Client Management<br>
+              <i class="fa-solid fa-check" style="color:var(--sukuma);"></i> Programs &amp; Reports<br>
+              <i class="fa-solid fa-check" style="color:var(--sukuma);"></i> Messaging &amp; Appointments
+            </div>
+            <button class="btn btn-primary" id="upgradeProBtn"><i class="fa-solid fa-mobile-screen-button" style="color:#10b981;"></i> Upgrade via M-Pesa (KES 3,999)</button>
+          </div>
+        </div>
+
+        <!-- ===== CLINIC UPGRADE ===== -->
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Clinic &amp; Hospital Plan</h3>
+            <span style="font-family:var(--font-mono);font-size:1.2rem;font-weight:700;color:var(--sukuma);">KES 12,999 <span style="font-size:0.8rem;font-weight:400;color:var(--text-muted);">/month</span></span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:16px 0 20px;">
+            <div style="font-size:0.85rem;color:var(--text-secondary);"><i class="fa-solid fa-check" style="color:var(--sukuma);"></i> Multiple Professionals</div>
+            <div style="font-size:0.85rem;color:var(--text-secondary);"><i class="fa-solid fa-check" style="color:var(--sukuma);"></i> Staff Management</div>
+            <div style="font-size:0.85rem;color:var(--text-secondary);"><i class="fa-solid fa-check" style="color:var(--sukuma);"></i> Departments</div>
+            <div style="font-size:0.85rem;color:var(--text-secondary);"><i class="fa-solid fa-check" style="color:var(--sukuma);"></i> Enterprise Reports</div>
+            <div style="font-size:0.85rem;color:var(--text-secondary);"><i class="fa-solid fa-check" style="color:var(--sukuma);"></i> Compliance Monitoring</div>
+            <div style="font-size:0.85rem;color:var(--text-secondary);"><i class="fa-solid fa-check" style="color:var(--sukuma);"></i> Centralized M-Pesa Billing</div>
+          </div>
+          <button class="btn btn-primary" id="upgradeClinicBtn" style="width:100%;justify-content:center;background:#059669;border-color:#059669;"><i class="fa-solid fa-mobile-screen-button"></i> Upgrade Clinic via M-Pesa (KES 12,999)</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ===== M-PESA EXPRESS UPGRADE MODAL ===== -->
+<div id="mpesaUpgradeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:var(--bg-card, #fff);border-radius:16px;max-width:480px;width:100%;padding:24px;box-shadow:0 20px 40px rgba(0,0,0,0.25);position:relative;border:1px solid var(--basket-line, #e2e8f0);">
+    <button id="closeMpesaModalBtn" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-muted);">&times;</button>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <div style="width:40px;height:40px;background:#ecfdf5;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#059669;font-size:1.3rem;">
+        <i class="fa-solid fa-mobile-screen-button"></i>
+      </div>
+      <div>
+        <h3 style="margin:0;font-family:var(--font-display, serif);font-size:1.15rem;color:var(--text-primary);">M-Pesa Express STK Upgrade</h3>
+        <p style="margin:0;font-size:0.78rem;color:var(--text-muted);" id="modalPlanSubtitle">Plan: Professional Nutritionist</p>
+      </div>
+    </div>
+
+    <div style="background:var(--paper-deep, #f8fafc);padding:12px;border-radius:10px;border:1px solid var(--basket-line, #e2e8f0);margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:0.85rem;font-weight:600;color:var(--text-primary);" id="modalPlanTitle">Professional Plan</span>
+      <span style="font-family:var(--font-mono, monospace);font-weight:700;color:#059669;font-size:1.05rem;" id="modalPlanCost">KES 3,999</span>
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <label style="display:block;font-size:0.82rem;font-weight:600;color:var(--text-primary);margin-bottom:6px;">M-Pesa Phone Number (Safaricom Kenya)</label>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="background:var(--basket-line, #e2e8f0);padding:10px 12px;border-radius:8px;font-weight:700;font-size:0.88rem;color:var(--text-primary);">+254</span>
+        <input type="tel" id="mpesaUpgradePhone" placeholder="0712345678 or 712345678" value="0712345678" style="flex:1;padding:10px 12px;border:1px solid var(--basket-line, #ccc);border-radius:8px;font-size:0.9rem;">
+      </div>
+    </div>
+
+    <div id="stkModalStatus" style="margin-bottom:16px;"></div>
+
+    <button id="sendStkBtn" class="btn btn-primary" style="width:100%;justify-content:center;background:#059669;padding:12px;font-size:0.95rem;">
+      <i class="fa-solid fa-mobile-screen-button"></i> Send M-Pesa STK Prompt
+    </button>
+  </div>
+</div>
+
+<!-- ===== CHATBOT ===== -->
+<button class="chatbot-fab" id="chatbotFab"><i class="fa-solid fa-robot"></i><span class="ping"></span></button>
+<div class="chatbot-panel" id="chatbotPanel">
+  <div class="chatbot-head">
+    <div class="ai-avatar"><i class="fa-solid fa-robot"></i></div>
+    <div class="info"><strong>Smart Lishe Assistant</strong><span>Online</span></div>
+    <button class="chatbot-close" id="chatbotClose"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="chatbot-body" id="chatbotBody"></div>
+  <div class="chatbot-suggestions" id="chatbotSuggestions">
+    <button class="chip-suggestion" data-q="weight loss">Weight loss tips</button>
+    <button class="chip-suggestion" data-q="diabetes meal">Diabetes-friendly meal</button>
+    <button class="chip-suggestion" data-q="water intake">How much water?</button>
+  </div>
+  <div class="chatbot-input-row">
+    <input type="text" id="chatbotInput" placeholder="Ask about meals, health, recipes...">
+    <button class="chatbot-send" id="chatbotSend"><i class="fa-solid fa-paper-plane"></i></button>
+  </div>
+</div>
+
+<button class="scroll-top-btn" id="scrollTopBtn"><i class="fa-solid fa-arrow-up"></i></button>
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+// ============================================================
+// UPGRADE — Complete JavaScript (Safe Navigation)
+// ============================================================
+
+const Store = {
+  get(key, fallback){
+    try{
+      const raw = localStorage.getItem('smartlishe_' + key);
+      return raw ? JSON.parse(raw) : fallback;
+    }catch(e){ return fallback; }
+  },
+  set(key, value){
+    try{
+      localStorage.setItem('smartlishe_' + key, JSON.stringify(value));
+      return true;
+    }catch(e){ return false; }
+  }
+};
+
+function showToast(message, type = 'success'){
+  const stack = document.getElementById('toastStack');
+  if(!stack) return;
+  const toast = document.createElement('div');
+  toast.className = 'toast' + (type === 'error' ? ' error' : '');
+  const icon = type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check';
+  toast.innerHTML = `<i class="fa-solid ${icon}"></i><span>${message}</span>`;
+  stack.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(40px)';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+window.showToast = showToast;
+
+function initTheme(){
+  const saved = Store.get('theme', 'light');
+  document.body.setAttribute('data-theme', saved);
+  const themeIcon = document.getElementById('themeIcon');
+  if(themeIcon) {
+    themeIcon.className = saved === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+  }
+  const themeToggle = document.getElementById('themeToggle');
+  if(themeToggle){
+    themeToggle.addEventListener('click', () => {
+      const current = document.body.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', next);
+      if(themeIcon) {
+        themeIcon.className = next === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+      }
+      Store.set('theme', next);
+    });
+  }
+}
+
+function initSidebar(){
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const hamburger = document.getElementById('hamburgerBtn');
+  
+  function openSidebar(){ 
+    if(sidebar) sidebar.classList.add('open'); 
+    if(overlay) overlay.classList.add('show'); 
+  }
+  function closeSidebar(){ 
+    if(sidebar) sidebar.classList.remove('open'); 
+    if(overlay) overlay.classList.remove('show'); 
+  }
+  
+  if(hamburger) hamburger.addEventListener('click', openSidebar);
+  if(overlay) overlay.addEventListener('click', closeSidebar);
+  
+  document.querySelectorAll('.service-group-header').forEach(header => {
+    header.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const group = header.closest('.service-group');
+      if(!group) return;
+      const wasOpen = group.classList.contains('open');
+      document.querySelectorAll('.service-group').forEach(g => g.classList.remove('open'));
+      if(!wasOpen) group.classList.add('open');
+    });
+  });
+  
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', closeSidebar);
+  });
+}
+
+function initScrollTop(){
+  const btn = document.getElementById('scrollTopBtn');
+  if(!btn) return;
+  window.addEventListener('scroll', () => {
+    btn.classList.toggle('show', window.scrollY > 400);
+  });
+  btn.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
+}
+
+function initChatbot(){
+  const fab = document.getElementById('chatbotFab');
+  const panel = document.getElementById('chatbotPanel');
+  const closeBtn = document.getElementById('chatbotClose');
+  const input = document.getElementById('chatbotInput');
+  const sendBtn = document.getElementById('chatbotSend');
+  if(!fab || !panel) return;
+  
+  let hasGreeted = false;
+  fab.addEventListener('click', () => {
+    panel.classList.toggle('open');
+    if(panel.classList.contains('open') && !hasGreeted){
+      hasGreeted = true;
+      addChatMessage("Habari! I'm your Smart Lishe assistant. Ask me about meals, weight goals, health conditions, or hydration.", 'bot');
+    }
+  });
+  if(closeBtn) closeBtn.addEventListener('click', () => panel.classList.remove('open'));
+  if(sendBtn) sendBtn.addEventListener('click', () => sendChatMessage(input ? input.value : ''));
+  if(input){
+    input.addEventListener('keypress', (e) => {
+      if(e.key === 'Enter') sendChatMessage(input.value);
+    });
+  }
+  document.querySelectorAll('.chip-suggestion').forEach(chip => {
+    chip.addEventListener('click', () => sendChatMessage(chip.dataset.q));
+  });
+}
+
+const chatKnowledge = [
+  { keys:['weight loss','lose weight','slim'], reply:"For healthy weight loss, aim for a moderate calorie deficit — about 300–500 kcal below your maintenance level." },
+  { keys:['diabetes','diabetic','blood sugar'], reply:"For diabetes-friendly eating, choose high-fibre carbs in moderate portions — mukimo, githeri, and brown rice are better than white rice alone." },
+  { keys:['water','hydration','how much water'], reply:"Most adults should aim for about 2 to 2.5 litres of water a day — roughly 8 glasses." },
+];
+
+function findBotReply(text){
+  const lower = text.toLowerCase();
+  for(const entry of chatKnowledge){
+    if(entry.keys.some(k => lower.includes(k))) return entry.reply;
+  }
+  return "I'm still learning that one. Try asking me about weight loss, diabetes, or hydration.";
+}
+
+function formatTime(date){ return date.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' }); }
+
+function addChatMessage(text, sender){
+  const body = document.getElementById('chatbotBody');
+  if(!body) return;
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg ' + sender;
+  msg.innerHTML = `<div class="bubble">${text}</div><span class="timestamp">${formatTime(new Date())}</span>`;
+  body.appendChild(msg);
+  body.scrollTop = body.scrollHeight;
+}
+
+function showTypingIndicator(){
+  const body = document.getElementById('chatbotBody');
+  if(!body) return;
+  const typing = document.createElement('div');
+  typing.className = 'chat-msg bot';
+  typing.id = 'typingIndicator';
+  typing.innerHTML = `<div class="bubble typing-dots"><span></span><span></span><span></span></div>`;
+  body.appendChild(typing);
+  body.scrollTop = body.scrollHeight;
+}
+
+function removeTypingIndicator(){ const el = document.getElementById('typingIndicator'); if(el) el.remove(); }
+
+function sendChatMessage(text){
+  if(!text.trim()) return;
+  addChatMessage(text, 'user');
+  const input = document.getElementById('chatbotInput');
+  if(input) input.value = '';
+  showTypingIndicator();
+  setTimeout(() => {
+    removeTypingIndicator();
+    addChatMessage(findBotReply(text), 'bot');
+  }, 700 + Math.random() * 500);
+}
+
+function initNotifications(){
+  const btn = document.getElementById('notifBtn');
+  if(btn){
+    btn.addEventListener('click', () => showToast("You're all caught up — no new notifications."));
+  }
+}
+
+function initGlobalSearch(){
+  const input = document.getElementById('globalSearch');
+  if(input){
+    input.addEventListener('keypress', (e) => {
+      if(e.key === 'Enter' && e.target.value.trim()) showToast(`Searching for "${e.target.value.trim()}"...`);
+    });
+  }
+}
+
+function initMpesaUpgradeModal() {
+  const modal = document.getElementById('mpesaUpgradeModal');
+  const closeBtn = document.getElementById('closeMpesaModalBtn');
+  const sendBtn = document.getElementById('sendStkBtn');
+  const phoneInput = document.getElementById('mpesaUpgradePhone');
+  const statusBox = document.getElementById('stkModalStatus');
+  const titleEl = document.getElementById('modalPlanTitle');
+  const subtitleEl = document.getElementById('modalPlanSubtitle');
+  const costEl = document.getElementById('modalPlanCost');
+
+  let currentTargetPlan = { id: 'plan-pro', name: 'Professional Nutritionist', price: 3999 };
+
+  function openModal(planId, planName, priceAmount) {
+    currentTargetPlan = { id: planId, name: planName, price: priceAmount };
+    if (titleEl) titleEl.textContent = planName;
+    if (subtitleEl) subtitleEl.textContent = `Instant M-Pesa Upgrade: ${planName}`;
+    if (costEl) costEl.textContent = `KES ${priceAmount.toLocaleString()}`;
+    if (statusBox) statusBox.innerHTML = '';
+    if (sendBtn) {
+      sendBtn.disabled = false;
+      sendBtn.innerHTML = '<i class="fa-solid fa-mobile-screen-button"></i> Send M-Pesa STK Prompt';
+    }
+    if (modal) modal.style.display = 'flex';
+  }
+
+  function closeModal() {
+    if (modal) modal.style.display = 'none';
+  }
+
+  document.getElementById('upgradeProBtn')?.addEventListener('click', () => {
+    openModal('plan-pro', 'Professional Nutritionist Plan', 3999);
+  });
+
+  document.getElementById('upgradeClinicBtn')?.addEventListener('click', () => {
+    openModal('plan-clinic', 'Clinic & Hospital Enterprise Plan', 12999);
+  });
+
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+  }
+
+  if (sendBtn) {
+    sendBtn.addEventListener('click', async () => {
+      const phoneVal = phoneInput ? phoneInput.value.trim() : '';
+      if (!phoneVal || phoneVal.length < 9) {
+        showToast('Please enter a valid Safaricom phone number.', 'error');
+        return;
+      }
+
+      sendBtn.disabled = true;
+      sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Contacting Safaricom Daraja...';
+
+      try {
+        const token = localStorage.getItem('access_token') || localStorage.getItem('smartlishe_token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch('/api/payments/mpesa/stkpush', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            phone: phoneVal,
+            amount: currentTargetPlan.price,
+            plan_id: currentTargetPlan.id,
+            plan_name: currentTargetPlan.name,
+            account_reference: 'SmartLishe-Upgrade'
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Failed to initiate STK push');
+        }
+
+        const checkoutId = data.data.CheckoutRequestID;
+        showToast('📱 STK Push prompt sent to handset!');
+
+        if (statusBox) {
+          statusBox.innerHTML = `
+            <div style="background:#0f172a;color:#fff;border-radius:12px;padding:14px;box-shadow:0 10px 25px rgba(0,0,0,0.3);font-family:sans-serif;">
+              <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #334155;padding-bottom:8px;margin-bottom:10px;">
+                <div style="display:flex;align-items:center;gap:6px;color:#10b981;font-weight:700;font-size:0.85rem;">
+                  <i class="fa-solid fa-mobile-screen-button"></i> M-Pesa STK Handset Prompt
+                </div>
+                <span style="font-size:0.7rem;background:#059669;padding:2px 6px;border-radius:10px;color:#fff;font-weight:600;">LIVE DARAJA</span>
+              </div>
+              <p style="font-size:0.8rem;color:#cbd5e1;line-height:1.4;margin-bottom:8px;">
+                Sent to <strong>+${data.data.phone}</strong>. Please enter your M-Pesa PIN on your mobile device.
+              </p>
+              <div style="background:#1e293b;border-left:4px solid #10b981;padding:8px;border-radius:4px;font-family:monospace;font-size:0.75rem;color:#38bdf8;">
+                Pay KES ${currentTargetPlan.price.toLocaleString()} to Smart Lishe Ltd?
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:0.75rem;color:#94a3b8;">
+                <i class="fa-solid fa-arrows-rotate fa-spin" style="color:#10b981;"></i> Waiting for PIN verification...
+              </div>
+            </div>
+          `;
+        }
+
+        let attempts = 0;
+        const pollInterval = setInterval(async () => {
+          attempts++;
+          try {
+            const qRes = await fetch('/api/payments/mpesa/query', {
+              method: 'POST',
+              headers,
+              body: JSON.stringify({ checkout_request_id: checkoutId })
+            }).then(r => r.json());
+
+            if (qRes.success && (qRes.data?.status === 'COMPLETED' || qRes.data?.ResultCode === '0')) {
+              clearInterval(pollInterval);
+              showToast(`🎉 Upgrade Confirmed! Receipt: ${qRes.data?.mpesa_receipt_number || 'SJK82910X4'}`);
+              
+              if (statusBox) {
+                statusBox.innerHTML = `
+                  <div style="background:#ecfdf5;border:1px solid #10b981;border-radius:12px;padding:14px;text-align:center;">
+                    <i class="fa-solid fa-circle-check" style="color:#059669;font-size:2rem;margin-bottom:8px;"></i>
+                    <h4 style="margin:0;color:#065f46;font-size:1rem;">Upgrade Active!</h4>
+                    <p style="font-size:0.8rem;color:#047857;margin:4px 0 10px;">
+                      Receipt: <strong style="font-family:monospace;">${qRes.data?.mpesa_receipt_number || 'SJK82910X4'}</strong>
+                    </p>
+                    <a href="../professional/dashboard.html" class="btn btn-primary btn-sm" style="background:#059669;display:inline-block;">Open Professional Portal</a>
+                  </div>
+                `;
+              }
+              sendBtn.style.display = 'none';
+            } else if (attempts > 15) {
+              clearInterval(pollInterval);
+              showToast('M-Pesa payment query timed out.', 'error');
+              sendBtn.disabled = false;
+              sendBtn.innerHTML = '<i class="fa-solid fa-mobile-screen-button"></i> Retry STK Prompt';
+            }
+          } catch (err) {
+            console.warn('[M-Pesa Poll Error]', err);
+          }
+        }, 1000);
+
+      } catch (err) {
+        showToast('STK Push failed: ' + err.message, 'error');
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '<i class="fa-solid fa-mobile-screen-button"></i> Send M-Pesa STK Prompt';
+      }
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  initSidebar();
+  initScrollTop();
+  initChatbot();
+  initNotifications();
+  initGlobalSearch();
+  initMpesaUpgradeModal();
+});
+</script>
+</body>
+</html>

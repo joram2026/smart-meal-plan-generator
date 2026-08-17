@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings — Smart Lishe Professional</title>
+  <!-- CSS now in same folder -->
+  <link rel="stylesheet" href="professional.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    /* ===== SETTINGS PAGE STYLES ===== */
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--basket-line);
+      border-radius: var(--radius-sm);
+      margin-bottom: 10px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .settings-row .sr-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+      min-width: 200px;
+    }
+    .settings-row .sr-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .settings-row .sr-text strong {
+      display: block;
+      font-size: 0.88rem;
+    }
+    .settings-row .sr-text span {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .settings-toggle {
+      width: 44px;
+      height: 24px;
+      border-radius: 12px;
+      background: var(--basket-line);
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      flex-shrink: 0;
+    }
+    .settings-toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      transition: transform 0.3s ease;
+    }
+    .settings-toggle.on {
+      background: var(--sukuma);
+    }
+    .settings-toggle.on::after {
+      transform: translateX(20px);
+    }
+
+    .filter-select {
+      padding: 8px 12px;
+      border-radius: 30px;
+      border: 1px solid var(--basket-line);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      font-size: 0.82rem;
+      font-weight: 600;
+      font-family: var(--font-body);
+      cursor: pointer;
+    }
+
+    .toast-stack {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 360px;
+      width: calc(100% - 48px);
+    }
+    .toast {
+      background: var(--bg-elevated);
+      border: 1px solid var(--basket-line);
+      border-left: 4px solid var(--sukuma);
+      border-radius: 12px;
+      padding: 14px 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      animation: slideUp 0.3s ease;
+      backdrop-filter: blur(8px);
+    }
+    .toast.error {
+      border-left-color: #dc2626;
+    }
+    .toast i {
+      font-size: 1.2rem;
+      color: var(--sukuma);
+    }
+    .toast.error i {
+      color: #dc2626;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hamburger-btn { display: none; }
+    @media (max-width: 1024px) { .hamburger-btn { display: flex; } }
+
+    .floating-ai-btn { display: none !important; }
+
+    /* Ensure consistent spacing */
+    .btn-sm { padding: 5px 14px; font-size: 0.7rem; }
+  </style>
+</head>
+<body>
+
+<!-- ===== SIDEBAR (all links relative, same folder) ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="mark"><i class="fa-solid fa-seedling"></i></div>
+    <div class="name">Smart Lishe<span>Professional</span></div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="home.html" class="nav-link"><i class="fa-solid fa-house"></i> Home</a>
+    <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+    <a href="clients.html" class="nav-link"><i class="fa-solid fa-users"></i> Clients</a>
+    <a href="engagement.html" class="nav-link"><i class="fa-solid fa-rocket"></i> Engagement</a>
+    <a href="ai-assistant.html" class="nav-link"><i class="fa-solid fa-robot"></i> AI Assistant</a>
+    <a href="profile.html" class="nav-link"><i class="fa-solid fa-user"></i> Profile</a>
+    <a href="billing.html" class="nav-link"><i class="fa-solid fa-credit-card"></i> Billing</a>
+    <a href="settings.html" class="nav-link active"><i class="fa-solid fa-gear"></i> Settings</a>
+    <a href="#" class="nav-link open-support-btn" onclick="event.preventDefault(); window.openSupportModal();"><i class="fa-solid fa-headset" style="color:var(--sukuma);"></i> Support &amp; Tickets</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="#" class="nav-link" style="color:var(--char);" onclick="event.preventDefault(); logout();">
+      <i class="fa-solid fa-right-from-bracket"></i> Logout
+    </a>
+  </div>
+</aside>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="app-shell">
+  <div class="main-content">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn" id="hamburgerBtn"><i class="fa-solid fa-bars"></i></button>
+        <div class="search-box">
+          <i class="fa-solid fa-search"></i>
+          <input type="text" id="globalSearch" placeholder="Search...">
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        <div class="profile-chip" id="profileChip">
+          <div class="avatar" id="profileAvatar">PK</div>
+          <span class="label" id="profileName">Dr. Peter</span>
+          <span class="pro-badge">PRO</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="prof-hero" style="margin-bottom:24px;">
+      <div>
+        <h1>Settings</h1>
+        <p>Manage your professional account preferences.</p>
+      </div>
+    </div>
+
+    <div style="max-width:800px;">
+      <!-- Appearance -->
+      <h3 style="font-family:var(--font-display);font-size:1.1rem;margin-bottom:12px;">Appearance</h3>
+      <div class="settings-row">
+        <div class="sr-info">
+          <div class="sr-icon" style="background:var(--sukuma);"><i class="fa-regular fa-moon"></i></div>
+          <div class="sr-text">
+            <strong>Dark Mode</strong>
+            <span>Switch between light and dark themes</span>
+          </div>
+        </div>
+        <div class="settings-toggle on" id="darkModeToggle" onclick="toggleDarkMode()"></div>
+      </div>
+
+      <div class="settings-row">
+        <div class="sr-info">
+          <div class="sr-icon" style="background:var(--accent-2);"><i class="fa-regular fa-font"></i></div>
+          <div class="sr-text">
+            <strong>Compact View</strong>
+            <span>Reduce spacing for a denser layout</span>
+          </div>
+        </div>
+        <div class="settings-toggle" id="compactToggle" onclick="toggleSetting('compact_view', this)"></div>
+      </div>
+
+      <!-- Notifications -->
+      <h3 style="font-family:var(--font-display);font-size:1.1rem;margin:24px 0 12px;">Notifications</h3>
+      <div class="settings-row">
+        <div class="sr-info">
+          <div class="sr-icon" style="background:var(--char);"><i class="fa-regular fa-bell"></i></div>
+          <div class="sr-text">
+            <strong>Email Notifications</strong>
+            <span>Receive updates via email</span>
+          </div>
+        </div>
+        <div class="settings-toggle on" id="emailNotifToggle" onclick="toggleSetting('email_notifications', this)"></div>
+      </div>
+
+      <div class="settings-row">
+        <div class="sr-info">
+          <div class="sr-icon" style="background:#1A5276;"><i class="fa-regular fa-message"></i></div>
+          <div class="sr-text">
+            <strong>Client Messages</strong>
+            <span>Get notified about client messages</span>
+          </div>
+        </div>
+        <div class="settings-toggle on" id="clientMsgToggle" onclick="toggleSetting('client_messages', this)"></div>
+      </div>
+
+      <div class="settings-row">
+        <div class="sr-info">
+          <div class="sr-icon" style="background:var(--maize-deep);"><i class="fa-regular fa-calendar"></i></div>
+          <div class="sr-text">
+            <strong>Appointment Reminders</strong>
+            <span>Receive reminders for scheduled appointments</span>
+          </div>
+        </div>
+        <div class="settings-toggle on" id="apptRemindToggle" onclick="toggleSetting('appointment_reminders', this)"></div>
+      </div>
+
+      <!-- Security -->
+      <h3 style="font-family:var(--font-display);font-size:1.1rem;margin:24px 0 12px;">Security</h3>
+      <div class="settings-row">
+        <div class="sr-info">
+          <div class="sr-icon" style="background:#8E44AD;"><i class="fa-regular fa-shield-halved"></i></div>
+          <div class="sr-text">
+            <strong>Two-Factor Authentication</strong>
+            <span>Add an extra layer of security</span>
+          </div>
+        </div>
+        <div class="settings-toggle" id="twoFactorToggle" onclick="toggleSetting('two_factor_auth', this)"></div>
+      </div>
+
+      <div class="settings-row">
+        <div class="sr-info">
+          <div class="sr-icon" style="background:var(--char);"><i class="fa-regular fa-key"></i></div>
+          <div class="sr-text">
+            <strong>Change Password</strong>
+            <span>Update your account password</span>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm" style="width:auto;" onclick="showToast('Password update form opened.')">Update</button>
+      </div>
+
+      <!-- Calendar & Availability -->
+      <h3 style="font-family:var(--font-display);font-size:1.1rem;margin:24px 0 12px;">Calendar & Availability</h3>
+      <div class="settings-row">
+        <div class="sr-info">
+          <div class="sr-icon" style="background:#2ECC71;"><i class="fa-regular fa-calendar-days"></i></div>
+          <div class="sr-text">
+            <strong>Working Days</strong>
+            <span>Set your available working days</span>
+          </div>
+        </div>
+        <select class="filter-select" id="workingDays" onchange="updateSetting('working_days', this.value)">
+          <option value="Mon - Fri">Mon - Fri</option>
+          <option value="Mon - Sat">Mon - Sat</option>
+          <option value="Custom">Custom</option>
+        </select>
+      </div>
+
+      <div class="settings-row">
+        <div class="sr-info">
+          <div class="sr-icon" style="background:var(--sukuma);"><i class="fa-regular fa-clock"></i></div>
+          <div class="sr-text">
+            <strong>Working Hours</strong>
+            <span>Set your available hours</span>
+          </div>
+        </div>
+        <select class="filter-select" id="workingHours" onchange="updateSetting('working_hours', this.value)">
+          <option value="8:00 AM - 6:00 PM">8:00 AM - 6:00 PM</option>
+          <option value="9:00 AM - 5:00 PM">9:00 AM - 5:00 PM</option>
+          <option value="Custom">Custom</option>
+        </select>
+      </div>
+
+      <!-- Privacy -->
+      <h3 style="font-family:var(--font-display);font-size:1.1rem;margin:24px 0 12px;">Privacy</h3>
+      <div class="settings-row">
+        <div class="sr-info">
+          <div class="sr-icon" style="background:#1A5276;"><i class="fa-regular fa-eye"></i></div>
+          <div class="sr-text">
+            <strong>Profile Visibility</strong>
+            <span>Control who can see your professional profile</span>
+          </div>
+        </div>
+        <select class="filter-select" id="profileVisibility" onchange="updateSetting('profile_visibility', this.value)">
+          <option value="Public">Public</option>
+          <option value="Only Clients">Only Clients</option>
+          <option value="Private">Private</option>
+        </select>
+      </div>
+
+      <!-- Preferences -->
+      <h3 style="font-family:var(--font-display);font-size:1.1rem;margin:24px 0 12px;">Preferences</h3>
+      <div class="settings-row">
+        <div class="sr-info">
+          <div class="sr-icon" style="background:var(--maize-deep);"><i class="fa-regular fa-language"></i></div>
+          <div class="sr-text">
+            <strong>Language</strong>
+            <span>Select your preferred language</span>
+          </div>
+        </div>
+        <select class="filter-select" id="languageSelect" onchange="updateSetting('language', this.value)">
+          <option value="en">English</option>
+          <option value="sw">Swahili</option>
+          <option value="fr">French</option>
+        </select>
+      </div>
+
+      <div class="settings-row" style="border-color:rgba(193,68,14,0.3);background:rgba(193,68,14,0.05);">
+        <div class="sr-info">
+          <div class="sr-icon" style="background:var(--char);"><i class="fa-regular fa-trash"></i></div>
+          <div class="sr-text">
+            <strong>Delete Account</strong>
+            <span>Permanently delete your professional account</span>
+          </div>
+        </div>
+        <button class="btn btn-sm" style="background:var(--char);color:#fff;width:auto;padding:8px 16px;" onclick="if(confirm('Are you sure you want to delete your account? This action cannot be undone.')) showToast('Account deletion request submitted.')">Delete</button>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:24px;">
+        <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="saveSettings()"><i class="fa-regular fa-check"></i> Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+// ============================================================
+// SMART LISHE — PROFESSIONAL SETTINGS (Backend-Integrated)
+// ============================================================
+
+const API_BASE = '/api';
+
+// ===== HELPERS =====
+function getToken() {
+  return localStorage.getItem('access_token') ||
+         localStorage.getItem('smartlishe_token') ||
+         localStorage.getItem('token') ||
+         '';
+}
+
+function getHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + getToken()
+  };
+}
+
+async function apiRequest(endpoint, method = 'GET', body = null) {
+  const url = API_BASE + endpoint;
+  const options = { method, headers: getHeaders() };
+  if (body) options.body = JSON.stringify(body);
+  const res = await fetch(url, options);
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err);
+  }
+  return res.json();
+}
+
+function showToast(message, type = 'success') {
+  const stack = document.getElementById('toastStack');
+  if (!stack) return;
+  const toast = document.createElement('div');
+  toast.className = 'toast' + (type === 'error' ? ' error' : '');
+  const icon = type === 'error' ? 'fa-circle-exclamation' : 'fa-check-circle';
+  toast.innerHTML = '<i class="fa-regular ' + icon + '"></i><span>' + message + '</span>';
+  stack.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(40px)';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+window.showToast = showToast;
+
+function logout() {
+  localStorage.clear();
+  sessionStorage.clear();
+  window.location.href = '../home.html';
+}
+
+// ===== AUTH CHECK – NO REDIRECT =====
+(function checkAuth() {
+  const token = getToken();
+  const role = localStorage.getItem('smartlishe_role') || localStorage.getItem('role') || '';
+  const isProfessional = role.toLowerCase() === 'professional';
+
+  console.log('🔐 Settings auth check:', { token: !!token, role, isProfessional });
+
+  if (!token) {
+    console.warn('⚠️ No token found – showing page anyway.');
+    showToast('⚠️ You are not logged in. Some data may not load.', 'error');
+    return;
+  }
+
+  if (!isProfessional) {
+    console.warn('⚠️ Role is not Professional (found: "' + role + '") – showing page anyway.');
+    showToast('⚠️ You are not logged in as a professional. Some data may not load.', 'error');
+    return;
+  }
+
+  console.log('✅ Authenticated as Professional.');
+})();
+
+// ===== GET PROFESSIONAL NAME =====
+function getProfessionalName() {
+  const profile = JSON.parse(localStorage.getItem('smartlishe_profile') || '{}');
+  if (profile.name) return profile.name;
+  const firstName = localStorage.getItem('firstName') || 'Professional';
+  const lastName = localStorage.getItem('lastName') || '';
+  return firstName + (lastName ? ' ' + lastName : '');
+}
+function getInitials() {
+  const name = getProfessionalName();
+  const parts = name.split(' ');
+  if (parts.length >= 2) return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+  return name.substring(0, 2).toUpperCase();
+}
+document.getElementById('profileName').textContent = getProfessionalName();
+document.getElementById('profileAvatar').textContent = getInitials();
+
+// ============================================================
+// SETTINGS STATE & API
+// ============================================================
+
+let settings = {};
+
+const toggleMap = {
+  'compact_view': 'compactToggle',
+  'email_notifications': 'emailNotifToggle',
+  'client_messages': 'clientMsgToggle',
+  'appointment_reminders': 'apptRemindToggle',
+  'two_factor_auth': 'twoFactorToggle'
+};
+const selectMap = {
+  'language': 'languageSelect',
+  'working_days': 'workingDays',
+  'working_hours': 'workingHours',
+  'profile_visibility': 'profileVisibility'
+};
+
+async function loadSettings() {
+  try {
+    const res = await apiRequest('/settings');
+    settings = res.data || {};
+
+    // Apply dark mode
+    const theme = settings.theme || 'light';
+    document.body.setAttribute('data-theme', theme);
+    const darkToggle = document.getElementById('darkModeToggle');
+    if (theme === 'dark') {
+      darkToggle.classList.add('on');
+    } else {
+      darkToggle.classList.remove('on');
+    }
+
+    // Apply toggles
+    for (const [key, elId] of Object.entries(toggleMap)) {
+      const el = document.getElementById(elId);
+      if (!el) continue;
+      const val = settings[key] !== undefined ? settings[key] : (key === 'two_factor_auth' ? false : true);
+      if (val) {
+        el.classList.add('on');
+      } else {
+        el.classList.remove('on');
+      }
+    }
+
+    // Apply selects
+    for (const [key, elId] of Object.entries(selectMap)) {
+      const el = document.getElementById(elId);
+      if (!el) continue;
+      const val = settings[key] || '';
+      const options = el.options;
+      for (let i = 0; i < options.length; i++) {
+        if (options[i].value === val) {
+          el.selectedIndex = i;
+          break;
+        }
+      }
+    }
+
+  } catch (e) {
+    console.error('Load settings error:', e);
+    showToast('Failed to load settings: ' + e.message, 'error');
+    document.body.setAttribute('data-theme', 'light');
+  }
+}
+
+// -------- UPDATE SETTING (called on toggle/select change) --------
+function updateSetting(key, value) {
+  if (typeof value === 'boolean' || value === 'true' || value === 'false') {
+    settings[key] = value === true || value === 'true';
+  } else {
+    settings[key] = value;
+  }
+}
+window.updateSetting = updateSetting;
+
+// -------- TOGGLE SETTING (for click toggles) --------
+function toggleSetting(key, element) {
+  const isOn = element.classList.contains('on');
+  const newValue = !isOn;
+  if (newValue) {
+    element.classList.add('on');
+  } else {
+    element.classList.remove('on');
+  }
+  settings[key] = newValue;
+  showToast(newValue ? 'Setting enabled.' : 'Setting disabled.');
+}
+window.toggleSetting = toggleSetting;
+
+// -------- TOGGLE DARK MODE (special) --------
+function toggleDarkMode() {
+  const toggle = document.getElementById('darkModeToggle');
+  const isOn = toggle.classList.contains('on');
+  const newTheme = isOn ? 'light' : 'dark';
+  document.body.setAttribute('data-theme', newTheme);
+  if (newTheme === 'dark') {
+    toggle.classList.add('on');
+  } else {
+    toggle.classList.remove('on');
+  }
+  settings.theme = newTheme;
+  localStorage.setItem('smartlishe_theme', newTheme);
+  showToast(newTheme === 'dark' ? 'Dark mode enabled.' : 'Light mode enabled.');
+}
+window.toggleDarkMode = toggleDarkMode;
+
+// -------- SAVE ALL SETTINGS --------
+async function saveSettings() {
+  // Gather all current settings from the UI
+  for (const [key, elId] of Object.entries(toggleMap)) {
+    const el = document.getElementById(elId);
+    if (el) {
+      settings[key] = el.classList.contains('on');
+    }
+  }
+  for (const [key, elId] of Object.entries(selectMap)) {
+    const el = document.getElementById(elId);
+    if (el) {
+      settings[key] = el.value;
+    }
+  }
+  const darkToggle = document.getElementById('darkModeToggle');
+  settings.theme = darkToggle.classList.contains('on') ? 'dark' : 'light';
+
+  try {
+    await apiRequest('/settings', 'PUT', settings);
+    showToast('All settings saved successfully!');
+  } catch (e) {
+    console.error('Save settings error:', e);
+    showToast('Failed to save settings: ' + e.message, 'error');
+  }
+}
+window.saveSettings = saveSettings;
+
+// ============================================================
+// SIDEBAR TOGGLE
+// ============================================================
+
+document.addEventListener('DOMContentLoaded', function() {
+  const hamburger = document.getElementById('hamburgerBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+
+  function toggleSidebar() {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('show');
+  }
+  hamburger.addEventListener('click', toggleSidebar);
+  overlay.addEventListener('click', toggleSidebar);
+  document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 1024) toggleSidebar();
+    });
+  });
+
+  // Notifications
+  document.getElementById('notifBtn').addEventListener('click', function() {
+    showToast('No new notifications.');
+  });
+
+  loadSettings();
+
+  // Hide floating AI button
+  const floatBtn = document.querySelector('.floating-ai-btn');
+  if (floatBtn) floatBtn.style.display = 'none';
+});
+</script>
+<script src="../support-widget.js"></script>
+</body>
+</html>
