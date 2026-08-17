@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Support — Smart Lishe Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="admin.css">
+  <style>
+    .support-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .support-stats .stat-mini {
+      background: var(--bg-card);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      border: 1px solid var(--basket-line);
+      text-align: center;
+    }
+    .support-stats .stat-mini .val {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.3rem;
+    }
+    .support-stats .stat-mini .lbl {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+    }
+    .ticket-preview {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .ticket-preview .subject {
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .ticket-preview .meta {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+    @media (max-width: 600px) {
+      .support-stats { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== AUTH CHECK ===== -->
+<script>
+(function() {
+  const token = localStorage.getItem('access_token');
+  const role = localStorage.getItem('smartlishe_role') || localStorage.getItem('role');
+  if (!token || (role && role.toLowerCase() !== 'admin')) { window.location.href = '../auth/login.html'; }
+})();
+</script>
+
+<!-- ===== MOBILE TOPBAR ===== -->
+<div class="mobile-topbar">
+  <div class="brand-mini">
+    <div class="mark"><i class="fa-solid fa-seedling"></i></div>
+    <span>Smart Lishe Admin</span>
+  </div>
+  <button class="hamburger-btn" id="hamburgerBtn"><i class="fa-solid fa-bars"></i></button>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="app-shell">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="mark"><i class="fa-solid fa-seedling"></i></div>
+      <div class="name">Smart Lishe<span>Admin</span></div>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <div class="nav-link" id="accountsToggle">
+        <i class="fa-solid fa-users"></i> Accounts
+        <span class="dropdown-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="nav-dropdown" id="accountsDropdown">
+        <a href="accounts.html#users" class="nav-link"><i class="fa-solid fa-user"></i> Users</a>
+        <a href="accounts.html#professionals" class="nav-link"><i class="fa-solid fa-user-md"></i> Professionals</a>
+        <a href="accounts.html#clients" class="nav-link"><i class="fa-solid fa-user-group"></i> Clients</a>
+      </div>
+      <div class="nav-link" id="operationsToggle">
+        <i class="fa-solid fa-gears"></i> Operations
+        <span class="dropdown-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="nav-dropdown" id="operationsDropdown">
+        <a href="operations.html#billing" class="nav-link"><i class="fa-solid fa-credit-card"></i> Billing</a>
+        <a href="operations.html#recipes" class="nav-link"><i class="fa-solid fa-book-open"></i> Recipes</a>
+        <a href="operations.html#datasets" class="nav-link"><i class="fa-solid fa-database"></i> Datasets</a>
+        <a href="operations.html#reports" class="nav-link"><i class="fa-solid fa-chart-bar"></i> Reports</a>
+        <a href="operations.html#ai-monitoring" class="nav-link"><i class="fa-solid fa-robot"></i> AI Monitoring</a>
+      </div>
+      <a href="support.html" class="nav-link active"><i class="fa-solid fa-headset"></i> Support</a>
+      <a href="settings.html" class="nav-link"><i class="fa-solid fa-gear"></i> Settings</a>
+      <a href="profile.html" class="nav-link"><i class="fa-solid fa-user-circle"></i> Profile</a>
+      <div style="margin-top:12px;">
+        <a href="#" class="nav-link" onclick="event.preventDefault(); logout();" style="color:var(--char);">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="theme-toggle" id="themeToggle">
+        <span><i class="fa-solid fa-moon" id="themeIcon"></i> Dark mode</span>
+        <span class="switch"></span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn" id="topbarHamburger"><i class="fa-solid fa-bars"></i></button>
+        <div class="search-box">
+          <i class="fa-solid fa-search"></i>
+          <input type="text" id="globalSearch" placeholder="Search support...">
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        <a href="profile.html" class="profile-chip">
+          <div class="avatar" id="adminAvatar">A</div>
+          <span class="label" id="adminName">Admin</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="page-header">
+      <div>
+        <div class="section-eyebrow"><i class="fa-solid fa-headset"></i> Support</div>
+        <h1>Customer Support &amp; Feedback</h1>
+        <p>Messages, bug reports, suggestions, and feedback all in one place.</p>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="support-stats">
+      <div class="stat-mini"><div class="val" id="statOpenTickets">0</div><div class="lbl">Open Tickets</div></div>
+      <div class="stat-mini"><div class="val" id="statPendingTickets">0</div><div class="lbl">Pending Action</div></div>
+      <div class="stat-mini"><div class="val" id="statResolvedTickets">0</div><div class="lbl">Resolved Tickets</div></div>
+      <div class="stat-mini"><div class="val" id="statTotalTickets">0</div><div class="lbl">Total Support Tickets</div></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs" id="supportTabs">
+      <button class="tab-btn active" data-tab="messages"><i class="fa-regular fa-envelope"></i> Support Tickets (<span id="ticketCountBadge">0</span>)</button>
+      <button class="tab-btn" data-tab="feedback"><i class="fa-regular fa-comment"></i> Feedback &amp; Reviews</button>
+      <button class="tab-btn" data-tab="bugs"><i class="fa-solid fa-bug"></i> Technical &amp; AI Issues</button>
+      <button class="tab-btn" data-tab="suggestions"><i class="fa-regular fa-lightbulb"></i> Feature Requests</button>
+    </div>
+
+    <!-- ===== MESSAGES TAB ===== -->
+    <div class="tab-panel active" id="tab-messages">
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>User / Email</th>
+                <th>Role &amp; Category</th>
+                <th>Subject &amp; Message</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminTicketsTableBody">
+              <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-secondary);">Loading support tickets...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== FEEDBACK TAB ===== -->
+    <div class="tab-panel" id="tab-feedback">
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>User</th><th>Feedback &amp; Rating</th><th>Date</th><th style="text-align:right;">Actions</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Joram Kiprop</strong> (user@example.com)</td><td>NutriScan AI Vision scanner speed is excellent. Sukuma Wiki recognition was instant.</td><td>Today</td><td style="text-align:right;"><button class="btn btn-ghost btn-sm" onclick="showToast('Feedback noted!')"><i class="fa-regular fa-thumbs-up"></i></button></td></tr>
+              <tr><td><strong>Amina Ochieng</strong> (client@example.com)</td><td>App interface is super clean and easy to navigate for my diet plan.</td><td>Yesterday</td><td style="text-align:right;"><button class="btn btn-ghost btn-sm" onclick="showToast('Feedback noted!')"><i class="fa-regular fa-thumbs-up"></i></button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TECHNICAL / BUGS TAB ===== -->
+    <div class="tab-panel" id="tab-bugs">
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Reported By</th><th>Technical Category</th><th>Issue Summary</th><th>Status</th><th style="text-align:right;">Actions</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Dr. Wanjiru Njuguna</strong></td><td>Account Verification</td><td>License verification document review KNDI-8842</td><td><span class="badge badge-warning">Pending Review</span></td><td style="text-align:right;"><button class="btn btn-ghost btn-sm" onclick="showToast('Reviewing license...')"><i class="fa-regular fa-eye"></i></button></td></tr>
+              <tr><td><strong>Joram Kiprop</strong></td><td>NutriScan AI</td><td>Ugali calories calculation query</td><td><span class="badge badge-success">Resolved</span></td><td style="text-align:right;"><button class="btn btn-ghost btn-sm" onclick="showToast('Issue already resolved')"><i class="fa-regular fa-eye"></i></button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SUGGESTIONS TAB ===== -->
+    <div class="tab-panel" id="tab-suggestions">
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>From</th><th>Suggestion</th><th>Date</th><th style="text-align:right;">Actions</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Amina Ochieng</strong></td><td>M-Pesa automatic recurring billing STK prompts</td><td>Today</td><td style="text-align:right;"><button class="btn btn-ghost btn-sm" onclick="showToast('Suggestion recorded!')"><i class="fa-regular fa-thumbs-up"></i></button></td></tr>
+              <tr><td><strong>Dr. Wanjiru Njuguna</strong></td><td>Client weekly export to PDF report feature</td><td>Yesterday</td><td style="text-align:right;"><button class="btn btn-ghost btn-sm" onclick="showToast('Suggestion recorded!')"><i class="fa-regular fa-thumbs-up"></i></button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Admin Ticket Reply Modal -->
+<div class="modal-overlay" id="adminReplyModal">
+  <div class="modal-card" style="max-width:600px;background:var(--bg-card);border-radius:16px;padding:24px;border:1px solid var(--basket-line);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;border-bottom:1px solid var(--basket-line);padding-bottom:12px;">
+      <h3 style="margin:0;font-size:1.15rem;display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-reply" style="color:var(--sukuma);"></i> Respond to Support Ticket</h3>
+      <button class="icon-btn" onclick="document.getElementById('adminReplyModal').classList.remove('open')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    
+    <div id="replyModalBody">
+      <div id="replyTicketPreview" style="background:var(--bg-elevated);padding:14px 18px;border-radius:10px;margin-bottom:16px;border:1px solid var(--basket-line);"></div>
+      
+      <div class="form-group" style="margin-bottom:16px;">
+        <label style="display:block;font-weight:600;font-size:0.88rem;margin-bottom:6px;">Your Official Admin Reply</label>
+        <textarea id="adminReplyInput" rows="4" class="form-control" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--basket-line);background:var(--bg-card);color:var(--text-primary);" placeholder="Write clear support instructions or response for the user..."></textarea>
+      </div>
+
+      <div class="form-group" style="margin-bottom:20px;">
+        <label style="display:block;font-weight:600;font-size:0.88rem;margin-bottom:6px;">Update Ticket Status</label>
+        <select id="adminStatusSelect" class="form-control" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--basket-line);background:var(--bg-card);color:var(--text-primary);">
+          <option value="resolved">Resolved (Close Ticket)</option>
+          <option value="pending">Pending Further Details</option>
+          <option value="open">Keep Open</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;justify-content:flex-end;border-top:1px solid var(--basket-line);padding-top:16px;">
+      <button class="btn btn-secondary" onclick="document.getElementById('adminReplyModal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-primary" id="adminSendReplyBtn"><i class="fa-solid fa-paper-plane"></i> Send Reply to User</button>
+    </div>
+  </div>
+</div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+// ============================================================
+// SUPPORT
+// ============================================================
+
+const Store = {
+  get: function(k, fb) {
+    try { const raw = localStorage.getItem('smartlishe_' + k); return raw ? JSON.parse(raw) : fb; }
+    catch(e) { return fb; }
+  },
+  set: function(k, v) {
+    try { localStorage.setItem('smartlishe_' + k, JSON.stringify(v)); return true; }
+    catch(e) { return false; }
+  }
+};
+
+function showToast(msg, type) {
+  type = type || 'success';
+  const stack = document.getElementById('toastStack');
+  if (!stack) return;
+  const t = document.createElement('div');
+  t.className = 'toast' + (type === 'error' ? ' error' : '');
+  const icon = type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check';
+  t.innerHTML = '<i class="fa-solid ' + icon + '"></i><span>' + msg + '</span>';
+  stack.appendChild(t);
+  setTimeout(function() {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(40px)';
+    setTimeout(function() { t.remove(); }, 300);
+  }, 3500);
+}
+window.showToast = showToast;
+
+function initTheme() {
+  const saved = Store.get('theme', 'light');
+  document.body.setAttribute('data-theme', saved);
+  if (saved === 'dark') document.body.classList.add('dark-mode');
+  const icon = document.getElementById('themeIcon');
+  if (icon) icon.className = saved === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+  const toggle = document.getElementById('themeToggle');
+  if (toggle) {
+    toggle.addEventListener('click', function() {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      if (icon) icon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+      Store.set('theme', isDark ? 'dark' : 'light');
+      document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    });
+  }
+}
+
+function initSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const hamburger = document.getElementById('hamburgerBtn');
+  const topbarHamburger = document.getElementById('topbarHamburger');
+
+  function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('show'); }
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+
+  if (hamburger) hamburger.addEventListener('click', openSidebar);
+  if (topbarHamburger) topbarHamburger.addEventListener('click', openSidebar);
+  if (overlay) overlay.addEventListener('click', closeSidebar);
+
+  function toggleDropdown(headerId, dropdownId) {
+    const header = document.getElementById(headerId);
+    const dropdown = document.getElementById(dropdownId);
+    if (!header || !dropdown) return;
+    header.addEventListener('click', function(e) {
+      e.preventDefault();
+      const isOpen = dropdown.classList.contains('open');
+      document.querySelectorAll('.nav-dropdown').forEach(d => d.classList.remove('open'));
+      document.querySelectorAll('.dropdown-chevron').forEach(c => c.classList.remove('open'));
+      if (!isOpen) {
+        dropdown.classList.add('open');
+        header.querySelector('.dropdown-chevron').classList.add('open');
+      }
+    });
+  }
+  toggleDropdown('accountsToggle', 'accountsDropdown');
+  toggleDropdown('operationsToggle', 'operationsDropdown');
+
+  document.querySelectorAll('.nav-link').forEach(function(link) {
+    link.addEventListener('click', function() {
+      if (window.innerWidth <= 768) closeSidebar();
+    });
+  });
+}
+
+function initTabs() {
+  const container = document.getElementById('supportTabs');
+  if (!container) return;
+  const tabs = container.querySelectorAll('.tab-btn');
+  const panels = {
+    messages: document.getElementById('tab-messages'),
+    feedback: document.getElementById('tab-feedback'),
+    bugs: document.getElementById('tab-bugs'),
+    suggestions: document.getElementById('tab-suggestions')
+  };
+
+  tabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      tabs.forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      const target = this.dataset.tab;
+      Object.keys(panels).forEach(function(key) {
+        panels[key].classList.toggle('active', key === target);
+      });
+      history.pushState(null, '', '#' + target);
+    });
+  });
+
+  const hash = window.location.hash.replace('#', '');
+  if (hash && panels[hash]) {
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === hash));
+    Object.keys(panels).forEach(function(key) {
+      panels[key].classList.toggle('active', key === hash);
+    });
+  }
+}
+
+function loadAdminInfo() {
+  const profile = Store.get('profileData', null);
+  const profileRaw = localStorage.getItem('smartlishe_profile');
+  let name = 'Admin';
+  if (profileRaw) {
+    try {
+      const p = JSON.parse(profileRaw);
+      if (p.name) name = p.name;
+    } catch(e) {}
+  }
+  if (profile && profile.name) name = profile.name;
+  document.getElementById('adminName').textContent = name;
+  document.getElementById('adminAvatar').textContent = name.charAt(0).toUpperCase();
+}
+
+function initNotifications() {
+  const btn = document.getElementById('notifBtn');
+  if (btn) btn.addEventListener('click', function() { showToast('You have 5 new support tickets.'); });
+}
+
+function initSearch() {
+  const input = document.getElementById('globalSearch');
+  if (input) input.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' && e.target.value.trim()) {
+      showToast('Searching for "' + e.target.value.trim() + '"...');
+    }
+  });
+}
+
+let activeAdminTickets = [];
+let currentReplyTicketId = null;
+
+async function fetchAdminTickets() {
+  const tbody = document.getElementById('adminTicketsTableBody');
+  if (!tbody) return;
+  
+  try {
+    const token = localStorage.getItem('smartlishe_token') || localStorage.getItem('token') || '';
+    const res = await fetch('/api/admin/support', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    activeAdminTickets = data.data || [];
+
+    // Calculate stats
+    const openCount = activeAdminTickets.filter(t => t.status === 'open').length;
+    const pendingCount = activeAdminTickets.filter(t => t.status === 'pending').length;
+    const resolvedCount = activeAdminTickets.filter(t => t.status === 'resolved').length;
+
+    document.getElementById('statOpenTickets').textContent = openCount;
+    document.getElementById('statPendingTickets').textContent = pendingCount;
+    document.getElementById('statResolvedTickets').textContent = resolvedCount;
+    document.getElementById('statTotalTickets').textContent = activeAdminTickets.length;
+    document.getElementById('ticketCountBadge').textContent = activeAdminTickets.length;
+
+    if (!activeAdminTickets.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-secondary);">No support tickets submitted yet.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = activeAdminTickets.map(t => {
+      const statusClass = t.status === 'resolved' ? 'badge-success' : t.status === 'pending' ? 'badge-warning' : 'badge-warning';
+      const createdDate = t.created_at ? new Date(t.created_at).toLocaleString() : 'Recently';
+      const replyCount = t.replies ? t.replies.length : 0;
+
+      return `
+        <tr>
+          <td>
+            <strong>${t.user_name || 'User'}</strong>
+            <div style="font-size:0.78rem;color:var(--text-secondary);">${t.user_email || 'No Email'}</div>
+          </td>
+          <td>
+            <span class="badge" style="background:var(--bg-elevated);color:var(--text-primary);">${t.user_role || 'user'}</span>
+            <div style="font-size:0.78rem;color:var(--text-secondary);margin-top:2px;">${t.category || 'General'}</div>
+          </td>
+          <td>
+            <strong>${t.subject}</strong>
+            <div style="font-size:0.83rem;color:var(--text-secondary);max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.message}</div>
+            ${replyCount > 0 ? `<div style="font-size:0.75rem;color:var(--sukuma);margin-top:2px;"><i class="fa-solid fa-reply"></i> ${replyCount} admin reply(ies) sent</div>` : ''}
+          </td>
+          <td><span class="badge" style="background:${t.priority==='urgent'?'#fee2e2':'var(--bg-elevated)'};color:${t.priority==='urgent'?'#991b1b':'var(--text-primary)'};">${(t.priority || 'normal').toUpperCase()}</span></td>
+          <td><span class="badge ${statusClass}">${t.status || 'open'}</span></td>
+          <td style="font-size:0.8rem;color:var(--text-secondary);">${createdDate}</td>
+          <td style="text-align:right;">
+            <div class="action-btns">
+              <button class="btn btn-ghost btn-sm" onclick="openAdminReplyModal('${t.id}')" title="Respond & Reply"><i class="fa-solid fa-reply" style="color:var(--sukuma);"></i> Reply</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+  } catch (err) {
+    console.error('Error fetching support tickets:', err);
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:#ef4444;">Failed to load support tickets.</td></tr>';
+  }
+}
+
+function openAdminReplyModal(ticketId) {
+  const ticket = activeAdminTickets.find(t => t.id === ticketId);
+  if (!ticket) return;
+
+  currentReplyTicketId = ticketId;
+  const preview = document.getElementById('replyTicketPreview');
+  preview.innerHTML = `
+    <div style="font-weight:700;font-size:1.02rem;color:var(--text-primary);margin-bottom:4px;">${ticket.subject}</div>
+    <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:8px;">
+      <strong>From:</strong> ${ticket.user_name} (${ticket.user_email}) · <strong>Role:</strong> ${ticket.user_role} · <strong>Category:</strong> ${ticket.category}
+    </div>
+    <div style="font-size:0.9rem;color:var(--text-primary);background:var(--bg-card);padding:10px;border-radius:6px;border:1px solid var(--basket-line);">${ticket.message}</div>
+  `;
+
+  document.getElementById('adminReplyInput').value = '';
+  document.getElementById('adminStatusSelect').value = ticket.status === 'resolved' ? 'resolved' : 'resolved';
+  document.getElementById('adminReplyModal').classList.add('open');
+}
+
+document.getElementById('adminSendReplyBtn')?.addEventListener('click', async () => {
+  if (!currentReplyTicketId) return;
+  const reply = document.getElementById('adminReplyInput').value.trim();
+  const status = document.getElementById('adminStatusSelect').value;
+
+  if (!reply) {
+    showToast('Please type a reply message', 'error');
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('smartlishe_token') || localStorage.getItem('token') || '';
+    const res = await fetch(`/api/admin/support/${currentReplyTicketId}/reply`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ reply, status })
+    });
+
+    const data = await res.json();
+    if (data.success || data.data) {
+      showToast('Reply sent successfully! User has been notified.');
+      document.getElementById('adminReplyModal').classList.remove('open');
+      fetchAdminTickets();
+    } else {
+      showToast(data.message || 'Failed to send reply', 'error');
+    }
+  } catch (e) {
+    showToast('Error sending reply', 'error');
+  }
+});
+
+function logout() {
+  localStorage.clear();
+  sessionStorage.clear();
+  window.location.href = '../auth/login.html';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  initTheme();
+  initSidebar();
+  loadAdminInfo();
+  initTabs();
+  initNotifications();
+  initSearch();
+  fetchAdminTickets();
+});
+</script>
+</body>
+</html>

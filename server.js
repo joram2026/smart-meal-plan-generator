@@ -4271,7 +4271,15 @@ app.post('/api/contact', (req, res) => {
 });
 
 // --- Static File Serving & Frontend Router ---
-const frontendDir = path.join(__dirname, 'FRONTEND');
+const possibleFrontendDirs = [
+  path.join(__dirname, 'public'),
+  path.join(__dirname, 'FRONTEND'),
+  path.join(process.cwd(), 'public'),
+  path.join(process.cwd(), 'FRONTEND'),
+  path.join(__dirname, '..', 'public'),
+  path.join(__dirname, '..', 'FRONTEND')
+];
+const frontendDir = possibleFrontendDirs.find(d => fs.existsSync(d)) || path.join(__dirname, 'public');
 app.use(express.static(frontendDir));
 
 // Fallback to home.html for root or unknown static routes
@@ -4283,7 +4291,11 @@ app.use((req, res, next) => {
   if (req.path.startsWith('/api')) {
     return res.status(404).json({ success: false, error: 'API endpoint not found' });
   }
-  res.sendFile(path.join(frontendDir, 'user', 'home.html'));
+  const homePath = path.join(frontendDir, 'user', 'home.html');
+  if (fs.existsSync(homePath)) {
+    return res.sendFile(homePath);
+  }
+  return res.status(404).send('Page not found');
 });
 
 // Async initial data sync function

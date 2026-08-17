@@ -255,5 +255,29 @@
       "Serve warm as a complete single-pot meal."
     ],
     "created_at": "2026-08-02T11:00:00.000Z"
+  },
+  {
+    "prep_time": "15 mins",
+    "category": "Fish",
+    "created_at": "2026-08-13T06:47:21.967Z",
+    "created_by": "user-1786344402852",
+    "servings": 4,
+    "desc": "Authentic Kenyan recipe curated for optimal health and taste.",
+    "calories": 450,
+    "name": "Umena",
+    "img": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600&auto=format&fit=crop",
+    "cook_time": "30 mins",
+    "difficulty": "Medium",
+    "carbs": "45g",
+    "instructions": [
+      "steam the umena"
+    ],
+    "ingredients": [
+      "1kg umena dried fish"
+    ],
+    "fats": "12g",
+    "cost": "Medium (KES 350-600)",
+    "id": "rec-1786603641967",
+    "protein": "20g"
   }
 ]

@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+  <title>Smart Lishe - Client Dashboard</title>
+  <link rel="stylesheet" href="client.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    /* ===== ALL STYLES (same as before) ===== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; display: flex; min-height: 100vh; }
+    :root {
+      --sidebar-width: 260px;
+      --sidebar-collapsed: 70px;
+      --primary: #1a7a64;
+      --primary-dark: #0d4f40;
+      --primary-light: #e6f4f0;
+      --basket-line: #e2e8f0;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --bg-card: #ffffff;
+      --shadow: 0 4px 12px rgba(0,0,0,0.05);
+      --radius: 12px;
+    }
+    .sidebar {
+      width: var(--sidebar-width);
+      background: #ffffff;
+      border-right: 1px solid var(--basket-line);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      transition: width 0.3s ease;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .sidebar.collapsed { width: var(--sidebar-collapsed); }
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+      padding: 0 8px;
+    }
+    .brand-icon {
+      background: var(--primary);
+      color: #fff;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .brand-text { font-size: 1.3rem; font-weight: 700; }
+    .brand-text span { color: var(--primary); }
+    .sidebar.collapsed .brand-text { display: none; }
+    .sidebar-nav {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+    .nav-item:hover { background: var(--primary-light); color: var(--primary); }
+    .nav-item.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+    .nav-item i { width: 20px; text-align: center; font-size: 1.1rem; }
+    .sidebar.collapsed .nav-item span { display: none; }
+    .logout-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #dc2626;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      transition: background 0.2s;
+      margin-top: 8px;
+      width: 100%;
+    }
+    .logout-btn:hover { background: #fee2e2; color: #b91c1c; }
+    .logout-btn i { width: 20px; }
+    .sidebar.collapsed .logout-btn span { display: none; }
+
+    .main-content {
+      flex: 1;
+      padding: 0;
+      overflow-y: auto;
+      max-height: 100vh;
+      background: #f8fafc;
+    }
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 0;
+      padding: 14px 32px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--basket-line);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    .nav-left { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+    .menu-toggle {
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: none;
+    }
+    .welcome-message .greeting { color: var(--text-secondary); font-size: 0.95rem; }
+    .welcome-message .client-name { font-weight: 700; font-size: 1.1rem; }
+    .nav-center {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .professional-badge, .goal-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      background: #f1f5f9;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid #e2e8f0;
+    }
+    .professional-badge .badge, .goal-badge .week-badge {
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .nav-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .search-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: var(--bg-card);
+      border: 1px solid var(--basket-line);
+      border-radius: 30px;
+      padding: 6px 14px;
+    }
+    .search-wrapper i { color: var(--text-muted); font-size: 0.9rem; margin-right: 8px; }
+    .search-wrapper input {
+      border: none;
+      outline: none;
+      background: transparent;
+      padding: 4px 0;
+      font-size: 0.85rem;
+      min-width: 140px;
+    }
+    .nav-actions { display: flex; align-items: center; gap: 8px; }
+    .icon-btn {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      position: relative;
+      padding: 6px;
+      border-radius: 50%;
+      transition: background 0.2s;
+    }
+    .icon-btn:hover { background: var(--primary-light); color: var(--primary); }
+    .badge-count {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 0.6rem;
+      font-weight: 700;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .profile-avatar img { border-radius: 50%; width: 40px; height: 40px; object-fit: cover; }
+
+    .content-area { max-width: 1400px; margin: 0 auto; padding: 24px 32px 40px; }
+    .section { display: none; }
+    .section.active { display: block; }
+    .welcome-card {
+      background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+      color: #ffffff;
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      border: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 20px;
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
+    }
+    .welcome-text h1 { font-size: 1.6rem; margin-bottom: 12px; color: #ffffff; }
+    .welcome-details { display: flex; flex-wrap: wrap; gap: 16px 32px; }
+    .detail-item { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.95); font-size: 0.95rem; }
+    .detail-item i { color: #a7f3d0; width: 18px; }
+    .welcome-illustration .illustration-img {
+      width: 90px; height: 90px; border-radius: 50%; object-fit: cover;
+      border: 3px solid rgba(255,255,255,0.4);
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .summary-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      border: 1px solid var(--basket-line);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .card-icon {
+      background: var(--primary-light);
+      color: var(--primary);
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+    .card-content { flex: 1; }
+    .card-label { font-size: 0.8rem; color: var(--text-secondary); display: block; }
+    .card-value { font-size: 1.2rem; font-weight: 700; display: block; }
+    .card-sub { font-size: 0.75rem; color: var(--text-muted); }
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: var(--basket-line);
+      border-radius: 4px;
+      margin-top: 6px;
+    }
+    .progress-fill { height: 100%; border-radius: 4px; background: var(--primary); transition: width 0.3s; }
+
+    .dashboard-section {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      border: 1px solid var(--basket-line);
+      margin-bottom: 28px;
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .section-header h2 { font-size: 1.3rem; display: flex; align-items: center; gap: 10px; }
+    .section-date { font-size: 0.85rem; color: var(--text-muted); }
+
+    /* ---- Meal grid ---- */
+    .meal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .meal-card {
+      border: 1px solid var(--basket-line);
+      border-radius: var(--radius);
+      padding: 16px;
+      background: #fafafa;
+    }
+    .meal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .meal-type { font-weight: 600; }
+    .meal-status { font-size: 0.75rem; font-weight: 600; padding: 2px 10px; border-radius: 20px; }
+    .meal-status.completed { background: #dcfce7; color: #15803d; }
+    .meal-status.pending { background: #fef3c7; color: #b45309; }
+    .meal-body p { font-weight: 500; }
+    .meal-meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 0.85rem; color: var(--text-secondary); margin: 8px 0 12px; }
+    .meal-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .btn { padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; border: none; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: #22c55e; color: #fff; }
+    .btn-success:hover { background: #16a34a; }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-outline { background: transparent; border: 1px solid var(--basket-line); color: var(--text-secondary); }
+    .btn-outline:hover { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+    .btn-sm { padding: 4px 12px; font-size: 0.75rem; }
+
+    .recipe-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .recipe-card {
+      border: 1px solid var(--basket-line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #fff;
+    }
+    .recipe-image img { width: 100%; height: 150px; object-fit: cover; }
+    .recipe-body { padding: 12px 14px; }
+    .recipe-body h3 { font-size: 0.95rem; margin-bottom: 4px; }
+    .recipe-time { color: var(--text-muted); font-size: 0.8rem; }
+    .recipe-nutrition { display: flex; gap: 8px; flex-wrap: wrap; font-size: 0.75rem; color: var(--text-secondary); margin: 6px 0; }
+    .recipe-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .shopping-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    .shopping-category { background: #fafafa; padding: 12px; border-radius: 8px; border: 1px solid var(--basket-line); }
+    .shopping-category h3 { font-size: 0.9rem; margin-bottom: 8px; color: var(--primary); }
+    .shopping-category label { display: block; font-size: 0.85rem; margin-bottom: 4px; cursor: pointer; }
+    .shopping-category label input[type="checkbox"] { margin-right: 8px; }
+
+    .quick-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+    }
+    .quick-action-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--basket-line);
+      border-radius: var(--radius);
+      padding: 16px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+    }
+    .quick-action-btn:hover { background: var(--primary-light); border-color: var(--primary); }
+    .quick-action-btn i { font-size: 1.4rem; color: var(--primary); }
+
+    .dropdown-header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--basket-line);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-bottom: 4px;
+    }
+    .dropdown-header:hover { background: var(--primary-light); }
+    .dropdown-arrow { margin-left: auto; transition: transform 0.2s; }
+    .dropdown-arrow.open { transform: rotate(180deg); }
+    .dropdown-content { display: none; padding: 16px 0 24px; }
+    .dropdown-content.open { display: block; }
+    .progress-charts { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .chart-card { background: #fafafa; padding: 16px; border-radius: var(--radius); border: 1px solid var(--basket-line); }
+    .chart-placeholder { height: 100px; background: #eef2f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.85rem; }
+    .progress-summary { display: flex; flex-wrap: wrap; gap: 16px; padding: 8px 0; }
+    .summary-item { background: #fff; padding: 12px 18px; border-radius: 8px; border: 1px solid var(--basket-line); flex: 1; min-width: 160px; }
+    .summary-item .label { display: block; font-size: 0.8rem; color: var(--text-muted); }
+    .summary-item .value { display: block; font-weight: 600; font-size: 1.1rem; }
+    .summary-item .change { font-size: 0.8rem; font-weight: 600; }
+    .summary-item .change.positive { color: #16a34a; }
+    .summary-item .change.negative { color: #dc2626; }
+    .water-tracker-grid { display: grid; grid-template-columns: 200px 1fr; align-items: start; gap: 16px; }
+    .water-circle { width: 200px; height: 200px; margin: 0 auto; }
+    .circular-progress { width: 100%; height: 100%; }
+    .water-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .water-controls .btn { padding: 8px 16px; }
+    .water-charts { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .reports-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+    .report-card { background: #fafafa; padding: 16px; border-radius: var(--radius); border: 1px solid var(--basket-line); }
+    .report-card h3 { font-size: 1rem; margin-bottom: 8px; }
+    .report-card p { font-size: 0.9rem; margin: 4px 0; }
+    .report-card .assessment-date { color: var(--text-muted); font-style: italic; font-size: 0.8rem; }
+
+    .profile-card { display: flex; gap: 24px; flex-wrap: wrap; }
+    .profile-avatar-large { text-align: center; }
+    .profile-avatar-large img { border-radius: 50%; width: 120px; height: 120px; object-fit: cover; }
+    .profile-details { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; }
+    .profile-details p { margin: 4px 0; font-size: 0.9rem; }
+    .profile-details hr { grid-column: 1 / -1; margin: 8px 0; }
+    .btn-xs { padding: 2px 8px; font-size: 0.7rem; }
+    .preferences-grid, .security-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .pref-group, .security-card { background: #fafafa; padding: 16px; border-radius: var(--radius); border: 1px solid var(--basket-line); }
+    .pref-group h3, .security-card h3 { font-size: 0.95rem; margin-bottom: 8px; }
+    .pref-group label, .security-card label { display: block; font-size: 0.85rem; margin: 4px 0; }
+    .security-card input[type="password"] { display: block; width: 100%; padding: 6px; margin: 4px 0; border: 1px solid var(--basket-line); border-radius: 6px; }
+    .help-content { padding: 8px 0; }
+    .help-content p { margin: 4px 0; }
+    .faq-item { background: #fafafa; padding: 12px 16px; border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--basket-line); }
+    .faq-item h4 { font-size: 0.95rem; margin-bottom: 4px; }
+    .faq-item p { font-size: 0.85rem; color: var(--text-secondary); }
+    .professional-avatar { border-radius: 50%; }
+
+    .message-container { display: flex; flex-direction: column; gap: 12px; }
+    .message-list { max-height: 200px; overflow-y: auto; }
+    .message-item { display: flex; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid var(--basket-line); }
+    .message-item .sender { font-weight: 600; }
+    .message-item .preview { color: var(--text-secondary); font-size: 0.85rem; }
+    .message-item .time { font-size: 0.75rem; color: var(--text-muted); }
+    .message-item.unread { background: var(--primary-light); }
+    .message-compose { display: flex; gap: 8px; margin-top: 8px; }
+    .message-compose textarea { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--basket-line); font-family: inherit; }
+    .appointment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .appointment-card { background: #fafafa; padding: 16px; border-radius: var(--radius); border: 1px solid var(--basket-line); }
+    .appointment-card h3 { font-size: 1rem; margin-bottom: 8px; }
+    .appointment-card p { font-size: 0.85rem; margin: 4px 0; }
+    .appointment-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .notification-item { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--basket-line); }
+    .notification-item.unread { background: var(--primary-light); }
+    .notification-item .time { margin-left: auto; font-size: 0.75rem; color: var(--text-muted); }
+    .notification-actions { display: flex; gap: 8px; padding-top: 12px; }
+
+    /* ===== TOAST ===== */
+    .toast-stack {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 360px;
+      width: calc(100% - 48px);
+    }
+    .toast {
+      background: #1e293b;
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      animation: slideUp 0.3s ease;
+    }
+    .toast.error { border-left: 4px solid #ef4444; }
+    .toast i { font-size: 1.2rem; }
+    .toast .fa-check-circle { color: #22c55e; }
+    .toast .fa-exclamation-circle { color: #ef4444; }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      .menu-toggle { display: block; }
+      .sidebar.collapsed { width: 0; padding: 0; border: none; }
+      .main-content { padding: 16px; }
+      .top-nav { flex-direction: column; align-items: stretch; }
+      .nav-center { flex-wrap: wrap; padding: 10px; }
+      .nav-right { flex-wrap: wrap; }
+      .search-wrapper input { min-width: 100px; }
+      .water-tracker-grid { grid-template-columns: 1fr; }
+      .profile-details { grid-template-columns: 1fr; }
+      .preferences-grid, .security-grid, .appointment-grid { grid-template-columns: 1fr; }
+      .water-charts { grid-template-columns: 1fr; }
+      .welcome-card { flex-direction: column; align-items: flex-start; }
+      .welcome-illustration { width: 100%; text-align: center; }
+    }
+    @media (max-width: 480px) {
+      .summary-grid { grid-template-columns: 1fr; }
+      .meal-grid { grid-template-columns: 1fr; }
+      .recipe-grid { grid-template-columns: 1fr; }
+      .shopping-grid { grid-template-columns: 1fr; }
+      .quick-actions-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ==================== AUTH CHECK ==================== -->
+<script>
+  (function() {
+    const token = localStorage.getItem('access_token');
+    const role = localStorage.getItem('smartlishe_role') || localStorage.getItem('role');
+    if (!token || role !== 'client') {
+      window.location.href = '../login.html';
+    }
+  })();
+</script>
+
+<!-- ==================== SIDEBAR ==================== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon"><i class="fas fa-utensils"></i></div>
+    <span class="brand-text">Smart<span>Lishe</span></span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-item active" data-section="dashboard"><i class="fas fa-th-large"></i><span>Dashboard</span></a>
+    <a href="#" class="nav-item" data-section="progress"><i class="fas fa-chart-line"></i><span>My Progress</span></a>
+    <a href="#" class="nav-item" data-section="communication"><i class="fas fa-comments"></i><span>Communication</span></a>
+    <a href="#" class="nav-item" data-section="account"><i class="fas fa-user-circle"></i><span>Account</span></a>
+    <a href="#" class="nav-item" data-section="help"><i class="fas fa-question-circle"></i><span>Help</span></a>
+    <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i><span>Logout</span></button>
+  </nav>
+</aside>
+
+<!-- ==================== MAIN CONTENT ==================== -->
+<main class="main-content" id="mainContent">
+  <!-- TOP NAV -->
+  <header class="top-nav">
+    <div class="nav-left">
+      <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+      <div class="welcome-message">
+        <span class="greeting">Welcome back,</span>
+        <span class="client-name" id="clientName">Client</span>
+      </div>
+    </div>
+    <div class="nav-center">
+      <div class="professional-badge">
+        <i class="fas fa-user-md"></i>
+        <span>Assigned: <span id="assignedProfessional">Professional</span></span>
+        <span class="badge">Registered Nutritionist</span>
+      </div>
+      <div class="goal-badge">
+        <i class="fas fa-bullseye"></i>
+        <span>Goal: <span id="clientGoal">Weight Loss</span></span>
+        <span class="week-badge" id="programWeek">Week 4 of 12</span>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="search-wrapper">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Quick search..." class="search-input" />
+      </div>
+      <div class="nav-actions">
+        <button class="icon-btn" id="notificationBtn"><i class="fas fa-bell"></i><span class="badge-count" id="notificationBadge">0</span></button>
+        <button class="icon-btn" id="messageBtn"><i class="fas fa-envelope"></i><span class="badge-count" id="messageBadge">0</span></button>
+        <button class="icon-btn" id="settingsBtn"><i class="fas fa-cog"></i></button>
+        <div class="profile-avatar">
+          <img id="clientAvatar" src="https://ui-avatars.com/api/?name=Client&size=40&background=4F46E5&color=fff&bold=true" alt="Client" />
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== CONTENT AREA ===== -->
+  <div class="content-area">
+    <!-- Dashboard Section -->
+    <section id="section-dashboard" class="section active">
+      <div class="welcome-card">
+        <div class="welcome-text">
+          <h1 id="welcomeHeading">Welcome back, Client! 👋</h1>
+          <div class="welcome-details">
+            <div class="detail-item"><i class="fas fa-user-md"></i><span><strong>Assigned Professional:</strong> <span id="welcomePro">Professional</span></span></div>
+            <div class="detail-item"><i class="fas fa-bullseye"></i><span><strong>Today's Goal:</strong> <span id="welcomeGoal">Weight Loss</span></span></div>
+            <div class="detail-item"><i class="fas fa-calendar-week"></i><span><strong>Program Week:</strong> <span id="welcomeWeek">Week 4 of 12</span></span></div>
+          </div>
+        </div>
+        <div class="welcome-illustration">
+          <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=100&h=100&fit=crop&crop=center" alt="Healthy lifestyle" class="illustration-img" />
+        </div>
+      </div>
+
+      <!-- Summary cards -->
+      <div class="summary-grid" id="summaryGrid"></div>
+
+      <!-- Meal Plan -->
+      <div class="dashboard-section">
+        <div class="section-header">
+          <h2><i class="fas fa-utensils"></i> Today's Meal Plan</h2>
+          <span class="section-date" id="todayDate">Loading...</span>
+        </div>
+        <div class="meal-grid" id="mealPlanGrid"></div>
+        <div class="week-navigation" style="margin-top:16px; display:flex; justify-content:space-between; align-items:center;">
+          <button class="btn btn-outline" id="prevWeekBtn"><i class="fas fa-chevron-left"></i> Previous Week</button>
+          <span class="week-label" id="weekLabel">Week 4 of 12</span>
+          <button class="btn btn-outline" id="nextWeekBtn">Next Week <i class="fas fa-chevron-right"></i></button>
+        </div>
+      </div>
+
+      <!-- Recipes -->
+      <div class="dashboard-section">
+        <div class="section-header">
+          <h2><i class="fas fa-book-open"></i> My Recipes</h2>
+          <span class="section-date">Assigned by <span id="recipesPro">Professional</span></span>
+        </div>
+        <div class="recipe-grid" id="recipeGrid"></div>
+      </div>
+
+      <!-- Shopping List -->
+      <div class="dashboard-section">
+        <div class="section-header">
+          <h2><i class="fas fa-shopping-cart"></i> Shopping List</h2>
+          <span class="section-date" id="shoppingBudget">Estimated Budget: KES 4,200</span>
+        </div>
+        <div class="shopping-grid" id="shoppingGrid"></div>
+        <div class="shopping-actions" style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-primary"><i class="fas fa-print"></i> Print List</button>
+          <button class="btn btn-primary"><i class="fas fa-download"></i> Download List</button>
+          <button class="btn btn-outline"><i class="fas fa-share-alt"></i> Share List</button>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="dashboard-section quick-actions">
+        <div class="section-header">
+          <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
+          <span class="section-date">Track your progress</span>
+        </div>
+        <div class="quick-actions-grid">
+          <button class="quick-action-btn" id="waterQuickBtn"><i class="fas fa-tint"></i><span>Log Water</span></button>
+          <button class="quick-action-btn" id="weightQuickBtn"><i class="fas fa-weight"></i><span>Log Weight</span></button>
+          <button class="quick-action-btn" id="exerciseQuickBtn"><i class="fas fa-running"></i><span>Log Exercise</span></button>
+          <button class="quick-action-btn" id="sleepQuickBtn"><i class="fas fa-bed"></i><span>Log Sleep</span></button>
+          <button class="quick-action-btn" id="messageQuickBtn"><i class="fas fa-envelope"></i><span>Message Professional</span></button>
+          <button class="quick-action-btn" id="appointmentQuickBtn"><i class="fas fa-calendar-plus"></i><span>View Appointments</span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Progress Section -->
+    <section id="section-progress" class="section">
+      <!-- same as before -->
+      <div class="section-header">
+        <h2><i class="fas fa-chart-line"></i> My Progress</h2>
+        <span class="section-date">Track your journey</span>
+      </div>
+      <div class="progress-dropdown">
+        <button class="dropdown-header" id="progressOverviewToggle"><i class="fas fa-chart-pie"></i><span>Progress Overview</span><i class="fas fa-chevron-down dropdown-arrow"></i></button>
+        <div class="dropdown-content" id="progressOverviewContent">
+          <div class="progress-charts">
+            <div class="chart-card"><h4>Weight Trend</h4><div class="chart-placeholder line-chart">📊 Weight trend chart</div></div>
+            <div class="chart-card"><h4>BMI Trend</h4><div class="chart-placeholder line-chart">📊 BMI trend chart</div></div>
+            <div class="chart-card"><h4>Meal Completion</h4><div class="chart-placeholder bar-chart">📊 Meal completion</div></div>
+            <div class="chart-card"><h4>Water Intake</h4><div class="chart-placeholder bar-chart">📊 Water intake</div></div>
+          </div>
+          <div class="progress-summary" id="progressSummary"></div>
+        </div>
+      </div>
+      <div class="progress-dropdown">
+        <button class="dropdown-header" id="waterTrackerToggle"><i class="fas fa-tint"></i><span>Water Tracker</span><i class="fas fa-chevron-down dropdown-arrow"></i></button>
+        <div class="dropdown-content" id="waterTrackerContent">
+          <div class="water-tracker-grid">
+            <div class="water-circle"><div class="circular-progress" data-progress="62.5"><span class="progress-label">5 / 8</span></div></div>
+            <div class="water-controls">
+              <button class="btn btn-primary"><i class="fas fa-plus"></i> Add Glass</button>
+              <button class="btn btn-danger"><i class="fas fa-minus"></i> Remove Glass</button>
+              <button class="btn btn-outline"><i class="fas fa-redo"></i> Reset Today</button>
+              <button class="btn btn-outline"><i class="fas fa-bell"></i> Reminder Settings</button>
+            </div>
+            <div class="water-charts">
+              <div class="chart-card"><h4>Weekly Water</h4><div class="chart-placeholder bar-chart">📊 Weekly water</div></div>
+              <div class="chart-card"><h4>Monthly Trend</h4><div class="chart-placeholder line-chart">📊 Monthly trend</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="progress-dropdown">
+        <button class="dropdown-header" id="healthReportsToggle"><i class="fas fa-file-medical-alt"></i><span>Health Reports</span><i class="fas fa-chevron-down dropdown-arrow"></i></button>
+        <div class="dropdown-content" id="healthReportsContent">
+          <div class="reports-grid" id="reportsGrid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Communication Section -->
+    <section id="section-communication" class="section">
+      <div class="section-header">
+        <h2><i class="fas fa-comments"></i> Communication</h2>
+        <span class="section-date">Stay connected</span>
+      </div>
+      <div class="communication-dropdown">
+        <button class="dropdown-header" id="messagesToggle"><i class="fas fa-envelope"></i><span>Messages</span><i class="fas fa-chevron-down dropdown-arrow"></i></button>
+        <div class="dropdown-content" id="messagesContent">
+          <div class="message-container">
+            <div class="message-list" id="messageList"></div>
+            <div class="message-compose">
+              <textarea id="messageText" placeholder="Type your message..." rows="3"></textarea>
+              <button class="btn btn-primary" id="sendMessageBtn"><i class="fas fa-paper-plane"></i> Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="communication-dropdown">
+        <button class="dropdown-header" id="appointmentsToggle"><i class="fas fa-calendar-check"></i><span>Appointments</span><i class="fas fa-chevron-down dropdown-arrow"></i></button>
+        <div class="dropdown-content" id="appointmentsContent">
+          <div class="appointment-grid" id="appointmentGrid"></div>
+        </div>
+      </div>
+      <div class="communication-dropdown">
+        <button class="dropdown-header" id="notificationsToggle"><i class="fas fa-bell"></i><span>Notifications</span><i class="fas fa-chevron-down dropdown-arrow"></i></button>
+        <div class="dropdown-content" id="notificationsContent">
+          <div class="notification-list" id="notificationList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Account Section -->
+    <section id="section-account" class="section">
+      <div class="section-header">
+        <h2><i class="fas fa-user-circle"></i> Account</h2>
+        <span class="section-date">Manage your profile</span>
+      </div>
+      <div class="account-dropdown">
+        <button class="dropdown-header" id="profileToggle"><i class="fas fa-id-card"></i><span>My Profile</span><i class="fas fa-chevron-down dropdown-arrow"></i></button>
+        <div class="dropdown-content" id="profileContent">
+          <div class="profile-card" id="profileCard"></div>
+        </div>
+      </div>
+      <div class="account-dropdown">
+        <button class="dropdown-header" id="preferencesToggle"><i class="fas fa-sliders-h"></i><span>Preferences</span><i class="fas fa-chevron-down dropdown-arrow"></i></button>
+        <div class="dropdown-content" id="preferencesContent">
+          <div class="preferences-grid"><!-- same content as before --></div>
+        </div>
+      </div>
+      <div class="account-dropdown">
+        <button class="dropdown-header" id="securityToggle"><i class="fas fa-lock"></i><span>Security</span><i class="fas fa-chevron-down dropdown-arrow"></i></button>
+        <div class="dropdown-content" id="securityContent">
+          <div class="security-grid"><!-- same --></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Help Section -->
+    <section id="section-help" class="section">
+      <div class="section-header">
+        <h2><i class="fas fa-question-circle"></i> Help & Support</h2>
+        <span class="section-date">We're here to help</span>
+      </div>
+      <!-- same as before -->
+      <div class="help-dropdown">
+        <button class="dropdown-header" id="faqToggle"><i class="fas fa-question"></i><span>Frequently Asked Questions</span><i class="fas fa-chevron-down dropdown-arrow"></i></button>
+        <div class="dropdown-content" id="faqContent"><div class="faq-item"><h4>How do I mark a meal as completed?</h4><p>Click the "Mark Completed" button on any meal card.</p></div></div>
+      </div>
+      <div class="help-dropdown">
+        <button class="dropdown-header" id="supportToggle"><i class="fas fa-headset"></i><span>Support Centre</span><i class="fas fa-chevron-down dropdown-arrow"></i></button>
+        <div class="dropdown-content" id="supportContent">
+          <div class="help-content">
+            <p><strong>📞 Phone Support:</strong> +254 67 52181/4 LAN Ext 2814.</p>
+            <p><strong>📧 Email:</strong> info.jhub@jkuat.ac.ke</p>
+            <p><strong>🕐 Hours:</strong> Monday-Friday, 8:00 AM - 6:00 PM</p>
+            <button class="btn btn-primary btn-sm" style="margin-top:12px;width:100%;" onclick="window.openSupportModal()"><i class="fa-solid fa-headset"></i> Submit &amp; Track Support Tickets</button>
+          </div>
+        </div>
+      </div>
+      <div class="help-dropdown">
+        <button class="dropdown-header" id="contactToggle"><i class="fas fa-user-md"></i><span>Contact Professional</span><i class="fas fa-chevron-down dropdown-arrow"></i></button>
+        <div class="dropdown-content" id="contactContent">
+          <div class="help-content" id="professionalContact"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- Toast container -->
+<div id="toastStack" class="toast-stack"></div>
+
+<!-- ==================== JAVASCRIPT ==================== -->
+<script>
+(function() {
+  'use strict';
+
+  const BASE_URL = '/api';
+  const token = localStorage.getItem('access_token');
+
+  if (!token) {
+    window.location.href = '../login.html';
+    return;
+  }
+
+  // ===== API HELPER =====
+  async function apiFetch(endpoint, options = {}) {
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      ...options.headers
+    };
+    const response = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || data.message || 'API request failed');
+    }
+    return data;
+  }
+
+  // ===== TOAST =====
+  function showToast(message, type = 'success') {
+    const stack = document.getElementById('toastStack');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type === 'error' ? 'error' : ''}`;
+    const icon = type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle';
+    toast.innerHTML = `<i class="fas ${icon}"></i><span>${message}</span>`;
+    stack.appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(40px)';
+      setTimeout(() => toast.remove(), 300);
+    }, 3500);
+  }
+
+  // ===== LOGOUT =====
+  function logout() {
+    const keys = ['access_token', 'smartlishe_role', 'smartlishe_profile', 'email', 'firstName', 'lastName', 'role'];
+    keys.forEach(k => localStorage.removeItem(k));
+    sessionStorage.clear();
+    window.location.href = '../home.html';
+  }
+  document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout(); });
+
+  // ===== SIDEBAR & NAVIGATION =====
+  const menuToggle = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  menuToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    sidebar.classList.toggle('collapsed');
+  });
+
+  const navItems = document.querySelectorAll('.sidebar-nav .nav-item[data-section]');
+  const sections = document.querySelectorAll('.section');
+  const sectionMap = {
+    'dashboard': 'section-dashboard',
+    'progress': 'section-progress',
+    'communication': 'section-communication',
+    'account': 'section-account',
+    'help': 'section-help'
+  };
+  function navigateTo(sectionId) {
+    sections.forEach(s => s.classList.remove('active'));
+    const targetId = sectionMap[sectionId];
+    if (targetId) {
+      const target = document.getElementById(targetId);
+      if (target) target.classList.add('active');
+    } else {
+      document.getElementById('section-dashboard').classList.add('active');
+    }
+    navItems.forEach(item => item.classList.remove('active'));
+    const activeItem = document.querySelector(`.sidebar-nav .nav-item[data-section="${sectionId}"]`);
+    if (activeItem) activeItem.classList.add('active');
+  }
+  navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      navigateTo(item.dataset.section);
+    });
+  });
+
+  // ===== DROPDOWNS =====
+  document.querySelectorAll('.dropdown-header').forEach(header => {
+    header.addEventListener('click', function() {
+      const content = this.nextElementSibling;
+      if (content && content.classList.contains('dropdown-content')) {
+        content.classList.toggle('open');
+        const arrow = this.querySelector('.dropdown-arrow');
+        if (arrow) arrow.classList.toggle('open');
+      }
+    });
+  });
+
+  // ===== QUICK NAV =====
+  document.getElementById('waterQuickBtn')?.addEventListener('click', () => {
+    navigateTo('progress');
+    setTimeout(() => {
+      document.getElementById('waterTrackerToggle')?.click();
+      document.getElementById('waterTrackerContent')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+  });
+  document.getElementById('weightQuickBtn')?.addEventListener('click', () => {
+    navigateTo('progress');
+    setTimeout(() => {
+      document.getElementById('progressOverviewToggle')?.click();
+      document.getElementById('progressOverviewContent')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+  });
+  document.getElementById('messageQuickBtn')?.addEventListener('click', () => {
+    navigateTo('communication');
+    setTimeout(() => {
+      document.getElementById('messagesToggle')?.click();
+      document.getElementById('messagesContent')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+  });
+  document.getElementById('appointmentQuickBtn')?.addEventListener('click', () => {
+    navigateTo('communication');
+    setTimeout(() => {
+      document.getElementById('appointmentsToggle')?.click();
+      document.getElementById('appointmentsContent')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+  });
+
+  // ============================================================
+  // ✅ MAIN LOGIC – FETCH DATA AND RENDER
+  // ============================================================
+
+  let userProfile = {};
+  let mealPlans = [];
+  let appointments = [];
+  let reports = [];
+  let recipes = [];
+
+  async function loadAll() {
+    try {
+      // Profile
+      const profileData = await apiFetch('/profile');
+      if (profileData.success) userProfile = profileData.data;
+
+      // Meal Plans
+      const mealData = await apiFetch('/client/mealplans');
+      if (mealData.success) mealPlans = mealData.data || [];
+
+      // Appointments
+      const apptData = await apiFetch('/client/appointments');
+      if (apptData.success) appointments = apptData.data || [];
+
+      // Reports
+      const reportData = await apiFetch('/client/reports');
+      if (reportData.success) reports = reportData.data || [];
+
+      // Recipes – we can fetch from /recipes/search?q=all but we'll just search for the first few
+      try {
+        const recipeData = await apiFetch('/recipes/search?q=&limit=8');
+        if (recipeData.success) recipes = recipeData.data || [];
+      } catch (e) {
+        recipes = [];
+      }
+
+      renderAll();
+    } catch (err) {
+      console.error('Load error:', err);
+      showToast('Failed to load data.', 'error');
+    }
+  }
+
+  function renderAll() {
+    updateProfile();
+    updateBadges();
+    renderSummary();
+    renderMealPlans();
+    renderRecipes();
+    renderAppointments();
+    renderReports();
+    renderMessages();
+    renderNotifications();
+    renderProfessionalContact();
+    renderProfileCard();
+  }
+
+  function updateProfile() {
+    const name = userProfile.first_name || 'Client';
+    document.getElementById('clientName').textContent = name;
+    document.getElementById('welcomeHeading').textContent = `Welcome back, ${name}! 👋`;
+    document.getElementById('welcomePro').textContent = userProfile.professional_name || 'Not assigned';
+    document.getElementById('assignedProfessional').textContent = userProfile.professional_name || 'Not assigned';
+    document.getElementById('clientGoal').textContent = userProfile.goal || 'Weight Loss';
+    document.getElementById('welcomeGoal').textContent = userProfile.goal || 'Weight Loss';
+    document.getElementById('recipesPro').textContent = userProfile.professional_name || 'Professional';
+    document.getElementById('clientAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=40&background=4F46E5&color=fff&bold=true`;
+    document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  }
+
+  // ===== BADGES (Notification & Message) =====
+  function updateBadges() {
+    // Notification count – we can count unread notifications from the notif list (if we have an endpoint)
+    // For now, we'll set from the user profile (maybe later we'll have a /notifications endpoint)
+    const notifCount = 3; // placeholder – you can replace with actual data later
+    document.getElementById('notificationBadge').textContent = notifCount;
+
+    // Message count – we can count unread messages (if we had a messaging endpoint)
+    const msgCount = 2; // placeholder
+    document.getElementById('messageBadge').textContent = msgCount;
+  }
+
+  // ===== SUMMARY CARDS =====
+  function renderSummary() {
+    const grid = document.getElementById('summaryGrid');
+    const weight = userProfile.weight_kg || '--';
+    const bmi = userProfile.bmi || '--';
+    const cards = [
+      { icon: 'fa-utensils', label: "Today's Meals", value: '2 / 3', progress: 67 },
+      { icon: 'fa-tint', label: 'Water Intake', value: '5 / 8', progress: 62.5 },
+      { icon: 'fa-weight', label: 'Current Weight', value: `${weight} kg`, sub: 'Target: 70 kg' },
+      { icon: 'fa-chart-pie', label: 'BMI', value: bmi, sub: bmi > 25 ? 'Overweight' : 'Normal' },
+      { icon: 'fa-check-circle', label: 'Compliance Score', value: '84%', progress: 84 },
+      { icon: 'fa-calendar-check', label: 'Upcoming Appointment', value: 'Mon, 9:00 AM', sub: 'Virtual Consultation' },
+      { icon: 'fa-envelope', label: 'Unread Messages', value: '3', sub: 'From your professional' },
+      { icon: 'fa-flag-checkered', label: 'Current Goal', value: 'Weight Loss', sub: '12 Week Program' }
+    ];
+    grid.innerHTML = cards.map(c => `
+      <div class="summary-card">
+        <div class="card-icon"><i class="fas ${c.icon}"></i></div>
+        <div class="card-content">
+          <span class="card-label">${c.label}</span>
+          <span class="card-value">${c.value}</span>
+          ${c.progress ? `<div class="progress-bar"><div class="progress-fill" style="width:${c.progress}%"></div></div>` : `<span class="card-sub">${c.sub}</span>`}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ===== MEAL PLANS =====
+  function renderMealPlans() {
+    const grid = document.getElementById('mealPlanGrid');
+    if (!mealPlans.length) {
+      grid.innerHTML = '<p>No meal plans assigned yet.</p>';
+      return;
+    }
+    // For now, show the first plan (you can later add week navigation)
+    const plan = mealPlans[0];
+    grid.innerHTML = `
+      <div class="meal-card">
+        <div class="meal-header">
+          <span class="meal-type"><i class="fas fa-calendar-day"></i> Current Plan</span>
+          <span class="meal-status completed">Active</span>
+        </div>
+        <div class="meal-body">
+          <p><strong>${plan.title || 'Meal Plan'}</strong></p>
+          <div class="meal-meta">
+            <span><i class="fas fa-calendar"></i> ${plan.start_date || 'Start'} – ${plan.end_date || 'End'}</span>
+            <span><i class="fas fa-fire"></i> ${plan.daily_calories || 0} kcal</span>
+          </div>
+          <div class="meal-actions">
+            <button class="btn btn-success btn-sm" onclick="showToast('Meal marked as completed.')"><i class="fas fa-check"></i> Mark Completed</button>
+            <button class="btn btn-outline btn-sm" onclick="showToast('Meal skipped.')"><i class="fas fa-times"></i> Skip Meal</button>
+          </div>
+        </div>
+      </div>
+    `;
+    // Set week label
+    document.getElementById('weekLabel').textContent = `Week ${plan.week || '1'} of ${plan.total_weeks || '12'}`;
+    document.getElementById('welcomeWeek').textContent = `Week ${plan.week || '1'} of ${plan.total_weeks || '12'}`;
+  }
+
+  // Previous/Next week – can be used to navigate meal plans (if your backend supports week offset)
+  document.getElementById('prevWeekBtn')?.addEventListener('click', () => {
+    showToast('Previous week view coming soon.');
+  });
+  document.getElementById('nextWeekBtn')?.addEventListener('click', () => {
+    showToast('Next week view coming soon.');
+  });
+
+  // ===== RECIPES =====
+  function renderRecipes() {
+    const grid = document.getElementById('recipeGrid');
+    if (!recipes.length) {
+      grid.innerHTML = '<p>No recipes found.</p>';
+      return;
+    }
+    grid.innerHTML = recipes.slice(0, 4).map(r => `
+      <div class="recipe-card">
+        <div class="recipe-image"><img src="${r.image_url || 'https://via.placeholder.com/300x150?text=Recipe'}" alt="${r.title}" /></div>
+        <div class="recipe-body">
+          <h3>${r.title}</h3>
+          <span class="recipe-time"><i class="fas fa-clock"></i> ${r.total_time_minutes || '30'} min</span>
+          <div class="recipe-nutrition">
+            <span>🔥 ${r.calories || 0} kcal</span>
+            <span>💪 ${r.protein || 0}g Protein</span>
+            <span>🍞 ${r.carbohydrates || 0}g Carbs</span>
+          </div>
+          <div class="recipe-actions">
+            <button class="btn btn-outline btn-sm" onclick="showToast('Added to favorites.')"><i class="fas fa-heart"></i> Favourite</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ===== APPOINTMENTS =====
+  function renderAppointments() {
+    const grid = document.getElementById('appointmentGrid');
+    if (!appointments.length) {
+      grid.innerHTML = '<p>No appointments scheduled.</p>';
+      return;
+    }
+    grid.innerHTML = appointments.map(a => `
+      <div class="appointment-card">
+        <h3>${a.title}</h3>
+        <p><strong>Date:</strong> ${a.appointment_date}</p>
+        <p><strong>Time:</strong> ${a.appointment_time}</p>
+        <p><strong>Type:</strong> ${a.type}</p>
+        <div class="appointment-actions">
+          <button class="btn btn-primary btn-sm" onclick="showToast('View details.')">View Details</button>
+          <button class="btn btn-outline btn-sm" onclick="showToast('Reschedule request sent.')">Request Reschedule</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ===== REPORTS =====
+  function renderReports() {
+    const grid = document.getElementById('reportsGrid');
+    if (!reports.length) {
+      grid.innerHTML = '<p>No reports available.</p>';
+      return;
+    }
+    grid.innerHTML = reports.map(r => `
+      <div class="report-card">
+        <h3>${r.title}</h3>
+        <p>${r.report_type}</p>
+        <p>Generated: ${r.generated_at ? new Date(r.generated_at).toLocaleDateString() : 'N/A'}</p>
+        <button class="btn btn-outline btn-sm" onclick="showToast('Downloading report.')"><i class="fas fa-download"></i> Download</button>
+      </div>
+    `).join('');
+  }
+
+  // ===== MESSAGES (mock for now) =====
+  function renderMessages() {
+    const container = document.getElementById('messageList');
+    // Mock messages – in real app, fetch from /messages or similar
+    const messages = [
+      { sender: 'James Otieno', preview: 'Great progress this week! Let\'s...', time: '10:30 AM', unread: true },
+      { sender: 'James Otieno', preview: 'Remember to drink 8 glasses...', time: 'Yesterday', unread: false },
+      { sender: 'James Otieno', preview: 'Your next appointment is...', time: 'Yesterday', unread: true }
+    ];
+    container.innerHTML = messages.map(m => `
+      <div class="message-item ${m.unread ? 'unread' : 'read'}">
+        <span class="sender">${m.sender}</span>
+        <span class="preview">${m.preview}</span>
+        <span class="time">${m.time}</span>
+      </div>
+    `).join('');
+  }
+
+  // ===== NOTIFICATIONS (mock) =====
+  function renderNotifications() {
+    const container = document.getElementById('notificationList');
+    // Mock notifications
+    const notifs = [
+      { icon: 'fa-utensils', text: 'Meal Reminder: Lunch is at 12:30 PM', time: '1 hour ago', unread: true },
+      { icon: 'fa-tint', text: 'Water Reminder: You\'re at 5/8 glasses', time: '3 hours ago', unread: true },
+      { icon: 'fa-calendar', text: 'Appointment Reminder: Monday 9:00 AM', time: '1 day ago', unread: true },
+      { icon: 'fa-user-md', text: 'Professional Announcement: New meal plan available', time: '2 days ago', unread: false }
+    ];
+    container.innerHTML = notifs.map(n => `
+      <div class="notification-item ${n.unread ? 'unread' : ''}">
+        <i class="fas ${n.icon}"></i>
+        <span>${n.text}</span>
+        <span class="time">${n.time}</span>
+      </div>
+    `).join('') + `
+      <div class="notification-actions">
+        <button class="btn btn-primary btn-sm" onclick="showToast('Marked all as read.')">Mark All as Read</button>
+        <button class="btn btn-danger btn-sm" onclick="showToast('Cleared all notifications.')">Clear All</button>
+      </div>
+    `;
+  }
+
+  // ===== PROFESSIONAL CONTACT =====
+  function renderProfessionalContact() {
+    const container = document.getElementById('professionalContact');
+    const proName = userProfile.professional_name || 'Not assigned';
+    container.innerHTML = `
+      <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(proName)}&size=80&background=10B981&color=fff&bold=true" alt="${proName}" class="professional-avatar" />
+      <h3>${proName}</h3>
+      <p><strong>Registered Nutritionist</strong></p>
+      <p><i class="fas fa-envelope"></i> ${userProfile.professional_email || 'professional@smartlishe.com'}</p>
+      <p><i class="fas fa-phone"></i> ${userProfile.professional_phone || '+254 722 345 678'}</p>
+      <p><i class="fas fa-calendar"></i> Available Mon-Fri, 8:00 AM - 5:00 PM</p>
+      <button class="btn btn-primary" onclick="document.getElementById('messageQuickBtn').click();"><i class="fas fa-paper-plane"></i> Send Message</button>
+    `;
+  }
+
+  // ===== PROFILE CARD =====
+  function renderProfileCard() {
+    const card = document.getElementById('profileCard');
+    const fullName = `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || 'Client';
+    const email = userProfile.email || 'No email';
+    const height = userProfile.height_cm || 'Not set';
+    const weight = userProfile.weight_kg || 'Not set';
+    const bmi = userProfile.bmi || 'N/A';
+    const dob = userProfile.date_of_birth || 'Not set';
+    const gender = userProfile.gender || 'Not set';
+    const proName = userProfile.professional_name || 'Not assigned';
+    const phone = userProfile.phone || 'Not set';
+
+    card.innerHTML = `
+      <div class="profile-avatar-large">
+        <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&size=120&background=4F46E5&color=fff&bold=true" alt="${fullName}" />
+        <button class="btn btn-outline btn-sm" onclick="showToast('Change photo feature coming soon.')">Change Photo</button>
+      </div>
+      <div class="profile-details">
+        <p><strong>Full Name:</strong> ${fullName}</p>
+        <p><strong>Age:</strong> ${dob ? new Date().getFullYear() - new Date(dob).getFullYear() : 'N/A'}</p>
+        <p><strong>Gender:</strong> ${gender}</p>
+        <p><strong>Date of Birth:</strong> ${dob}</p>
+        <p><strong>Phone Number:</strong> ${phone} <button class="btn btn-outline btn-xs" onclick="showToast('Edit phone feature coming soon.')">Edit</button></p>
+        <p><strong>Email:</strong> ${email} <button class="btn btn-outline btn-xs" onclick="showToast('Edit email feature coming soon.')">Edit</button></p>
+        <p><strong>Height:</strong> ${height} cm</p>
+        <p><strong>Current Weight:</strong> ${weight} kg</p>
+        <p><strong>BMI:</strong> ${bmi}</p>
+        <p><strong>Emergency Contact:</strong> +254 722 345 678 <button class="btn btn-outline btn-xs" onclick="showToast('Edit emergency contact coming soon.')">Edit</button></p>
+        <hr />
+        <p><strong>Assigned Professional:</strong> ${proName}</p>
+        <p><strong>Registration Number:</strong> NUTR-2024-007</p>
+        <p><strong>Current Goal:</strong> ${userProfile.goal || 'Weight Loss'}</p>
+        <p><strong>Program Duration:</strong> 12 Weeks</p>
+        <p><strong>Medical Conditions:</strong> ${userProfile.medical_conditions ? userProfile.medical_conditions.join(', ') : 'None'}</p>
+        <p><strong>Allergies:</strong> ${userProfile.allergies ? userProfile.allergies.join(', ') : 'None'}</p>
+        <p><strong>Professional Notes:</strong> Client is responding well to the meal plan.</p>
+      </div>
+    `;
+  }
+
+  // ===== SEND MESSAGE (contact endpoint) =====
+  document.getElementById('sendMessageBtn').addEventListener('click', async function() {
+    const textarea = document.getElementById('messageText');
+    const message = textarea.value.trim();
+    if (!message) {
+      showToast('Please enter a message.', 'error');
+      return;
+    }
+    this.disabled = true;
+    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    try {
+      await apiFetch('/contact', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: userProfile.first_name || 'Client',
+          email: userProfile.email || 'client@example.com',
+          subject: 'Message to Professional',
+          message: message
+        })
+      });
+      showToast('Message sent to your professional!');
+      textarea.value = '';
+    } catch (err) {
+      showToast('Failed to send message: ' + err.message, 'error');
+    } finally {
+      this.disabled = false;
+      this.innerHTML = '<i class="fas fa-paper-plane"></i> Send';
+    }
+  });
+
+  // ============================================================
+  // ✅ START
+  // ============================================================
+  loadAll();
+  navigateTo('dashboard');
+
+  // Responsive
+  function handleResize() {
+    if (window.innerWidth > 768) {
+      sidebar.classList.remove('collapsed');
+    } else {
+      sidebar.classList.add('collapsed');
+    }
+  }
+  window.addEventListener('resize', handleResize);
+  handleResize();
+
+  // Notification icon – navigate to communication and open notifications
+  document.getElementById('notificationBtn').addEventListener('click', () => {
+    navigateTo('communication');
+    setTimeout(() => {
+      document.getElementById('notificationsToggle')?.click();
+      document.getElementById('notificationsContent')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+  });
+
+  // Message icon – navigate to communication and open messages
+  document.getElementById('messageBtn').addEventListener('click', () => {
+    navigateTo('communication');
+    setTimeout(() => {
+      document.getElementById('messagesToggle')?.click();
+      document.getElementById('messagesContent')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+  });
+
+  // Settings icon – navigate to account
+  document.getElementById('settingsBtn').addEventListener('click', () => {
+    navigateTo('account');
+    setTimeout(() => {
+      document.getElementById('preferencesToggle')?.click();
+      document.getElementById('preferencesContent')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+  });
+
+  console.log('✅ Client Dashboard loaded with real backend data.');
+})();
+</script>
+<script src="../support-widget.js"></script>
+</body>
+</html>

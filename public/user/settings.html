@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<title>Settings — Smart Lishe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== AUTH CHECK ===== -->
+<script>
+(function() {
+  const token = localStorage.getItem('access_token') || localStorage.getItem('smartlishe_token');
+  if (!token) {
+    window.location.href = 'home.html';
+    return;
+  }
+})();
+</script>
+
+<!-- ===== MOBILE TOPBAR ===== -->
+<div class="mobile-topbar">
+  <div class="brand-mini">
+    <div class="mark"><i class="fa-solid fa-seedling"></i></div>
+    <span>Smart Lishe</span>
+  </div>
+  <button class="hamburger-btn" id="hamburgerBtn"><i class="fa-solid fa-bars"></i></button>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="app-shell">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="mark"><i class="fa-solid fa-seedling"></i></div>
+      <div class="name">Smart Lishe<span>Kenya</span></div>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <div class="nav-section-divider"><span>Plan &amp; Discover</span><i class="fa-solid fa-layer-group"></i></div>
+      <div class="service-group" data-group="plan">
+        <button type="button" class="service-group-header" data-group-toggle="plan">
+          <div class="sg-icon-wrap" style="background:var(--sukuma);"><i class="fa-solid fa-bowl-food"></i></div>
+          <span class="sg-title">Plan &amp; Discover</span>
+          <span class="sg-count">6</span>
+          <span class="sg-dropdown-hint"><i class="fa-solid fa-chevron-down sg-chevron"></i></span>
+        </button>
+        <div class="service-group-body">
+          <a href="ai-assistant.html" class="nav-link"><i class="fa-solid fa-robot"></i> AI Meal Assistant</a>
+          <a href="meal-generator.html" class="nav-link"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Meal Generator</a>
+          <a href="nutriscan.html" class="nav-link"><i class="fa-solid fa-camera-retro"></i> NutriScan</a>
+          <a href="health-conditions.html" class="nav-link"><i class="fa-solid fa-heart-pulse"></i> Health Conditions</a>
+          <a href="meal-planner.html" class="nav-link"><i class="fa-solid fa-calendar-days"></i> Meal Planner</a>
+          <a href="recipes.html" class="nav-link"><i class="fa-solid fa-book-open"></i> Recipes</a>
+        </div>
+      </div>
+      <div class="nav-section-divider"><span>Track &amp; Achieve</span><i class="fa-solid fa-chart-simple"></i></div>
+      <div class="service-group" data-group="track">
+        <button type="button" class="service-group-header" data-group-toggle="track">
+          <div class="sg-icon-wrap" style="background:var(--char);"><i class="fa-solid fa-chart-simple"></i></div>
+          <span class="sg-title">Track &amp; Achieve</span>
+          <span class="sg-count">4</span>
+          <span class="sg-dropdown-hint"><i class="fa-solid fa-chevron-down sg-chevron"></i></span>
+        </button>
+        <div class="service-group-body">
+          <a href="goal-tracker.html" class="nav-link"><i class="fa-solid fa-bullseye"></i> Goal Tracker</a>
+          <a href="water-tracker.html" class="nav-link"><i class="fa-solid fa-droplet"></i> Water Tracker</a>
+          <a href="analytics.html" class="nav-link"><i class="fa-solid fa-chart-line"></i> Nutrition Analytics</a>
+          <a href="shopping-list.html" class="nav-link"><i class="fa-solid fa-basket-shopping"></i> Shopping List</a>
+        </div>
+      </div>
+      <div class="nav-section-divider"><span>Profile</span><i class="fa-solid fa-user-gear"></i></div>
+      <div class="service-group open" data-group="profile">
+        <button type="button" class="service-group-header" data-group-toggle="profile">
+          <div class="sg-icon-wrap" style="background:#3D6FA8;"><i class="fa-solid fa-user"></i></div>
+          <span class="sg-title">Profile</span>
+          <span class="sg-count">2</span>
+          <span class="sg-dropdown-hint"><i class="fa-solid fa-chevron-down sg-chevron"></i></span>
+        </button>
+        <div class="service-group-body">
+          <a href="profile.html" class="nav-link"><i class="fa-solid fa-id-card"></i> User Profile</a>
+          <a href="settings.html" class="nav-link active"><i class="fa-solid fa-gear"></i> Settings</a>
+          <a href="#" class="nav-link open-support-btn" onclick="event.preventDefault(); window.openSupportModal();"><i class="fa-solid fa-headset" style="color:var(--sukuma);"></i> Support &amp; Tickets</a>
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <a href="#" class="nav-link" onclick="event.preventDefault(); localStorage.clear(); sessionStorage.clear(); window.location.href='home.html';" style="color:var(--char);">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="theme-toggle" id="themeToggle">
+        <span><i class="fa-solid fa-moon" id="themeIcon"></i> Dark mode</span>
+        <span class="switch"></span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="globalSearch" placeholder="Search recipes, meals, conditions...">
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="notifBtn"><i class="fa-regular fa-bell"></i><span class="dot"></span></button>
+        <a href="profile.html" class="profile-chip" style="cursor:pointer;">
+          <div class="avatar" id="topbarAvatar">U</div>
+          <span class="label" id="topbarName">User</span>
+        </a>
+      </div>
+    </header>
+
+    <section class="page active">
+      <div class="page-inner">
+        <div class="page-header">
+          <div class="section-eyebrow">Settings</div>
+          <h2>Make Smart Lishe work the way you want</h2>
+          <p>Theme, notifications, units, language, and your data — all in one place.</p>
+        </div>
+
+        <div class="settings-grid">
+          <div class="settings-section-label">Appearance</div>
+          <div class="settings-row">
+            <div class="sr-info">
+              <div class="sr-icon" style="background:var(--sukuma);"><i class="fa-solid fa-moon"></i></div>
+              <div class="sr-text"><strong>Dark mode</strong><span>Switch between light and dark themes</span></div>
+            </div>
+            <div class="settings-toggle-switch" id="settingsDarkModeToggle"></div>
+          </div>
+
+          <div class="settings-section-label">Notifications</div>
+          <div class="settings-row">
+            <div class="sr-info">
+              <div class="sr-icon" style="background:var(--char);"><i class="fa-solid fa-bell"></i></div>
+              <div class="sr-text"><strong>Email notifications</strong><span>Receive updates and reminders via email</span></div>
+            </div>
+            <div class="settings-toggle-switch" id="settingsEmailToggle"></div>
+          </div>
+          <div class="settings-row">
+            <div class="sr-info">
+              <div class="sr-icon" style="background:#3D6FA8;"><i class="fa-solid fa-bell"></i></div>
+              <div class="sr-text"><strong>Push notifications</strong><span>Get in-app notifications</span></div>
+            </div>
+            <div class="settings-toggle-switch" id="settingsPushToggle"></div>
+          </div>
+          <div class="settings-row">
+            <div class="sr-info">
+              <div class="sr-icon" style="background:var(--maize-deep);"><i class="fa-solid fa-sms"></i></div>
+              <div class="sr-text"><strong>SMS notifications</strong><span>Receive text message alerts</span></div>
+            </div>
+            <div class="settings-toggle-switch" id="settingsSmsToggle"></div>
+          </div>
+
+          <div class="settings-section-label">Units &amp; Language</div>
+          <div class="settings-row">
+            <div class="sr-info">
+              <div class="sr-icon" style="background:var(--maize-deep);"><i class="fa-solid fa-ruler"></i></div>
+              <div class="sr-text"><strong>Measurement units</strong><span>Used across the meal generator and tracker</span></div>
+            </div>
+            <select class="settings-select-inline" id="settingsUnitsSelect">
+              <option value="metric">Metric (kg, cm)</option>
+              <option value="imperial">Imperial (lb, in)</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <div class="sr-info">
+              <div class="sr-icon" style="background:#2D8C82;"><i class="fa-solid fa-globe"></i></div>
+              <div class="sr-text"><strong>Language</strong><span>Interface language</span></div>
+            </div>
+            <select class="settings-select-inline" id="settingsLanguageSelect">
+              <option value="en">English</option>
+              <option value="sw">Kiswahili</option>
+            </select>
+          </div>
+
+          <div class="settings-section-label">Your Data</div>
+          <div class="settings-row">
+            <div class="sr-info">
+              <div class="sr-icon" style="background:#8B5CB8;"><i class="fa-solid fa-file-export"></i></div>
+              <div class="sr-text"><strong>Export your data</strong><span>Download everything saved on this device as a file</span></div>
+            </div>
+            <button class="btn btn-secondary btn-sm" id="settingsExportBtn"><i class="fa-solid fa-download"></i> Export</button>
+          </div>
+          <div class="settings-row">
+            <div class="sr-info">
+              <div class="sr-icon" style="background:#5B7FA6;"><i class="fa-solid fa-file-import"></i></div>
+              <div class="sr-text"><strong>Import data</strong><span>Restore from a previously exported file</span></div>
+            </div>
+            <input type="file" id="settingsImportInput" accept=".json" style="display:none;">
+            <button class="btn btn-secondary btn-sm" id="settingsImportBtn"><i class="fa-solid fa-upload"></i> Import</button>
+          </div>
+          <div class="settings-row settings-danger-row">
+            <div class="sr-info">
+              <div class="sr-icon" style="background:var(--char);"><i class="fa-solid fa-trash"></i></div>
+              <div class="sr-text"><strong>Clear local data</strong><span>Permanently erase everything saved on this device</span></div>
+            </div>
+            <button class="btn btn-accent btn-sm" id="settingsClearAllBtn"><i class="fa-solid fa-triangle-exclamation"></i> Clear local</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- ===== FLOATING AI BUTTON ===== -->
+<a href="ai-assistant.html" class="floating-ai-btn" id="chatbotFab" aria-label="Smart Lishe AI Assistant" title="Open Smart Lishe AI Assistant">
+  <i class="fa-solid fa-robot"></i>
+  <span class="ping" style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:var(--char,#2e7d32);border:2px solid #fff;"></span>
+</a>
+
+<button class="scroll-top-btn" id="scrollTopBtn"><i class="fa-solid fa-arrow-up"></i></button>
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+// ============================================================
+// SMART LISHE — SETTINGS (Backend-Integrated)
+// ============================================================
+
+const API_BASE = '/api';
+
+// ---- Helpers ----
+function getToken() {
+  return localStorage.getItem('access_token') || localStorage.getItem('smartlishe_token') || '';
+}
+
+function isLoggedIn() {
+  return !!getToken();
+}
+
+function logout() {
+  localStorage.clear();
+  sessionStorage.clear();
+  window.location.href = 'home.html';
+}
+
+// ---- API Calls ----
+async function apiRequest(endpoint, method = 'GET', body = null) {
+  const url = API_BASE + endpoint;
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + getToken()
+  };
+  const options = { method, headers };
+  if (body) options.body = JSON.stringify(body);
+  const res = await fetch(url, options);
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || err.message || 'API request failed');
+  }
+  return res.json();
+}
+
+// ---- Toast ----
+function showToast(message, type = 'success') {
+  const stack = document.getElementById('toastStack');
+  if (!stack) return;
+  const toast = document.createElement('div');
+  toast.className = 'toast' + (type === 'error' ? ' error' : '');
+  const icon = type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check';
+  toast.innerHTML = `<i class="fa-solid ${icon}"></i><span>${message}</span>`;
+  stack.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(40px)';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+// ---- Load User Info ----
+function loadUserInfo() {
+  const profile = JSON.parse(localStorage.getItem('smartlishe_profile') || '{}');
+  const firstName = localStorage.getItem('firstName') || 'User';
+  const email = localStorage.getItem('email') || '';
+
+  let userName = 'User';
+  if (profile && profile.name) userName = profile.name;
+  else if (firstName && firstName !== 'User') userName = firstName;
+  else if (email) userName = email.split('@')[0];
+
+  const nameEl = document.getElementById('topbarName');
+  const avatarEl = document.getElementById('topbarAvatar');
+  if (nameEl) nameEl.textContent = userName;
+  if (avatarEl) avatarEl.textContent = userName.charAt(0).toUpperCase();
+}
+
+// ---- Load Settings from Backend ----
+let currentSettings = {};
+
+async function loadSettings() {
+  try {
+    const response = await apiRequest('/settings');
+    currentSettings = response.data;
+    populateUI(currentSettings);
+    applyTheme(currentSettings.theme);
+    // Also update theme toggle in sidebar
+    const themeIcon = document.getElementById('themeIcon');
+    if (themeIcon) {
+      themeIcon.className = currentSettings.theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    }
+  } catch (err) {
+    showToast('Could not load settings: ' + err.message, 'error');
+    // Fallback to defaults
+    currentSettings = {
+      language: 'en',
+      theme: 'light',
+      timezone: 'UTC',
+      currency: 'USD',
+      country: 'KE',
+      email_notifications: true,
+      push_notifications: true,
+      sms_notifications: false,
+      preferences: {}
+    };
+    populateUI(currentSettings);
+  }
+}
+
+// ---- Populate UI ----
+function populateUI(settings) {
+  // Theme toggle
+  const darkToggle = document.getElementById('settingsDarkModeToggle');
+  darkToggle.classList.toggle('on', settings.theme === 'dark');
+
+  // Notifications
+  document.getElementById('settingsEmailToggle').classList.toggle('on', settings.email_notifications !== false);
+  document.getElementById('settingsPushToggle').classList.toggle('on', settings.push_notifications !== false);
+  document.getElementById('settingsSmsToggle').classList.toggle('on', settings.sms_notifications === true);
+
+  // Units (stored in preferences)
+  const units = settings.preferences?.units || 'metric';
+  document.getElementById('settingsUnitsSelect').value = units;
+
+  // Language
+  document.getElementById('settingsLanguageSelect').value = settings.language || 'en';
+
+  // Theme in sidebar icon
+  const themeIcon = document.getElementById('themeIcon');
+  if (themeIcon) {
+    themeIcon.className = settings.theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+  }
+  applyTheme(settings.theme);
+}
+
+// ---- Apply Theme ----
+function applyTheme(theme) {
+  document.body.setAttribute('data-theme', theme);
+  const darkToggle = document.getElementById('settingsDarkModeToggle');
+  if (darkToggle) darkToggle.classList.toggle('on', theme === 'dark');
+}
+
+// ---- Save Settings ----
+async function saveSettings(updates) {
+  try {
+    // Merge with current
+    const payload = { ...currentSettings, ...updates };
+    // Ensure nested preferences are preserved
+    if (!payload.preferences) payload.preferences = {};
+    // Also handle theme separately (it's not in the backend yet? Actually it is)
+    // We'll send the whole payload
+    await apiRequest('/settings', 'PUT', payload);
+    // Update local copy
+    Object.assign(currentSettings, updates);
+    showToast('Settings saved successfully.');
+  } catch (err) {
+    showToast('Failed to save settings: ' + err.message, 'error');
+  }
+}
+
+// ---- Event Wiring ----
+function initSettingsUI() {
+  // Dark mode toggle
+  const darkToggle = document.getElementById('settingsDarkModeToggle');
+  darkToggle.addEventListener('click', async () => {
+    const newTheme = currentSettings.theme === 'dark' ? 'light' : 'dark';
+    applyTheme(newTheme);
+    await saveSettings({ theme: newTheme });
+    // Also update sidebar icon if exists
+    const themeIcon = document.getElementById('themeIcon');
+    if (themeIcon) {
+      themeIcon.className = newTheme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    }
+  });
+
+  // Theme toggle in sidebar (sync with dark toggle)
+  document.getElementById('themeToggle').addEventListener('click', async () => {
+    const newTheme = currentSettings.theme === 'dark' ? 'light' : 'dark';
+    applyTheme(newTheme);
+    await saveSettings({ theme: newTheme });
+    darkToggle.classList.toggle('on', newTheme === 'dark');
+    const themeIcon = document.getElementById('themeIcon');
+    if (themeIcon) {
+      themeIcon.className = newTheme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    }
+  });
+
+  // Notification toggles
+  const notifToggles = [
+    { id: 'settingsEmailToggle', key: 'email_notifications' },
+    { id: 'settingsPushToggle', key: 'push_notifications' },
+    { id: 'settingsSmsToggle', key: 'sms_notifications' }
+  ];
+  notifToggles.forEach(({ id, key }) => {
+    const el = document.getElementById(id);
+    el.addEventListener('click', async () => {
+      const currentVal = currentSettings[key];
+      const nextVal = !currentVal;
+      await saveSettings({ [key]: nextVal });
+      el.classList.toggle('on', nextVal);
+    });
+  });
+
+  // Units
+  const unitsSelect = document.getElementById('settingsUnitsSelect');
+  unitsSelect.addEventListener('change', async () => {
+    const prefs = { ...currentSettings.preferences, units: unitsSelect.value };
+    await saveSettings({ preferences: prefs });
+  });
+
+  // Language
+  const langSelect = document.getElementById('settingsLanguageSelect');
+  langSelect.addEventListener('change', async () => {
+    await saveSettings({ language: langSelect.value });
+  });
+
+  // Export
+  document.getElementById('settingsExportBtn').addEventListener('click', () => {
+    const exportData = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('smartlishe_')) {
+        try {
+          exportData[key] = JSON.parse(localStorage.getItem(key));
+        } catch (e) {
+          exportData[key] = localStorage.getItem(key);
+        }
+      }
+    }
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `smartlishe-backup-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast('Data exported successfully.');
+  });
+
+  // Import
+  document.getElementById('settingsImportBtn').addEventListener('click', () => {
+    document.getElementById('settingsImportInput').click();
+  });
+  document.getElementById('settingsImportInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const imported = JSON.parse(ev.target.result);
+        Object.keys(imported).forEach(key => {
+          localStorage.setItem(key, typeof imported[key] === 'string' ? imported[key] : JSON.stringify(imported[key]));
+        });
+        showToast('Data imported. Reloading...');
+        setTimeout(() => location.reload(), 1200);
+      } catch (err) {
+        showToast('That file could not be read. Please choose a valid export file.', 'error');
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  // Clear local data
+  document.getElementById('settingsClearAllBtn').addEventListener('click', () => {
+    if (!confirm('This will permanently erase all local data on this device — profile, meal plans, goals, shopping lists, everything. Continue?')) return;
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('smartlishe_')) keysToRemove.push(key);
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k));
+    showToast('All local data cleared. Reloading...');
+    setTimeout(() => location.reload(), 1200);
+  });
+}
+
+// ---- Sidebar, Theme, etc. (same as before) ----
+function initSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const hamburger = document.getElementById('hamburgerBtn');
+  function openSidebar() { if (sidebar) sidebar.classList.add('open'); if (overlay) overlay.classList.add('show'); }
+  function closeSidebar() { if (sidebar) sidebar.classList.remove('open'); if (overlay) overlay.classList.remove('show'); }
+  if (hamburger) hamburger.addEventListener('click', openSidebar);
+  if (overlay) overlay.addEventListener('click', closeSidebar);
+  document.querySelectorAll('.service-group-header').forEach(header => {
+    header.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const group = header.closest('.service-group');
+      if (!group) return;
+      const wasOpen = group.classList.contains('open');
+      document.querySelectorAll('.service-group').forEach(g => g.classList.remove('open'));
+      if (!wasOpen) group.classList.add('open');
+    });
+  });
+  document.querySelectorAll('.nav-link').forEach(link => link.addEventListener('click', closeSidebar));
+}
+
+function initScrollTop() {
+  const btn = document.getElementById('scrollTopBtn');
+  if (!btn) return;
+  window.addEventListener('scroll', () => btn.classList.toggle('show', window.scrollY > 400));
+  btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+}
+
+function initNotifications() {
+  document.getElementById('notifBtn')?.addEventListener('click', () => showToast("You're all caught up — no new notifications."));
+}
+
+function initGlobalSearch() {
+  const input = document.getElementById('globalSearch');
+  if (input) {
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && e.target.value.trim()) {
+        showToast(`Searching for "${e.target.value.trim()}"...`);
+      }
+    });
+  }
+}
+
+// ---- Boot ----
+document.addEventListener('DOMContentLoaded', async () => {
+  // Check auth
+  if (!isLoggedIn()) {
+    window.location.href = 'home.html';
+    return;
+  }
+  initSidebar();
+  initScrollTop();
+  loadUserInfo();
+  initNotifications();
+  initGlobalSearch();
+  await loadSettings();
+  initSettingsUI();
+});
+</script>
+<script src="global-search.js"></script>
+<script src="../support-widget.js"></script>
+</body>
+</html>
