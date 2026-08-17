@@ -1,22 +1,49 @@
 {
   "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "server.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": [
-          "FRONTEND/**",
-          "*_db.json",
-          "*.json"
-        ]
-      }
-    }
-  ],
-  "routes": [
+      "source": "/api/(.*)",
+      "destination": "/api/index.js"
+    },
     {
-      "src": "/(.*)",
-      "dest": "/server.js"
+      "source": "/",
+      "destination": "/FRONTEND/user/home.html"
+    },
+    {
+      "source": "/user/(.*)",
+      "destination": "/FRONTEND/user/$1"
+    },
+    {
+      "source": "/auth/(.*)",
+      "destination": "/FRONTEND/auth/$1"
+    },
+    {
+      "source": "/client/(.*)",
+      "destination": "/FRONTEND/client/$1"
+    },
+    {
+      "source": "/professional/(.*)",
+      "destination": "/FRONTEND/professional/$1"
+    },
+    {
+      "source": "/admin/(.*)",
+      "destination": "/FRONTEND/admin/$1"
+    },
+    {
+      "source": "/membership/(.*)",
+      "destination": "/FRONTEND/membership/$1"
+    },
+    {
+      "source": "/assets/(.*)",
+      "destination": "/FRONTEND/assets/$1"
+    },
+    {
+      "source": "/support-widget.js",
+      "destination": "/FRONTEND/support-widget.js"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/FRONTEND/$1"
     }
   ]
 }
